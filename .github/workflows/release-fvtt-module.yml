@@ -1,0 +1,88 @@
+on:
+  push:
+    branches:
+      - main
+
+name: Release FoundryVTT Module
+
+jobs:
+  check_version:
+    name: Check FoundryVTT module version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Check for new version
+        id: check_for_new_version
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          create-tag: false
+          version-command: |
+            jq -r .version module.json
+    outputs:
+      module_previous_version: v${{ steps.check_for_new_version.outputs.previous-version }}
+      module_current_version: v${{ steps.check_for_new_version.outputs.current-version }}
+  build:
+    name: Release FoundryVTT Module
+    runs-on: ubuntu-latest
+    needs: check_version
+    if: ${{ needs.check_version.outputs.module_current_version != needs.check_version.outputs.module_previous_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Create tag changelog
+        id: changelog
+        run: |
+          CHANGELOG=$(git log --reverse --pretty=oneline --abbrev-commit ${{ needs.check_version.outputs.module_previous_version }}..HEAD)
+          # Support for multiline, see
+          # https://github.com/actions/create-release/pull/11#issuecomment-640071918
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "Got changelog: $CHANGELOG"
+          echo "::set-output name=changelog::$CHANGELOG"
+      - name: Update download URL
+        id: update_module_download_url
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: 'module.json'
+        env:
+          download: https://github.com/${{ github.repository }}/releases/download/${{ needs.check_version.outputs.module_current_version }}/${{ github.event.repository.name }}.zip
+      - name: Package module
+        run: |
+          zip -r ./${{ github.event.repository.name }}.zip lang/ src/ CHANGELOG.md module.json README.md
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check_version.outputs.module_current_version }}
+          release_name: Release ${{ needs.check_version.outputs.module_current_version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+      - name: Upload module zip
+        id: upload-module-zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ github.event.repository.name }}.zip
+          asset_name: ${{ github.event.repository.name }}.zip
+          asset_content_type: application/zip
+      - name: Upload module json
+        id: upload-module-json
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./module.json
+          asset_name: module.json
+          asset_content_type: application/json

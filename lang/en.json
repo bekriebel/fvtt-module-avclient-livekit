@@ -1,0 +1,4 @@
+{
+    "LIVEKITAVCLIENT.debug": "Enable debug logging",
+    "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging"
+}

@@ -1,0 +1,43 @@
+{
+  "name": "avclient-livekit",
+  "title": "LiveKit AVClient",
+  "description": "Use LiveKit to handle A/V",
+  "author": "bekit",
+  "authors": [
+    {
+      "name": "bekit",
+      "email": "fvtt-module-help@bekit.net",
+      "url": "https://bekit.net",
+      "discord": "bekit#4213",
+      "patreon": "bekit",
+      "ko-fi": "bekit",
+      "twitter": "@bekit"
+    }
+  ],
+  "version": "0.0.0",
+  "minimumCoreVersion": "0.8.8",
+  "compatibleCoreVersion": "0.8.8",
+  "manifestPlusVersion": "1.1.0",
+  "esmodules": [
+    "src/avclient-livekit.js"
+  ],
+  "socket": true,
+  "url": "https://github.com/bekriebel/fvtt-module-avclient-livekit",
+  "manifest": "https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json",
+  "download": "https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/fvtt-module-avclient-livekit.zip",
+  "readme": "https://github.com/bekriebel/fvtt-module-avclient-livekit/blob/main/README.md",
+  "changelog": "https://github.com/bekriebel/fvtt-module-avclient-livekit/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/bekriebel/fvtt-module-avclient-livekit/issues",
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
+    }
+  ]
+}
