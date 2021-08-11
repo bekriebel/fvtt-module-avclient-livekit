@@ -1,7 +1,7 @@
 import { MODULE_NAME } from "./utils/constants.js";
 import * as log from "./utils/logging.js";
 
-import "./libs/livekit-client.js";
+import LiveKitClient from "./LiveKitClient.js";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
@@ -10,9 +10,13 @@ import "./libs/livekit-client.js";
  * @param {AVSettings} settings       The audio/video settings being used
  */
 export default class LiveKitAVClient extends AVClient {
-  // constructor(master, settings) {
-  //   super(master, settings);
-  // }
+  constructor(master, settings) {
+    super(master, settings);
+
+    this._liveKitClient = new LiveKitClient(this);
+    this.audioBroadcastEnabled = false;
+    this.room = null;
+  }
 
   /* -------------------------------------------- */
 
@@ -58,7 +62,9 @@ export default class LiveKitAVClient extends AVClient {
    * @return {Promise<void>}
    */
   async initialize() {
-    throw Error("The initialize() method must be defined by an AVClient subclass.");
+    log.debug("LiveKitAVClient initialize");
+
+    await this._liveKitClient.initializeLocalTracks();
   }
 
   /* -------------------------------------------- */
@@ -71,7 +77,67 @@ export default class LiveKitAVClient extends AVClient {
    * @return {Promise<boolean>}   Was the connection attempt successful?
    */
   async connect() {
-    throw Error("The connect() method must be defined by an AVClient subclass.");
+    log.debug("LiveKitAVClient connect");
+
+    const connectionSettings = this.settings.get("world", "server");
+
+    // Set a room name if one doesn't yet exist
+    if (!connectionSettings.room) {
+      log.warn("No meeting room set, creating random name.");
+      this.settings.set("world", "server.room", randomID(32));
+    }
+
+    // Set the room name
+    this.room = connectionSettings.room;
+    log.debug("Meeting room name:", this.room);
+
+    // Get an access token
+    const accessToken = this._liveKitClient.getAccessToken(
+      connectionSettings.username,
+      connectionSettings.password,
+      this.room,
+      game.user.name,
+      game.user.id,
+    );
+
+    const localTracks = [];
+    if (this._liveKitClient.audioTrack) localTracks.push(this._liveKitClient.audioTrack);
+    if (this._liveKitClient.videoTrack) localTracks.push(this._liveKitClient.videoTrack);
+
+    // Connect to the server
+    try {
+      this._liveKitClient.liveKitRoom = await LiveKit.connect(
+        `wss://${connectionSettings.url}`,
+        accessToken,
+        {
+          tracks: localTracks,
+        },
+      );
+      log.info("Connected to room", this.room);
+    } catch (error) {
+      log.error("Could not connect:", error.message);
+      return false;
+    }
+
+    // Verify that we are connected
+    if (!this._liveKitClient.liveKitRoom?.state === LiveKit.RoomState.Connected) {
+      log.error("Not connected to room after attempting to connect");
+      return false;
+    }
+
+    // Set up room callbacks
+    this._liveKitClient.setRoomCallbacks();
+
+    // Set up local participant callbacks
+    this._liveKitClient.setLocalParticipantCallbacks();
+
+    // Set up local track callbacks
+    this._liveKitClient.setLocalTrackCallbacks();
+
+    // Add users to participants list
+    this._liveKitClient.addAllParticipants();
+
+    return true;
   }
 
   /* -------------------------------------------- */
@@ -82,7 +148,15 @@ export default class LiveKitAVClient extends AVClient {
    * @return {Promise<boolean>}   Did a disconnection occur?
    */
   async disconnect() {
-    throw Error("The disconnect() method must be defined by an AVClient subclass.");
+    log.debug("LiveKitAVClient disconnect");
+    if (this._liveKitClient.liveKitRoom
+      && this._liveKitClient.liveKitRoom.state !== LiveKit.RoomState.Disconnected) {
+      this._liveKitClient.liveKitRoom.disconnect();
+      return true;
+    }
+
+    // Not currently connected
+    return false;
   }
 
   /* -------------------------------------------- */
@@ -131,10 +205,10 @@ export default class LiveKitAVClient extends AVClient {
   async _getSourcesOfType(kind) {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices.reduce((obj, device) => {
-      if ( device.kind === kind ) {
+      if (device.kind === kind) {
         obj[device.deviceId] = device.label || game.i18n.localize("WEBRTC.UnknownDevice");
       }
-      return obj
+      return obj;
     }, {});
   }
 
@@ -148,7 +222,10 @@ export default class LiveKitAVClient extends AVClient {
    * @return {string[]}           The connected User IDs
    */
   getConnectedUsers() {
-    throw Error("The getConnectedUsers() method must be defined by an AVClient subclass.");
+    const connectedUsers = Array.from(this._liveKitClient.liveKitParticipants.keys());
+
+    log.debug("connectedUsers:", connectedUsers);
+    return connectedUsers;
   }
 
   /* -------------------------------------------- */
@@ -159,8 +236,9 @@ export default class LiveKitAVClient extends AVClient {
    * @return {MediaStream|null}    The MediaStream for the user, or null if the user does not have
    *                                one
    */
-  getMediaStreamForUser(userId) {
-    throw Error("The getMediaStreamForUser() method must be defined by an AVClient subclass.");
+  getMediaStreamForUser() {
+    log.debug("getMediaStreamForUser called but is not used with", MODULE_NAME);
+    return null;
   }
 
   /* -------------------------------------------- */
@@ -170,7 +248,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {boolean}
    */
   isAudioEnabled() {
-    throw Error("The isAudioEnabled() method must be defined by an AVClient subclass.");
+    return this.audioBroadcastEnabled;
   }
 
   /* -------------------------------------------- */
@@ -180,7 +258,11 @@ export default class LiveKitAVClient extends AVClient {
    * @return {boolean}
    */
   isVideoEnabled() {
-    throw Error("The isVideoEnabled() method must be defined by an AVClient subclass.");
+    let videoTrackEnabled = false;
+    if (this._liveKitClient.videoTrack && !this._liveKitClient.videoTrack.isMuted) {
+      videoTrackEnabled = true;
+    }
+    return videoTrackEnabled;
   }
 
   /* -------------------------------------------- */
@@ -193,7 +275,13 @@ export default class LiveKitAVClient extends AVClient {
    *                                 disabled (false)
    */
   toggleAudio(enable) {
-    throw Error("The toggleAudio() method must be defined by an AVClient subclass.");
+    log.debug("Toggling audio:", enable);
+
+    // If "always on" broadcasting is not enabled, don't proceed
+    if (!this.audioBroadcastEnabled || this.isVoicePTT) return;
+
+    // Enable active broadcasting
+    this.toggleBroadcast(enable);
   }
 
   /* -------------------------------------------- */
@@ -205,7 +293,10 @@ export default class LiveKitAVClient extends AVClient {
    * @param {boolean} broadcast     Whether outbound audio should be sent to connected peers or not?
    */
   toggleBroadcast(broadcast) {
-    throw Error("The toggleBroadcast() method must be defined by an AVClient subclass.");
+    log.debug("Toggling broadcast audio:", broadcast);
+
+    this.audioBroadcastEnabled = broadcast;
+    this._liveKitClient.setAudioEnabledState(broadcast);
   }
 
   /* -------------------------------------------- */
@@ -218,7 +309,18 @@ export default class LiveKitAVClient extends AVClient {
    *                                 disabled (false)
    */
   toggleVideo(enable) {
-    throw Error("The toggleVideo() method must be defined by an AVClient subclass.");
+    if (!this._liveKitClient.videoTrack) {
+      log.debug("toggleVideo called but no video track available");
+      return;
+    }
+
+    if (!enable) {
+      log.debug("Muting video track", this._liveKitClient.videoTrack);
+      this._liveKitClient.videoTrack.mute();
+    } else {
+      log.debug("Un-muting video track", this._liveKitClient.videoTrack);
+      this._liveKitClient.videoTrack.unmute();
+    }
   }
 
   /* -------------------------------------------- */
@@ -229,7 +331,43 @@ export default class LiveKitAVClient extends AVClient {
    * @param {HTMLVideoElement} videoElement   The HTMLVideoElement to which the video should be set
    */
   async setUserVideo(userId, videoElement) {
-    throw Error("The setUserVideo() method must be defined by an AVClient subclass.");
+    log.debug("Setting video element:", videoElement, "for user:", userId);
+
+    // Make sure the room is active first
+    if (!this._liveKitClient.liveKitRoom) {
+      log.warn("Attempted to set user video with no active room; skipping");
+      return;
+    }
+
+    // If this if for our local user, attach our video track using LiveKit
+    if (userId === game.user.id) {
+      // Attach only our video track
+      const userVideoTrack = this._liveKitClient.videoTrack;
+      if (userVideoTrack && videoElement) {
+        this._liveKitClient.attachVideoTrack(userVideoTrack, videoElement);
+      }
+      return;
+    }
+
+    // For all other users, get their video and audio tracks
+    const userAudioTrack = this._liveKitClient.getParticipantAudioTrack(userId);
+    const userVideoTrack = this._liveKitClient.getParticipantVideoTrack(userId);
+
+    // Add the video for the user
+    if (userVideoTrack) {
+      this._liveKitClient.attachVideoTrack(userVideoTrack, videoElement);
+    }
+
+    // Get the audio element for the user
+    const audioElement = this._liveKitClient.getUserAudioElement(userId, videoElement);
+
+    // Add the audio for the user
+    if (userAudioTrack && audioElement) {
+      this._liveKitClient.attachAudioTrack(userId, userAudioTrack, audioElement);
+    }
+
+    const event = new CustomEvent("webrtcVideoSet", { detail: userId });
+    videoElement.dispatchEvent(event);
   }
 
   /* -------------------------------------------- */
@@ -240,5 +378,28 @@ export default class LiveKitAVClient extends AVClient {
    * Handle changes to A/V configuration settings.
    * @param {object} changed      The settings which have changed
    */
-  onSettingsChanged(changed) {}
+  onSettingsChanged(changed) {
+    log.debug("onSettingsChanged:", changed);
+    const keys = new Set(Object.keys(foundry.utils.flattenObject(changed)));
+
+    // Change audio source
+    const audioSourceChange = ["client.audioSrc"].some((k) => keys.has(k));
+    if (audioSourceChange) this._liveKitClient.changeAudioSource(changed.client.audioSrc);
+
+    // Change video source
+    const videoSourceChange = ["client.videoSrc"].some((k) => keys.has(k));
+    if (videoSourceChange) this._liveKitClient.changeVideoSource(changed.client.videoSrc);
+
+    // Change voice broadcasting mode
+    const modeChange = ["client.voice.mode", `client.users.${game.user.id}.muted`].some((k) => keys.has(k));
+    if (modeChange) {
+      const isAlways = this.settings.client.voice.mode === "always";
+      this.toggleAudio(isAlways && this.master.canUserShareAudio(game.user.id));
+      this.master.broadcast(isAlways);
+    }
+
+    // Re-render the AV camera view
+    const renderChange = ["client.audioSink", "client.muteAll"].some((k) => keys.has(k));
+    if (audioSourceChange || videoSourceChange || renderChange) this.master.render();
+  }
 }
