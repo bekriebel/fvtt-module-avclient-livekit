@@ -7,6 +7,23 @@ import * as log from "./logging.js";
  */
 export const delayReload = debounce(() => window.location.reload(), 100);
 
+export const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+
+/**
+   * Transform the device info array from enumerated devices into an object with {id: label} keys
+   * @param {Array} list    The list of devices
+   */
+export function deviceInfoToObject(list, kind) {
+  const obj = {};
+  for (let i = 0; i < list.length; i += 1) {
+    if (list[i].kind === kind) {
+      obj[list[i].deviceId] = list[i].label || game.i18n.localize("WEBRTC.UnknownDevice");
+    }
+  }
+
+  return obj;
+}
+
 /**
  * Dynamically load additional script files, returning when loaded
  * @param scriptSrc    The location of the script file
