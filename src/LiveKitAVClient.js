@@ -110,6 +110,8 @@ export default class LiveKitAVClient extends AVClient {
         `wss://${connectionSettings.url}`,
         accessToken,
         {
+          // TODO: add config for trace logging
+          // logLevel: LiveKit.LogLevel.trace,
           tracks: localTracks,
         },
       );

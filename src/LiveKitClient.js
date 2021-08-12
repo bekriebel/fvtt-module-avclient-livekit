@@ -1,7 +1,6 @@
 import * as log from "./utils/logging.js";
 
 import "./libs/livekit-client.min.js";
-
 import "./libs/livekit-accesstoken.min.js";
 
 export default class LiveKitClient {
@@ -100,7 +99,7 @@ export default class LiveKitClient {
         await this.initializeVideoTrack();
         if (this.videoTrack) {
           await this.liveKitRoom.localParticipant.publishTrack(this.videoTrack);
-          this.attachVideoTrack(this.videoTrack, ui.webrtc.getUserVideoElement(game.user.id))
+          this.attachVideoTrack(this.videoTrack, ui.webrtc.getUserVideoElement(game.user.id));
         }
       }
     } else {
@@ -254,6 +253,14 @@ export default class LiveKitClient {
     this.render();
   }
 
+  onRemoteTrackMuted(publication, participant) {
+    // TODO - Add a mute indicator for users
+  }
+
+  onRemoteTrackUnMuted(publication, participant) {
+    // TODO - Add a mute indicator for users
+  }
+
   async onTrackSubscribed(track, publication, participant) {
     log.debug("onTrackSubscribed:", track, publication, participant);
     const userId = participant.metadata;
@@ -334,6 +341,13 @@ export default class LiveKitClient {
     });
   }
 
+  async onReconnected() {
+    log.info("Reconnect issued");
+    await this.liveKitAvClient.disconnect();
+    await this.initializeLocalTracks();
+    await this.liveKitAvClient.connect();
+  }
+
   setRemoteParticipantCallbacks(participant) {
     participant
       .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
@@ -350,9 +364,10 @@ export default class LiveKitClient {
       .on(LiveKit.RoomEvent.TrackUnpublished, (...args) => { log.debug("RoomEvent TrackUnpublished:", args); })
       .on(LiveKit.RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
       .on(LiveKit.RoomEvent.Disconnected, (...args) => { log.debug("RoomEvent Disconnected:", args); })
+      // TODO - add better disconnect / reconnect logic with incremental backup
       .on(LiveKit.RoomEvent.Reconnecting, () => { log.warn("Reconnecting to room"); })
-      .on(LiveKit.RoomEvent.TrackMuted, (...args) => { log.debug("RoomEvent TrackMuted:", args); })
-      .on(LiveKit.RoomEvent.TrackUnmuted, (...args) => { log.debug("RoomEvent TrackUnmuted:", args); })
-      .on(LiveKit.RoomEvent.Reconnected, () => { log.info("Reconnected to room"); });
+      .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuted.bind(this))
+      .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackUnMuted.bind(this))
+      .on(LiveKit.RoomEvent.Reconnected, this.onReconnected.bind(this));
   }
 }
