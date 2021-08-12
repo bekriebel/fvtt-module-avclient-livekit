@@ -343,9 +343,8 @@ export default class LiveKitClient {
 
   async onReconnected() {
     log.info("Reconnect issued");
-    await this.liveKitAvClient.disconnect();
-    await this.initializeLocalTracks();
-    await this.liveKitAvClient.connect();
+    // Re-render just in case users changed
+    this.render();
   }
 
   setRemoteParticipantCallbacks(participant) {
