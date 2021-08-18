@@ -13,6 +13,7 @@ export default class LiveKitClient {
     this.room = null;
     this.settings = liveKitAvClient.settings;
     this.videoTrack = null;
+    this.windowClickListener = null;
 
     this.render = debounce(this.avMaster.render.bind(this.liveKitAvClient), 2000);
   }
@@ -226,6 +227,14 @@ export default class LiveKitClient {
     }
   }
 
+  onAudioPlaybackStatusChanged(canPlayback) {
+    if (!canPlayback) {
+      log.warn("Cannot play audio/video, waiting for user interaction");
+      this.windowClickListener = this.windowClickListener || this.onWindowClick.bind(this);
+      window.addEventListener("click", this.windowClickListener);
+    }
+  }
+
   onIsSpeakingChanged(userId, speaking) {
     ui.webrtc.setUserIsSpeaking(userId, speaking);
   }
@@ -298,6 +307,12 @@ export default class LiveKitClient {
     box.getElementsByTagName("audio")[0].volume = volume;
   }
 
+  onWindowClick() {
+    log.info("User interaction; retrying A/V");
+    window.removeEventListener("click", this.windowClickListener);
+    this.render();
+  }
+
   getVideoParams() {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
@@ -356,6 +371,8 @@ export default class LiveKitClient {
   setRoomCallbacks() {
     // Set up event callbacks
     this.liveKitRoom
+      .on(LiveKit.RoomEvent.AudioPlaybackStatusChanged,
+        this.onAudioPlaybackStatusChanged.bind(this))
       .on(LiveKit.RoomEvent.ParticipantConnected, this.onParticipantConnected.bind(this))
       .on(LiveKit.RoomEvent.ParticipantDisconnected, this.onParticipantDisconnected.bind(this))
       .on(LiveKit.RoomEvent.TrackPublished, (...args) => { log.debug("RoomEvent TrackPublished:", args); })
@@ -363,7 +380,7 @@ export default class LiveKitClient {
       .on(LiveKit.RoomEvent.TrackUnpublished, (...args) => { log.debug("RoomEvent TrackUnpublished:", args); })
       .on(LiveKit.RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
       .on(LiveKit.RoomEvent.Disconnected, (...args) => { log.debug("RoomEvent Disconnected:", args); })
-      // TODO - add better disconnect / reconnect logic with incremental backup
+      // TODO - add better disconnect / reconnect logic with incremental backoff
       .on(LiveKit.RoomEvent.Reconnecting, () => { log.warn("Reconnecting to room"); })
       .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuted.bind(this))
       .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackUnMuted.bind(this))
