@@ -242,6 +242,21 @@ export default class LiveKitClient {
   onParticipantConnected(participant) {
     log.debug("Participant connected:", participant);
 
+    const fvttUserId = participant.metadata;
+    const fvttUser = game.users.get(fvttUserId);
+
+    if (!fvttUser) {
+      log.error("Joining participant", participant, "is not an FVTT user; cannot display them");
+      return;
+    }
+
+    if (!fvttUser.active) {
+      // Force the user to be active. If they are signing in to meeting, they should be online.
+      log.warn("Joining user", fvttUserId, "is not listed as active. Setting to active.");
+      fvttUser.active = true;
+      ui.players.render();
+    }
+
     // Save the participant to the ID mapping
     this.liveKitParticipants.set(participant.metadata, participant);
 
