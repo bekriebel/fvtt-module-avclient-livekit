@@ -104,16 +104,22 @@ export default class LiveKitAVClient extends AVClient {
     if (this._liveKitClient.audioTrack) localTracks.push(this._liveKitClient.audioTrack);
     if (this._liveKitClient.videoTrack) localTracks.push(this._liveKitClient.videoTrack);
 
+    // Set the livekit connection options
+    const livekitConnectionOptions = {
+      tracks: localTracks,
+    };
+
+    if (game.settings.get(MODULE_NAME, "livekitTrace")) {
+      log.debug("Setting livekit trace logging");
+      livekitConnectionOptions.logLevel = LiveKit.LogLevel.trace;
+    }
+
     // Connect to the server
     try {
       this._liveKitClient.liveKitRoom = await LiveKit.connect(
         `wss://${connectionSettings.url}`,
         accessToken,
-        {
-          // TODO: add config for trace logging
-          // logLevel: LiveKit.LogLevel.trace,
-          tracks: localTracks,
-        },
+        livekitConnectionOptions,
       );
       log.info("Connected to room", this.room);
     } catch (error) {
