@@ -21,3 +21,11 @@ Hooks.on(`${MODULE_NAME}DebugSet`, (value) => {
   CONFIG.debug.av = value;
   CONFIG.debug.avclient = value;
 });
+
+Hooks.on("ready", () => {
+  Hooks.on("renderCameraViews", (cameraViews, cameraViewsElement) => {
+    if (game.webrtc?.client?._liveKitClient) {
+      game.webrtc.client._liveKitClient.onRenderCameraViews(cameraViews, cameraViewsElement);
+    }
+  });
+});

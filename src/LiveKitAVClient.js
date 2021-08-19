@@ -1,4 +1,4 @@
-import { MODULE_NAME } from "./utils/constants.js";
+import { LANG_NAME, MODULE_NAME } from "./utils/constants.js";
 import * as log from "./utils/logging.js";
 
 import LiveKitClient from "./LiveKitClient.js";
@@ -135,6 +135,8 @@ export default class LiveKitAVClient extends AVClient {
     } catch (error) {
       log.error("Could not connect:", error.message);
       // TODO: Add some incremental back-off reconnect logic here
+      ui.notifications.error(`${game.i18n.localize(`${LANG_NAME}.connectError`)}: ${error.message}`);
+      this._liveKitClient.setConnectionButtons(false);
       return false;
     }
 
@@ -144,17 +146,8 @@ export default class LiveKitAVClient extends AVClient {
       return false;
     }
 
-    // Set up room callbacks
-    this._liveKitClient.setRoomCallbacks();
-
-    // Set up local participant callbacks
-    this._liveKitClient.setLocalParticipantCallbacks();
-
-    // Set up local track callbacks
-    this._liveKitClient.setLocalTrackCallbacks();
-
-    // Add users to participants list
-    this._liveKitClient.addAllParticipants();
+    // Set up after connection
+    this._liveKitClient.onConnected();
 
     return true;
   }

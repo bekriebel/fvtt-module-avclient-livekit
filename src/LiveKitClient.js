@@ -33,6 +33,33 @@ export default class LiveKitClient {
     });
   }
 
+  addConnectionButtons(element) {
+    if (element.length !== 1) {
+      log.warn("Can't find CameraView configure element", element);
+      return;
+    }
+
+    const connectButton = $(`<a class="av-control toggle livekit-control connect hidden" title="${game.i18n.localize(`${LANG_NAME}.connect`)}"><i class="fas fa-toggle-off"></i></a>`);
+    connectButton.on("click", () => {
+      connectButton.toggleClass("disabled", true);
+      this.avMaster.connect();
+    });
+    element.before(connectButton);
+
+    const disconnectButton = $(`<a class="av-control toggle livekit-control disconnect hidden" title="${game.i18n.localize(`${LANG_NAME}.disconnect`)}"><i class="fas fa-toggle-on"></i></a>`);
+    disconnectButton.on("click", () => {
+      disconnectButton.toggleClass("disabled", true);
+      this.avMaster.disconnect();
+    });
+    element.before(disconnectButton);
+
+    if (this.liveKitRoom?.state === LiveKit.RoomState.Connected) {
+      disconnectButton.toggleClass("hidden", false);
+    } else {
+      connectButton.toggleClass("hidden", false);
+    }
+  }
+
   addStatusIndicators(userId) {
     // Get the user camera view and notification bar
     const userCameraView = ui.webrtc.getUserCameraView(userId);
@@ -260,6 +287,35 @@ export default class LiveKitClient {
     }
   }
 
+  onConnected() {
+    log.debug("Client connected");
+
+    // Set up room callbacks
+    this.setRoomCallbacks();
+
+    // Set up local participant callbacks
+    this.setLocalParticipantCallbacks();
+
+    // Set up local track callbacks
+    this.setLocalTrackCallbacks();
+
+    // Add users to participants list
+    this.addAllParticipants();
+
+    // Set connection button state
+    this.setConnectionButtons(true);
+  }
+
+  onDisconnected() {
+    log.debug("Client disconnected");
+    ui.notifications.warn(`${game.i18n.localize(`${LANG_NAME}.onDisconnected`)}`);
+
+    // Set connection buttons state
+    this.setConnectionButtons(false);
+
+    // TODO: Add some incremental back-off reconnect logic here
+  }
+
   onIsSpeakingChanged(userId, speaking) {
     ui.webrtc.setUserIsSpeaking(userId, speaking);
   }
@@ -309,6 +365,11 @@ export default class LiveKitClient {
     this.render();
   }
 
+  onReconnecting() {
+    log.warn("Reconnecting to room");
+    ui.notifications.warn(`${game.i18n.localize("WEBRTC.ConnectionLostWarning")}`);
+  }
+
   onRemoteTrackMuteChanged(publication, participant) {
     const { fvttUserId } = JSON.parse(participant.metadata);
     const userCameraView = ui.webrtc.getUserCameraView(fvttUserId);
@@ -325,6 +386,12 @@ export default class LiveKitClient {
         uiIndicator.classList.toggle("hidden", !publication.isMuted);
       }
     }
+  }
+
+  onRenderCameraViews(cameraviews, html) {
+    const cameraBox = html.find(`[data-user="${game.user.id}"]`);
+    const element = cameraBox.find('[data-action="configure"]');
+    this.addConnectionButtons(element);
   }
 
   async onTrackSubscribed(track, publication, participant) {
@@ -396,6 +463,20 @@ export default class LiveKitClient {
     }
   }
 
+  setConnectionButtons(connected) {
+    const userCameraView = ui.webrtc.getUserCameraView(game.user.id);
+
+    if (userCameraView) {
+      const connectButton = userCameraView.querySelector(".livekit-control.connect");
+      const disconnectButton = userCameraView.querySelector(".livekit-control.disconnect");
+
+      connectButton.classList.toggle("hidden", connected);
+      connectButton.classList.toggle("disabled", false);
+      disconnectButton.classList.toggle("hidden", !connected);
+      disconnectButton.classList.toggle("disabled", false);
+    }
+  }
+
   setLocalParticipantCallbacks() {
     this.liveKitRoom.localParticipant
       .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
@@ -434,9 +515,8 @@ export default class LiveKitClient {
       .on(LiveKit.RoomEvent.TrackSubscribed, this.onTrackSubscribed.bind(this))
       .on(LiveKit.RoomEvent.TrackUnpublished, (...args) => { log.debug("RoomEvent TrackUnpublished:", args); })
       .on(LiveKit.RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
-      .on(LiveKit.RoomEvent.Disconnected, (...args) => { log.debug("RoomEvent Disconnected:", args); })
-      // TODO - add better disconnect / reconnect logic with incremental backoff
-      .on(LiveKit.RoomEvent.Reconnecting, () => { log.warn("Reconnecting to room"); })
+      .on(LiveKit.RoomEvent.Disconnected, this.onDisconnected.bind(this))
+      .on(LiveKit.RoomEvent.Reconnecting, this.onReconnecting.bind(this))
       .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuteChanged.bind(this))
       .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackMuteChanged.bind(this))
       .on(LiveKit.RoomEvent.MetadataChanged, (...args) => { log.debug("RoomEvent MetadataChanged:", args); })

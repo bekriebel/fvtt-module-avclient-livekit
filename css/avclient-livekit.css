@@ -2,6 +2,14 @@
   color: #FFF;
 }
 
+.camera-view .av-control.livekit-control.hidden {
+  display: none;
+}
+
+.camera-view .av-control.livekit-control.disabled {
+  pointer-events: none;
+}
+
 .camera-view .status-remote-hidden,
 .camera-view .status-remote-muted {
   font-size: 20px;
