@@ -96,13 +96,18 @@ export default class LiveKitAVClient extends AVClient {
     this.room = connectionSettings.room;
     log.debug("Meeting room name:", this.room);
 
+    // Set the user's metadata
+    const metadata = {
+      fvttUserId: game.user.id,
+    };
+
     // Get an access token
     const accessToken = this._liveKitClient.getAccessToken(
       connectionSettings.username,
       connectionSettings.password,
       this.room,
       game.user.name,
-      game.user.id,
+      metadata,
     );
 
     const localTracks = [];
@@ -129,6 +134,7 @@ export default class LiveKitAVClient extends AVClient {
       log.info("Connected to room", this.room);
     } catch (error) {
       log.error("Could not connect:", error.message);
+      // TODO: Add some incremental back-off reconnect logic here
       return false;
     }
 
@@ -378,6 +384,9 @@ export default class LiveKitAVClient extends AVClient {
     if (userAudioTrack && audioElement) {
       this._liveKitClient.attachAudioTrack(userId, userAudioTrack, audioElement);
     }
+
+    // Add status indicators
+    this._liveKitClient.addStatusIndicators(userId);
 
     const event = new CustomEvent("webrtcVideoSet", { detail: userId });
     videoElement.dispatchEvent(event);

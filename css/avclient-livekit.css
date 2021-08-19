@@ -1,0 +1,27 @@
+.camera-view .av-control.toggle .fa-closed-captioning.active {
+  color: #FFF;
+}
+
+.camera-view .status-remote-hidden,
+.camera-view .status-remote-muted {
+  font-size: 20px;
+  width: 30px;
+  line-height: 30px;
+  color: #ba2200;
+}
+.camera-view .status-remote-hidden.hidden,
+.camera-view .status-remote-muted.hidden,
+.camera-view .status-remote-ptt.hidden {
+  display: none;
+}
+
+.camera-view .status-remote-ptt {
+  font-size: 20px;
+  width: 30px;
+  line-height: 30px;
+  color: gray;
+}
+
+.camera-view .status-remote-ptt.active {
+  color: greenyellow;
+}

@@ -21,6 +21,9 @@
   "esmodules": [
     "src/avclient-livekit.js"
   ],
+  "styles": [
+    "css/avclient-livekit.css"
+  ],
   "socket": true,
   "url": "https://github.com/bekriebel/fvtt-module-avclient-livekit",
   "manifest": "https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json",

@@ -1,3 +1,4 @@
+import { LANG_NAME } from "./utils/constants.js";
 import * as log from "./utils/logging.js";
 
 import "./libs/livekit-client.min.js";
@@ -32,6 +33,30 @@ export default class LiveKitClient {
     });
   }
 
+  addStatusIndicators(userId) {
+    // Get the user camera view and notification bar
+    const userCameraView = ui.webrtc.getUserCameraView(userId);
+    const userNotificationBar = userCameraView.querySelector(".notification-bar");
+
+    // Add indicators
+    const indicators = {
+      ptt: $(`<i class="fas fa-podcast fa-fw status-remote-ptt hidden" title="${game.i18n.localize("WEBRTC.VoiceModePtt")}"></i>`),
+      muted: $(`<i class="fas fa-microphone-alt-slash fa-fw status-remote-muted hidden" title="${game.i18n.localize(`${LANG_NAME}.indicatorMuted`)}"></i>`),
+      hidden: $(`<i class="fas fa-eye-slash fa-fw status-remote-hidden hidden" title="${game.i18n.localize(`${LANG_NAME}.indicatorHidden`)}"></i>`),
+    };
+
+    // TODO: We aren't tracking PTT properly yet. Set this after we are.
+    // const voiceMode = something;
+    // indicators.ptt.toggleClass("hidden", !(voiceMode === "ptt"));
+
+    indicators.muted.toggleClass("hidden", !this.getParticipantAudioTrack(userId)?.isMuted);
+    indicators.hidden.toggleClass("hidden", !this.getParticipantVideoTrack(userId)?.isMuted);
+
+    Object.values(indicators).forEach((indicator) => {
+      $(userNotificationBar).append(indicator);
+    });
+  }
+
   async attachAudioTrack(userId, userAudioTrack, audioElement) {
     if (userAudioTrack.attachedElements.includes(audioElement)) {
       log.debug("Audio track", userAudioTrack, "already attached to element", audioElement, "; skipping");
@@ -44,7 +69,7 @@ export default class LiveKitClient {
     } else {
       const requestedSink = this.settings.get("client", "audioSink");
       await audioElement.setSinkId(requestedSink).catch((error) => {
-        log.warn("An error occurred when requesting the output audio device:", requestedSink, error.message);
+        log.error("An error occurred when requesting the output audio device:", requestedSink, error.message);
       });
     }
 
@@ -108,11 +133,11 @@ export default class LiveKitClient {
     }
   }
 
-  getAccessToken(apiKey, secretKey, roomName, userName, fvttUserId) {
+  getAccessToken(apiKey, secretKey, roomName, userName, metadata) {
     const accessToken = new LiveKit.AccessToken(apiKey, secretKey, {
       ttl: "10h",
       identity: userName,
-      metadata: fvttUserId,
+      metadata: JSON.stringify(metadata),
     });
     accessToken.addGrant({ roomJoin: true, room: roomName });
 
@@ -242,7 +267,7 @@ export default class LiveKitClient {
   onParticipantConnected(participant) {
     log.debug("Participant connected:", participant);
 
-    const fvttUserId = participant.metadata;
+    const { fvttUserId } = JSON.parse(participant.metadata);
     const fvttUser = game.users.get(fvttUserId);
 
     if (!fvttUser) {
@@ -258,7 +283,7 @@ export default class LiveKitClient {
     }
 
     // Save the participant to the ID mapping
-    this.liveKitParticipants.set(participant.metadata, participant);
+    this.liveKitParticipants.set(fvttUserId, participant);
 
     // Set up remote participant callbacks
     this.setRemoteParticipantCallbacks(participant);
@@ -271,34 +296,51 @@ export default class LiveKitClient {
     log.debug("Participant disconnected:", participant);
 
     // Remove the participant from the ID mapping
-    this.liveKitParticipants.delete(participant.metadata);
+    const { fvttUserId } = JSON.parse(participant.metadata);
+    this.liveKitParticipants.delete(fvttUserId);
 
     // Call a debounced render
     this.render();
   }
 
-  onRemoteTrackMuted(publication, participant) {
-    // TODO - Add a mute indicator for users
+  async onReconnected() {
+    log.info("Reconnect issued");
+    // Re-render just in case users changed
+    this.render();
   }
 
-  onRemoteTrackUnMuted(publication, participant) {
-    // TODO - Add a mute indicator for users
+  onRemoteTrackMuteChanged(publication, participant) {
+    const { fvttUserId } = JSON.parse(participant.metadata);
+    const userCameraView = ui.webrtc.getUserCameraView(fvttUserId);
+
+    if (userCameraView) {
+      let uiIndicator;
+      if (publication.kind === LiveKit.Track.Kind.Audio) {
+        uiIndicator = userCameraView.querySelector(".status-remote-muted");
+      } else if (publication.kind === LiveKit.Track.Kind.Video) {
+        uiIndicator = userCameraView.querySelector(".status-remote-hidden");
+      }
+
+      if (uiIndicator) {
+        uiIndicator.classList.toggle("hidden", !publication.isMuted);
+      }
+    }
   }
 
   async onTrackSubscribed(track, publication, participant) {
     log.debug("onTrackSubscribed:", track, publication, participant);
-    const userId = participant.metadata;
-    const videoElement = ui.webrtc.getUserVideoElement(userId);
+    const { fvttUserId } = JSON.parse(participant.metadata);
+    const videoElement = ui.webrtc.getUserVideoElement(fvttUserId);
 
     if (!videoElement) {
-      log.debug("videoElement not yet ready for", userId, "; skipping publication", publication);
+      log.debug("videoElement not yet ready for", fvttUserId, "; skipping publication", publication);
       return;
     }
 
     if (publication.kind === LiveKit.Track.Kind.Audio) {
       // Get the audio element for the user
-      const audioElement = this.getUserAudioElement(userId, videoElement);
-      await this.attachAudioTrack(userId, track, audioElement);
+      const audioElement = this.getUserAudioElement(fvttUserId, videoElement);
+      await this.attachAudioTrack(fvttUserId, track, audioElement);
     } else if (publication.kind === LiveKit.Track.Kind.Video) {
       this.attachVideoTrack(track, videoElement);
     } else {
@@ -358,6 +400,7 @@ export default class LiveKitClient {
     this.liveKitRoom.localParticipant
       .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, game.user.id))
+      .on(LiveKit.ParticipantEvent.MetadataChanged, (...args) => { log.debug("Local ParticipantEvent MetadataChanged:", args); })
       .on(LiveKit.ParticipantEvent.TrackPublished, (...args) => { log.debug("Local ParticipantEvent TrackPublished:", args); });
   }
 
@@ -371,16 +414,13 @@ export default class LiveKitClient {
     });
   }
 
-  async onReconnected() {
-    log.info("Reconnect issued");
-    // Re-render just in case users changed
-    this.render();
-  }
-
   setRemoteParticipantCallbacks(participant) {
+    const { fvttUserId } = JSON.parse(participant.metadata);
+
     participant
       .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
-        this.onIsSpeakingChanged.bind(this, participant.metadata));
+        this.onIsSpeakingChanged.bind(this, fvttUserId))
+      .on(LiveKit.ParticipantEvent.MetadataChanged, (...args) => { log.debug("Remote ParticipantEvent MetadataChanged:", args); });
   }
 
   setRoomCallbacks() {
@@ -397,8 +437,9 @@ export default class LiveKitClient {
       .on(LiveKit.RoomEvent.Disconnected, (...args) => { log.debug("RoomEvent Disconnected:", args); })
       // TODO - add better disconnect / reconnect logic with incremental backoff
       .on(LiveKit.RoomEvent.Reconnecting, () => { log.warn("Reconnecting to room"); })
-      .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuted.bind(this))
-      .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackUnMuted.bind(this))
+      .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuteChanged.bind(this))
+      .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackMuteChanged.bind(this))
+      .on(LiveKit.RoomEvent.MetadataChanged, (...args) => { log.debug("RoomEvent MetadataChanged:", args); })
       .on(LiveKit.RoomEvent.Reconnected, this.onReconnected.bind(this));
   }
 }

@@ -1,6 +1,8 @@
 {
     "LIVEKITAVCLIENT.debug": "Enable debug logging",
     "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging",
+    "LIVEKITAVCLIENT.indicatorMuted": "Audio Muted",
+    "LIVEKITAVCLIENT.indicatorHidden": "Video Hidden",
     "LIVEKITAVCLIENT.livekitTrace": "Enable LiveKit trace logging",
     "LIVEKITAVCLIENT.livekitTraceHint": "Enables trace logging of the LiveKit client library",
     "LIVEKITAVCLIENT.resetRoom": "Reset Meeting Room ID",
