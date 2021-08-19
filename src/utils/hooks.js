@@ -6,6 +6,12 @@ import registerModuleSettings from "./registerModuleSettings.js";
 /* -------------------------------------------- */
 
 Hooks.on("init", () => {
+  // Override voice modes
+  AVSettings.VOICE_MODES = {
+    ALWAYS: "always",
+    PTT: "ptt",
+  };
+
   // Register module settings
   registerModuleSettings();
 });

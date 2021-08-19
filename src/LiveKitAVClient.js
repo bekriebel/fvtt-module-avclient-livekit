@@ -64,6 +64,11 @@ export default class LiveKitAVClient extends AVClient {
   async initialize() {
     log.debug("LiveKitAVClient initialize");
 
+    if (this.settings.get("client", "voice.mode") === "activity") {
+      log.debug("Disabling voice activation mode as it is handled natively by LiveKit");
+      this.settings.set("client", "voice.mode", "always");
+    }
+
     await this._liveKitClient.initializeLocalTracks();
   }
 
