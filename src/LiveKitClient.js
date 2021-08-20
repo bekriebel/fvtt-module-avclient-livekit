@@ -1,8 +1,15 @@
+import { AccessToken } from "livekit-server-sdk";
+import {
+  createLocalAudioTrack,
+  createLocalVideoTrack,
+  ParticipantEvent,
+  RoomEvent,
+  RoomState,
+  Track,
+  TrackEvent,
+} from "livekit-client";
 import { LANG_NAME } from "./utils/constants.js";
 import * as log from "./utils/logging.js";
-
-import "./libs/livekit-client.min.js";
-import "./libs/livekit-accesstoken.min.js";
 
 export default class LiveKitClient {
   constructor(liveKitAvClient) {
@@ -16,7 +23,7 @@ export default class LiveKitClient {
     this.videoTrack = null;
     this.windowClickListener = null;
 
-    this.render = debounce(this.avMaster.render.bind(this.liveKitAvClient), 2000);
+    this.render = debounce(this.avMaster.render.bind(this.liveKitAvClient), 2001);
   }
 
   /* -------------------------------------------- */
@@ -53,7 +60,7 @@ export default class LiveKitClient {
     });
     element.before(disconnectButton);
 
-    if (this.liveKitRoom?.state === LiveKit.RoomState.Connected) {
+    if (this.liveKitRoom?.state === RoomState.Connected) {
       disconnectButton.toggleClass("hidden", false);
     } else {
       connectButton.toggleClass("hidden", false);
@@ -161,7 +168,7 @@ export default class LiveKitClient {
   }
 
   getAccessToken(apiKey, secretKey, roomName, userName, metadata) {
-    const accessToken = new LiveKit.AccessToken(apiKey, secretKey, {
+    const accessToken = new AccessToken(apiKey, secretKey, {
       ttl: "10h",
       identity: userName,
       metadata: JSON.stringify(metadata),
@@ -185,7 +192,7 @@ export default class LiveKitClient {
   getParticipantAudioTrack(userId) {
     let audioTrack = null;
     this.liveKitParticipants.get(userId).audioTracks.forEach((publication) => {
-      if (publication.kind === LiveKit.Track.Kind.Audio) {
+      if (publication.kind === Track.Kind.Audio) {
         audioTrack = publication.track;
       }
     });
@@ -195,7 +202,7 @@ export default class LiveKitClient {
   getParticipantVideoTrack(userId) {
     let videoTrack = null;
     this.liveKitParticipants.get(userId).videoTracks.forEach((publication) => {
-      if (publication.kind === LiveKit.Track.Kind.Video) {
+      if (publication.kind === Track.Kind.Video) {
         videoTrack = publication.track;
       }
     });
@@ -243,7 +250,7 @@ export default class LiveKitClient {
     // Get the track if requested
     if (audioParams) {
       try {
-        this.audioTrack = await LiveKit.createLocalAudioTrack(audioParams);
+        this.audioTrack = await createLocalAudioTrack(audioParams);
       } catch (error) {
         log.error("Unable to acquire local audio:", error.message);
       }
@@ -266,7 +273,7 @@ export default class LiveKitClient {
     // Get the track if requested
     if (videoParams) {
       try {
-        this.videoTrack = await LiveKit.createLocalVideoTrack(videoParams);
+        this.videoTrack = await createLocalVideoTrack(videoParams);
       } catch (error) {
         log.error("Unable to acquire local video:", error.message);
       }
@@ -376,9 +383,9 @@ export default class LiveKitClient {
 
     if (userCameraView) {
       let uiIndicator;
-      if (publication.kind === LiveKit.Track.Kind.Audio) {
+      if (publication.kind === Track.Kind.Audio) {
         uiIndicator = userCameraView.querySelector(".status-remote-muted");
-      } else if (publication.kind === LiveKit.Track.Kind.Video) {
+      } else if (publication.kind === Track.Kind.Video) {
         uiIndicator = userCameraView.querySelector(".status-remote-hidden");
       }
 
@@ -404,11 +411,11 @@ export default class LiveKitClient {
       return;
     }
 
-    if (publication.kind === LiveKit.Track.Kind.Audio) {
+    if (publication.kind === Track.Kind.Audio) {
       // Get the audio element for the user
       const audioElement = this.getUserAudioElement(fvttUserId, videoElement);
       await this.attachAudioTrack(fvttUserId, track, audioElement);
-    } else if (publication.kind === LiveKit.Track.Kind.Video) {
+    } else if (publication.kind === Track.Kind.Video) {
       this.attachVideoTrack(track, videoElement);
     } else {
       log.warn("Unknown track type subscribed from publication", publication);
@@ -479,10 +486,10 @@ export default class LiveKitClient {
 
   setLocalParticipantCallbacks() {
     this.liveKitRoom.localParticipant
-      .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
+      .on(ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, game.user.id))
-      .on(LiveKit.ParticipantEvent.MetadataChanged, (...args) => { log.debug("Local ParticipantEvent MetadataChanged:", args); })
-      .on(LiveKit.ParticipantEvent.TrackPublished, (...args) => { log.debug("Local ParticipantEvent TrackPublished:", args); });
+      .on(ParticipantEvent.MetadataChanged, (...args) => { log.debug("Local ParticipantEvent MetadataChanged:", args); })
+      .on(ParticipantEvent.TrackPublished, (...args) => { log.debug("Local ParticipantEvent TrackPublished:", args); });
   }
 
   setLocalTrackCallbacks() {
@@ -490,8 +497,8 @@ export default class LiveKitClient {
     this.liveKitRoom.localParticipant.tracks.forEach((publication) => {
       const { track } = publication;
       track
-        .on(LiveKit.TrackEvent.Muted, (...args) => { log.debug("Local TrackEvent Muted:", args); })
-        .on(LiveKit.TrackEvent.Unmuted, (...args) => { log.debug("Local TrackEvent Unmuted:", args); });
+        .on(TrackEvent.Muted, (...args) => { log.debug("Local TrackEvent Muted:", args); })
+        .on(TrackEvent.Unmuted, (...args) => { log.debug("Local TrackEvent Unmuted:", args); });
     });
   }
 
@@ -499,27 +506,27 @@ export default class LiveKitClient {
     const { fvttUserId } = JSON.parse(participant.metadata);
 
     participant
-      .on(LiveKit.ParticipantEvent.IsSpeakingChanged,
+      .on(ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, fvttUserId))
-      .on(LiveKit.ParticipantEvent.MetadataChanged, (...args) => { log.debug("Remote ParticipantEvent MetadataChanged:", args); });
+      .on(ParticipantEvent.MetadataChanged, (...args) => { log.debug("Remote ParticipantEvent MetadataChanged:", args); });
   }
 
   setRoomCallbacks() {
     // Set up event callbacks
     this.liveKitRoom
-      .on(LiveKit.RoomEvent.AudioPlaybackStatusChanged,
+      .on(RoomEvent.AudioPlaybackStatusChanged,
         this.onAudioPlaybackStatusChanged.bind(this))
-      .on(LiveKit.RoomEvent.ParticipantConnected, this.onParticipantConnected.bind(this))
-      .on(LiveKit.RoomEvent.ParticipantDisconnected, this.onParticipantDisconnected.bind(this))
-      .on(LiveKit.RoomEvent.TrackPublished, (...args) => { log.debug("RoomEvent TrackPublished:", args); })
-      .on(LiveKit.RoomEvent.TrackSubscribed, this.onTrackSubscribed.bind(this))
-      .on(LiveKit.RoomEvent.TrackUnpublished, (...args) => { log.debug("RoomEvent TrackUnpublished:", args); })
-      .on(LiveKit.RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
-      .on(LiveKit.RoomEvent.Disconnected, this.onDisconnected.bind(this))
-      .on(LiveKit.RoomEvent.Reconnecting, this.onReconnecting.bind(this))
-      .on(LiveKit.RoomEvent.TrackMuted, this.onRemoteTrackMuteChanged.bind(this))
-      .on(LiveKit.RoomEvent.TrackUnmuted, this.onRemoteTrackMuteChanged.bind(this))
-      .on(LiveKit.RoomEvent.MetadataChanged, (...args) => { log.debug("RoomEvent MetadataChanged:", args); })
-      .on(LiveKit.RoomEvent.Reconnected, this.onReconnected.bind(this));
+      .on(RoomEvent.ParticipantConnected, this.onParticipantConnected.bind(this))
+      .on(RoomEvent.ParticipantDisconnected, this.onParticipantDisconnected.bind(this))
+      .on(RoomEvent.TrackPublished, (...args) => { log.debug("RoomEvent TrackPublished:", args); })
+      .on(RoomEvent.TrackSubscribed, this.onTrackSubscribed.bind(this))
+      .on(RoomEvent.TrackUnpublished, (...args) => { log.debug("RoomEvent TrackUnpublished:", args); })
+      .on(RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
+      .on(RoomEvent.Disconnected, this.onDisconnected.bind(this))
+      .on(RoomEvent.Reconnecting, this.onReconnecting.bind(this))
+      .on(RoomEvent.TrackMuted, this.onRemoteTrackMuteChanged.bind(this))
+      .on(RoomEvent.TrackUnmuted, this.onRemoteTrackMuteChanged.bind(this))
+      .on(RoomEvent.MetadataChanged, (...args) => { log.debug("RoomEvent MetadataChanged:", args); })
+      .on(RoomEvent.Reconnected, this.onReconnected.bind(this));
   }
 }

@@ -1,1 +1,3 @@
-*.lock
+dist/
+node_modules/
+*.log

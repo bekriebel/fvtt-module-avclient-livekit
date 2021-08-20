@@ -1,3 +1,8 @@
+import {
+  connect as liveKitConnect,
+  LogLevel,
+  RoomState,
+} from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants.js";
 import * as log from "./utils/logging.js";
 
@@ -121,12 +126,12 @@ export default class LiveKitAVClient extends AVClient {
 
     if (game.settings.get(MODULE_NAME, "livekitTrace")) {
       log.debug("Setting livekit trace logging");
-      livekitConnectionOptions.logLevel = LiveKit.LogLevel.trace;
+      livekitConnectionOptions.logLevel = LogLevel.trace;
     }
 
     // Connect to the server
     try {
-      this._liveKitClient.liveKitRoom = await LiveKit.connect(
+      this._liveKitClient.liveKitRoom = await liveKitConnect(
         `wss://${connectionSettings.url}`,
         accessToken,
         livekitConnectionOptions,
@@ -141,7 +146,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Verify that we are connected
-    if (!this._liveKitClient.liveKitRoom?.state === LiveKit.RoomState.Connected) {
+    if (!this._liveKitClient.liveKitRoom?.state === RoomState.Connected) {
       log.error("Not connected to room after attempting to connect");
       return false;
     }
@@ -162,7 +167,7 @@ export default class LiveKitAVClient extends AVClient {
   async disconnect() {
     log.debug("LiveKitAVClient disconnect");
     if (this._liveKitClient.liveKitRoom
-      && this._liveKitClient.liveKitRoom.state !== LiveKit.RoomState.Disconnected) {
+      && this._liveKitClient.liveKitRoom.state !== RoomState.Disconnected) {
       this._liveKitClient.liveKitRoom.disconnect();
       return true;
     }

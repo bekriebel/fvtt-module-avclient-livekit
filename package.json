@@ -1,0 +1,33 @@
+{
+  "name": "avclient-livekit",
+  "version": "0.0.0",
+  "description": "LiveKit A/V module for FoundryVTT",
+  "private": true,
+  "repository": "https://github.com/bekriebel/fvtt-module-avclient-livekit",
+  "author": "Brint E. Kriebel <fvtt-module-help@bekit.net>",
+  "license": "Hippocratic-2.1",
+  "scripts": {
+    "watch": "webpack --watch --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "build:dev": "webpack --config webpack.dev.js"
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "dependencies": {
+    "livekit-client": "^0.11.1",
+    "livekit-server-sdk": "^0.5.1"
+    },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "copy-webpack-plugin": "^9.0.1",
+    "crypto-browserify": "^3.12.0",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "terser-webpack-plugin": "^5.1.4",
+    "util": "^0.12.4",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-merge": "^5.8.0"
+  }
+}
