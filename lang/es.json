@@ -1,7 +1,7 @@
 {
-    "I18N.LANGUAGE": "Español",
-    "I18N.MAINTAINERS": "@Viriato139ac#0342",
+  "I18N.LANGUAGE": "Español",
+  "I18N.MAINTAINERS": "@Viriato139ac#0342",
 
-    "LIVEKITAVCLIENT.debug": "Habilitar registro de errores",
-    "LIVEKITAVCLIENT.debugHint": "Habilita CONFIG.debug.av y CONFIG.debug.avclient para crear un registro de errores detallado"
+  "LIVEKITAVCLIENT.debug": "Habilitar registro de errores",
+  "LIVEKITAVCLIENT.debugHint": "Habilita CONFIG.debug.av y CONFIG.debug.avclient para crear un registro de errores detallado"
 }

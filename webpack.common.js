@@ -5,7 +5,7 @@ const webpack = require("webpack");
 module.exports = {
   target: "browserslist",
   entry: {
-    "avclient-livekit": "./src/avclient-livekit.ts"
+    "avclient-livekit": "./src/avclient-livekit.ts",
   },
   output: {
     filename: "[name].bundle.js",
@@ -30,12 +30,12 @@ module.exports = {
   resolve: {
     extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
     fallback: {
-      "buffer": require.resolve("buffer/"),
-      "crypto": require.resolve("crypto-browserify/"),
-      "stream": require.resolve("stream-browserify"),
-      "util": require.resolve("util/")
+      buffer: require.resolve("buffer/"),
+      crypto: require.resolve("crypto-browserify/"),
+      stream: require.resolve("stream-browserify"),
+      util: require.resolve("util/"),
     },
-    symlinks: false
+    symlinks: false,
   },
   module: {
     rules: [

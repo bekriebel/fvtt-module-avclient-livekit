@@ -14,7 +14,11 @@ export default function registerModuleSettings() {
       if (value && getGame().user?.isGM) {
         log.warn("Resetting meeting room ID");
         getGame().settings.set(MODULE_NAME, "resetRoom", false);
-        getGame().webrtc?.client.settings.set("world", "server.room", randomID(32));
+        getGame().webrtc?.client.settings.set(
+          "world",
+          "server.room",
+          randomID(32)
+        );
       }
     },
   });

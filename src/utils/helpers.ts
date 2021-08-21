@@ -7,17 +7,19 @@ import * as log from "./logging";
  */
 export const delayReload = debounce(() => window.location.reload(), 100);
 
-export const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+export const sleep = (delay) =>
+  new Promise((resolve) => setTimeout(resolve, delay));
 
 /**
-   * Transform the device info array from enumerated devices into an object with {id: label} keys
-   * @param {Array} list    The list of devices
-   */
+ * Transform the device info array from enumerated devices into an object with {id: label} keys
+ * @param {Array} list    The list of devices
+ */
 export function deviceInfoToObject(list, kind) {
   const obj = {};
   for (let i = 0; i < list.length; i += 1) {
     if (list[i].kind === kind) {
-      obj[list[i].deviceId] = list[i].label || getGame().i18n.localize("WEBRTC.UnknownDevice");
+      obj[list[i].deviceId] =
+        list[i].label || getGame().i18n.localize("WEBRTC.UnknownDevice");
     }
   }
 
@@ -26,23 +28,22 @@ export function deviceInfoToObject(list, kind) {
 
 export function getCanvas(): Canvas {
   if (!(canvas instanceof Canvas) || !canvas.ready) {
-      throw new Error("Canvas is not yet ready.");
+    throw new Error("Canvas is not yet ready.");
   }
   return canvas;
 }
 
 export function getGame(): Game {
   if (!(game instanceof Game)) {
-      throw new Error("Game is not yet initialized.");
+    throw new Error("Game is not yet initialized.");
   }
   return game;
 }
 
-
 /**
  * Dynamically load additional script files, returning when loaded
  * @param scriptSrc    The location of the script file
-*/
+ */
 export async function loadScript(scriptSrc) {
   log.debug("Loading script:", scriptSrc);
   return new Promise((resolve, reject) => {

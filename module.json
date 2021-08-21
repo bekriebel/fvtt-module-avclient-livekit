@@ -18,12 +18,8 @@
   "minimumCoreVersion": "0.8.8",
   "compatibleCoreVersion": "0.8.8",
   "manifestPlusVersion": "1.1.0",
-  "esmodules": [
-    "avclient-livekit.bundle.js"
-  ],
-  "styles": [
-    "css/avclient-livekit.css"
-  ],
+  "esmodules": ["avclient-livekit.bundle.js"],
+  "styles": ["css/avclient-livekit.css"],
   "socket": true,
   "url": "https://github.com/bekriebel/fvtt-module-avclient-livekit",
   "manifest": "https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json",

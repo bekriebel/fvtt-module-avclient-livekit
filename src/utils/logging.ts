@@ -38,7 +38,7 @@ export const warn = console.warn.bind(console, LOG_PREFIX);
 export const error = console.error.bind(console, LOG_PREFIX);
 
 // Enable debug & info logs if debugging is enabled
-export function setDebug(value) {
+export function setDebug(value: any) {
   if (value) {
     debug = console.debug.bind(console, LOG_PREFIX);
     info = console.info.bind(console, LOG_PREFIX);

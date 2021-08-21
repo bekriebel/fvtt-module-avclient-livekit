@@ -6,7 +6,8 @@
     "sourceMap": true,
     "types": ["@league-of-foundry-developers/foundry-vtt-types"],
     "moduleResolution": "node",
-    "strictNullChecks": true,
+    "strictNullChecks": true
+    // "noImplicitAny": true,
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules"]
