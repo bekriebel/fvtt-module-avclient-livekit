@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    // "outDir": "./built",
+    // "allowJs": true,
+    "target": "ES6",
+    "sourceMap": true,
+    "types": ["@league-of-foundry-developers/foundry-vtt-types"],
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules"]
+}

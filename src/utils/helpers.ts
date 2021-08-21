@@ -1,5 +1,5 @@
-import { LANG_NAME, MODULE_NAME } from "./constants.js";
-import * as log from "./logging.js";
+import { LANG_NAME, MODULE_NAME } from "./constants";
+import * as log from "./logging";
 
 /**
  * Issue a delayed (debounced) reload to the whole window.
@@ -17,12 +17,27 @@ export function deviceInfoToObject(list, kind) {
   const obj = {};
   for (let i = 0; i < list.length; i += 1) {
     if (list[i].kind === kind) {
-      obj[list[i].deviceId] = list[i].label || game.i18n.localize("WEBRTC.UnknownDevice");
+      obj[list[i].deviceId] = list[i].label || getGame().i18n.localize("WEBRTC.UnknownDevice");
     }
   }
 
   return obj;
 }
+
+export function getCanvas(): Canvas {
+  if (!(canvas instanceof Canvas) || !canvas.ready) {
+      throw new Error("Canvas is not yet ready.");
+  }
+  return canvas;
+}
+
+export function getGame(): Game {
+  if (!(game instanceof Game)) {
+      throw new Error("Game is not yet initialized.");
+  }
+  return game;
+}
+
 
 /**
  * Dynamically load additional script files, returning when loaded
@@ -55,7 +70,7 @@ export async function loadScript(scriptSrc) {
 }
 
 export function registerModuleSetting(settingsObject) {
-  game.settings.register(MODULE_NAME, settingsObject.name, {
+  getGame().settings.register(MODULE_NAME, settingsObject.name, {
     name: `${LANG_NAME}.${settingsObject.name}`,
     hint: `${LANG_NAME}.${settingsObject.name}Hint`,
     scope: settingsObject.scope,

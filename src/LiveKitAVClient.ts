@@ -3,10 +3,11 @@ import {
   LogLevel,
   RoomState,
 } from "livekit-client";
-import { LANG_NAME, MODULE_NAME } from "./utils/constants.js";
-import * as log from "./utils/logging.js";
+import { LANG_NAME, MODULE_NAME } from "./utils/constants";
+import * as log from "./utils/logging";
 
-import LiveKitClient from "./LiveKitClient.js";
+import LiveKitClient from "./LiveKitClient";
+import { getGame } from "./utils/helpers";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
@@ -15,6 +16,10 @@ import LiveKitClient from "./LiveKitClient.js";
  * @param {AVSettings} settings       The audio/video settings being used
  */
 export default class LiveKitAVClient extends AVClient {
+  room: any;
+  _liveKitClient: any;
+  audioBroadcastEnabled: boolean;
+
   constructor(master, settings) {
     super(master, settings);
 
@@ -54,7 +59,7 @@ export default class LiveKitAVClient extends AVClient {
    * @returns {boolean}
    */
   get isMuted() {
-    return this.settings.client.users[game.user.id]?.muted;
+    return this.settings.client.users[getGame().user?.id || ""]?.muted;
   }
 
   /* -------------------------------------------- */
@@ -89,7 +94,7 @@ export default class LiveKitAVClient extends AVClient {
   async connect() {
     log.debug("LiveKitAVClient connect");
 
-    const connectionSettings = this.settings.get("world", "server");
+    const connectionSettings:any = this.settings.get("world", "server");
 
     // Set a room name if one doesn't yet exist
     if (!connectionSettings.room) {
@@ -103,7 +108,7 @@ export default class LiveKitAVClient extends AVClient {
 
     // Set the user's metadata
     const metadata = {
-      fvttUserId: game.user.id,
+      fvttUserId: getGame().user?.id,
     };
 
     // Get an access token
@@ -111,20 +116,20 @@ export default class LiveKitAVClient extends AVClient {
       connectionSettings.username,
       connectionSettings.password,
       this.room,
-      game.user.name,
+      getGame().user?.name,
       metadata,
     );
 
-    const localTracks = [];
+    const localTracks:any = [];
     if (this._liveKitClient.audioTrack) localTracks.push(this._liveKitClient.audioTrack);
     if (this._liveKitClient.videoTrack) localTracks.push(this._liveKitClient.videoTrack);
 
     // Set the livekit connection options
-    const livekitConnectionOptions = {
+    const livekitConnectionOptions:any = {
       tracks: localTracks,
     };
 
-    if (game.settings.get(MODULE_NAME, "livekitTrace")) {
+    if (getGame().settings.get(MODULE_NAME, "livekitTrace")) {
       log.debug("Setting livekit trace logging");
       livekitConnectionOptions.logLevel = LogLevel.trace;
     }
@@ -140,13 +145,13 @@ export default class LiveKitAVClient extends AVClient {
     } catch (error) {
       log.error("Could not connect:", error.message);
       // TODO: Add some incremental back-off reconnect logic here
-      ui.notifications.error(`${game.i18n.localize(`${LANG_NAME}.connectError`)}: ${error.message}`);
+      ui.notifications?.error(`${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${error.message}`);
       this._liveKitClient.setConnectionButtons(false);
       return false;
     }
 
     // Verify that we are connected
-    if (!this._liveKitClient.liveKitRoom?.state === RoomState.Connected) {
+    if (!(this._liveKitClient.liveKitRoom?.state === RoomState.Connected)) {
       log.error("Not connected to room after attempting to connect");
       return false;
     }
@@ -223,7 +228,7 @@ export default class LiveKitAVClient extends AVClient {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices.reduce((obj, device) => {
       if (device.kind === kind) {
-        obj[device.deviceId] = device.label || game.i18n.localize("WEBRTC.UnknownDevice");
+        obj[device.deviceId] = device.label || getGame().i18n.localize("WEBRTC.UnknownDevice");
       }
       return obj;
     }, {});
@@ -239,7 +244,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {string[]}           The connected User IDs
    */
   getConnectedUsers() {
-    const connectedUsers = Array.from(this._liveKitClient.liveKitParticipants.keys());
+    const connectedUsers:string[] = Array.from(this._liveKitClient.liveKitParticipants.keys());
 
     log.debug("connectedUsers:", connectedUsers);
     return connectedUsers;
@@ -357,7 +362,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // If this if for our local user, attach our video track using LiveKit
-    if (userId === game.user.id) {
+    if (userId === getGame().user?.id) {
       // Attach only our video track
       const userVideoTrack = this._liveKitClient.videoTrack;
       if (userVideoTrack && videoElement) {
@@ -411,10 +416,10 @@ export default class LiveKitAVClient extends AVClient {
     if (videoSourceChange) this._liveKitClient.changeVideoSource(changed.client.videoSrc);
 
     // Change voice broadcasting mode
-    const modeChange = ["client.voice.mode", `client.users.${game.user.id}.muted`].some((k) => keys.has(k));
+    const modeChange = ["client.voice.mode", `client.users.${getGame().user?.id}.muted`].some((k) => keys.has(k));
     if (modeChange) {
       const isAlways = this.settings.client.voice.mode === "always";
-      this.toggleAudio(isAlways && this.master.canUserShareAudio(game.user.id));
+      this.toggleAudio(isAlways && this.master.canUserShareAudio(getGame().user?.id || ""));
       this.master.broadcast(isAlways);
     }
 

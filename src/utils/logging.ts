@@ -1,4 +1,4 @@
-import { LOG_PREFIX, MODULE_NAME } from "./constants.js";
+import { LOG_PREFIX, MODULE_NAME } from "./constants";
 
 /* -------------------------------------------- */
 /*  Logging Methods                             */

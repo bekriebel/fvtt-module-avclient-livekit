@@ -1,5 +1,6 @@
-import { MODULE_NAME } from "./constants.js";
-import registerModuleSettings from "./registerModuleSettings.js";
+import { MODULE_NAME } from "./constants";
+import { getGame } from "./helpers";
+import registerModuleSettings from "./registerModuleSettings";
 
 /* -------------------------------------------- */
 /*  Hook calls                                  */
@@ -7,6 +8,7 @@ import registerModuleSettings from "./registerModuleSettings.js";
 
 Hooks.on("init", () => {
   // Override voice modes
+  // @ts-expect-error - we are overriding this value
   AVSettings.VOICE_MODES = {
     ALWAYS: "always",
     PTT: "ptt",
@@ -24,8 +26,10 @@ Hooks.on(`${MODULE_NAME}DebugSet`, (value) => {
 
 Hooks.on("ready", () => {
   Hooks.on("renderCameraViews", (cameraViews, cameraViewsElement) => {
-    if (game.webrtc?.client?._liveKitClient) {
-      game.webrtc.client._liveKitClient.onRenderCameraViews(cameraViews, cameraViewsElement);
+    // @ts-expect-error - we are extending this
+    if (getGame().webrtc?.client?._liveKitClient) {
+      // @ts-expect-error - we are extending this
+      getGame()?.webrtc?.client._liveKitClient.onRenderCameraViews(cameraViews, cameraViewsElement);
     }
   });
 });
