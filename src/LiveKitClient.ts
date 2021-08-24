@@ -1,41 +1,50 @@
 import { AccessToken } from "livekit-server-sdk";
 import {
+  CreateAudioTrackOptions,
   createLocalAudioTrack,
   createLocalVideoTrack,
+  CreateVideoTrackOptions,
+  LocalAudioTrack,
+  LocalVideoTrack,
+  Participant,
   ParticipantEvent,
+  RemoteAudioTrack,
+  RemoteParticipant,
+  RemoteTrack,
+  RemoteTrackPublication,
+  RemoteVideoTrack,
+  Room,
   RoomEvent,
   RoomState,
   Track,
   TrackEvent,
+  VideoTrack,
 } from "livekit-client";
 import { LANG_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
+import LiveKitAVClient from "./LiveKitAVClient";
 
 export default class LiveKitClient {
-  audioTrack: any;
-  avMaster: any;
-  liveKitAvClient: any;
-  liveKitParticipants: Map<any, any>;
-  liveKitRoom: any;
-  settings: any;
-  videoTrack: any;
-  windowClickListener: any;
+  avMaster: AVMaster;
+  liveKitAvClient: LiveKitAVClient;
+  settings: AVSettings;
+  render: () => void;
 
-  render: (...args: unknown[]) => void;
-  constructor(liveKitAvClient) {
-    this.audioTrack = null;
+  audioTrack: LocalAudioTrack | null = null;
+  liveKitParticipants: Map<string, Participant> = new Map();
+  liveKitRoom: Room | null = null;
+  videoTrack: LocalVideoTrack | null = null;
+  windowClickListener: EventListener | null = null;
+
+  constructor(liveKitAvClient: LiveKitAVClient) {
     this.avMaster = liveKitAvClient.master;
     this.liveKitAvClient = liveKitAvClient;
-    this.liveKitParticipants = new Map();
-    this.liveKitRoom = null;
     this.settings = liveKitAvClient.settings;
-    this.videoTrack = null;
-    this.windowClickListener = null;
 
     this.render = debounce(
       this.avMaster.render.bind(this.liveKitAvClient),
-      2001
+      2000
     );
   }
 
@@ -44,19 +53,26 @@ export default class LiveKitClient {
   /* -------------------------------------------- */
 
   addAllParticipants() {
+    if (!this.liveKitRoom) {
+      log.warn(
+        "Attempting to add participants before the LiveKit room is available"
+      );
+      return;
+    }
+
     // Add our user to the participants list
-    this.liveKitParticipants.set(
-      getGame().user?.id,
-      this.liveKitRoom.localParticipant
-    );
+    const userId = getGame().user?.id;
+    if (userId) {
+      this.liveKitParticipants.set(userId, this.liveKitRoom.localParticipant);
+    }
 
     // Set up all other users
-    this.liveKitRoom.participants.forEach((participant) => {
+    this.liveKitRoom.participants.forEach((participant: RemoteParticipant) => {
       this.onParticipantConnected(participant);
     });
   }
 
-  addConnectionButtons(element) {
+  addConnectionButtons(element: JQuery<HTMLElement>) {
     if (element.length !== 1) {
       log.warn("Can't find CameraView configure element", element);
       return;
@@ -91,7 +107,7 @@ export default class LiveKitClient {
     }
   }
 
-  addStatusIndicators(userId) {
+  addStatusIndicators(userId: string) {
     // Get the user camera view and notification bar
     const userCameraView = ui.webrtc?.getUserCameraView(userId);
     const userNotificationBar =
@@ -136,7 +152,11 @@ export default class LiveKitClient {
     });
   }
 
-  async attachAudioTrack(userId, userAudioTrack, audioElement) {
+  async attachAudioTrack(
+    userId: string,
+    userAudioTrack: RemoteAudioTrack,
+    audioElement: HTMLAudioElement
+  ) {
     if (userAudioTrack.attachedElements.includes(audioElement)) {
       log.debug(
         "Audio track",
@@ -149,10 +169,12 @@ export default class LiveKitClient {
     }
 
     // Set audio output device
+    // @ts-expect-error - sinkId is currently an experimental property and not in the defined types
     if (audioElement.sinkId === undefined) {
       log.warn("Your web browser does not support output audio sink selection");
     } else {
       const requestedSink = this.settings.get("client", "audioSink");
+      // @ts-expect-error - setSinkId is currently an experimental method and not in the defined types
       await audioElement.setSinkId(requestedSink).catch((error) => {
         log.error(
           "An error occurred when requesting the output audio device:",
@@ -169,11 +191,11 @@ export default class LiveKitClient {
     userAudioTrack.attach(audioElement);
 
     // Set the parameters
-    audioElement.volume = this.settings.getUser(userId).volume;
-    audioElement.muted = this.settings.get("client", "muteAll");
+    audioElement.volume = this.settings.getUser(userId)?.volume || 1.0;
+    audioElement.muted = this.settings.get("client", "muteAll") === true;
   }
 
-  attachVideoTrack(userVideoTrack, videoElement) {
+  attachVideoTrack(userVideoTrack: VideoTrack, videoElement: HTMLVideoElement) {
     if (userVideoTrack.attachedElements.includes(videoElement)) {
       log.debug(
         "Video track",
@@ -198,17 +220,22 @@ export default class LiveKitClient {
       this.settings.get("client", "audioSrc") === "disabled"
     ) {
       if (this.audioTrack) {
-        await this.liveKitRoom.localParticipant.unpublishTrack(this.audioTrack);
+        this.liveKitRoom?.localParticipant.unpublishTrack(this.audioTrack);
         this.audioTrack.stop();
         this.audioTrack = null;
       } else {
         await this.initializeAudioTrack();
         if (this.audioTrack) {
-          await this.liveKitRoom.localParticipant.publishTrack(this.audioTrack);
+          await this.liveKitRoom?.localParticipant.publishTrack(
+            this.audioTrack
+          );
         }
       }
     } else {
-      this.audioTrack.restartTrack(this.getAudioParams());
+      const audioParams = this.getAudioParams();
+      if (audioParams) {
+        this.audioTrack.restartTrack(audioParams);
+      }
     }
   }
 
@@ -218,30 +245,43 @@ export default class LiveKitClient {
       this.settings.get("client", "videoSrc") === "disabled"
     ) {
       if (this.videoTrack) {
-        await this.liveKitRoom.localParticipant.unpublishTrack(this.videoTrack);
+        this.liveKitRoom?.localParticipant.unpublishTrack(this.videoTrack);
         this.videoTrack.detach();
         this.videoTrack.stop();
         this.videoTrack = null;
       } else {
         await this.initializeVideoTrack();
         if (this.videoTrack) {
-          await this.liveKitRoom.localParticipant.publishTrack(this.videoTrack);
-          this.attachVideoTrack(
-            this.videoTrack,
-            ui.webrtc?.getUserVideoElement(getGame().user?.id || "")
+          await this.liveKitRoom?.localParticipant.publishTrack(
+            this.videoTrack
           );
+          const userVideoElement = ui.webrtc?.getUserVideoElement(
+            getGame().user?.id || ""
+          );
+          if (userVideoElement instanceof HTMLVideoElement) {
+            this.attachVideoTrack(this.videoTrack, userVideoElement);
+          }
         }
       }
     } else {
-      this.videoTrack.restartTrack(this.getVideoParams());
+      const videoParams = this.getVideoParams();
+      if (videoParams) {
+        this.videoTrack.restartTrack(videoParams);
+      }
     }
   }
 
-  getAccessToken(apiKey, secretKey, roomName, userName, metadata) {
+  getAccessToken(
+    apiKey: string,
+    secretKey: string,
+    roomName: string,
+    userName: string,
+    metadata: string
+  ): string {
     const accessToken = new AccessToken(apiKey, secretKey, {
       ttl: "10h",
       identity: userName,
-      metadata: JSON.stringify(metadata),
+      metadata: metadata,
     });
     accessToken.addGrant({ roomJoin: true, room: roomName });
 
@@ -250,33 +290,42 @@ export default class LiveKitClient {
     return accessTokenJwt;
   }
 
-  getAudioParams() {
+  getAudioParams(): CreateAudioTrackOptions | false {
     // Determine whether the user can send audio
     const audioSrc = this.settings.get("client", "audioSrc");
     const canBroadcastAudio = this.avMaster.canUserBroadcastAudio(
-      getGame().user?.id
+      getGame().user?.id || ""
     );
-    return audioSrc && audioSrc !== "disabled" && canBroadcastAudio
+
+    return typeof audioSrc === "string" &&
+      audioSrc !== "disabled" &&
+      canBroadcastAudio
       ? {
           deviceId: { ideal: audioSrc },
         }
       : false;
   }
 
-  getParticipantAudioTrack(userId) {
-    let audioTrack: any = null;
-    this.liveKitParticipants.get(userId).audioTracks.forEach((publication) => {
-      if (publication.kind === Track.Kind.Audio) {
+  getParticipantAudioTrack(userId: string): RemoteAudioTrack | null {
+    let audioTrack: RemoteAudioTrack | null = null;
+    this.liveKitParticipants.get(userId)?.audioTracks.forEach((publication) => {
+      if (
+        publication.kind === Track.Kind.Audio &&
+        publication.track instanceof RemoteAudioTrack
+      ) {
         audioTrack = publication.track;
       }
     });
     return audioTrack;
   }
 
-  getParticipantVideoTrack(userId) {
-    let videoTrack: any = null;
-    this.liveKitParticipants.get(userId).videoTracks.forEach((publication) => {
-      if (publication.kind === Track.Kind.Video) {
+  getParticipantVideoTrack(userId: string): RemoteVideoTrack | null {
+    let videoTrack: RemoteVideoTrack | null = null;
+    this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
+      if (
+        publication.kind === Track.Kind.Video &&
+        publication.track instanceof RemoteVideoTrack
+      ) {
         videoTrack = publication.track;
       }
     });
@@ -291,7 +340,10 @@ export default class LiveKitClient {
    * @param {HTMLVideoElement} videoElement   The HTMLVideoElement of the user
    * @return {HTMLVideoElement|null}
    */
-  getUserAudioElement(userId, videoElement: any = null) {
+  getUserAudioElement(
+    userId: string,
+    videoElement: HTMLVideoElement | null = null
+  ): HTMLAudioElement | null {
     // Find an existing audio element
     let audioElement = ui.webrtc?.element.find(
       `.camera-view[data-user=${userId}] audio.user-audio`
@@ -312,7 +364,12 @@ export default class LiveKitClient {
         .change(this.onVolumeChange.bind(this));
     }
 
-    return audioElement;
+    if (audioElement instanceof HTMLAudioElement) {
+      return audioElement;
+    }
+
+    // The audio element was not found or created
+    return null;
   }
 
   async initializeLocalTracks() {
@@ -341,7 +398,7 @@ export default class LiveKitClient {
       this.audioTrack &&
       !(
         this.liveKitAvClient.isVoiceAlways &&
-        this.avMaster.canUserShareAudio(getGame().user?.id)
+        this.avMaster.canUserShareAudio(getGame().user?.id || "")
       )
     ) {
       this.audioTrack.mute();
@@ -367,13 +424,13 @@ export default class LiveKitClient {
     // Check that mute/hidden/broadcast is toggled properly for the track
     if (
       this.videoTrack &&
-      !this.avMaster.canUserShareVideo(getGame().user?.id)
+      !this.avMaster.canUserShareVideo(getGame().user?.id || "")
     ) {
       this.videoTrack.mute();
     }
   }
 
-  onAudioPlaybackStatusChanged(canPlayback) {
+  onAudioPlaybackStatusChanged(canPlayback: boolean) {
     if (!canPlayback) {
       log.warn("Cannot play audio/video, waiting for user interaction");
       this.windowClickListener =
@@ -413,14 +470,16 @@ export default class LiveKitClient {
     // TODO: Add some incremental back-off reconnect logic here
   }
 
-  onIsSpeakingChanged(userId, speaking) {
-    ui.webrtc?.setUserIsSpeaking(userId, speaking);
+  onIsSpeakingChanged(userId: string | undefined, speaking: boolean) {
+    if (userId) {
+      ui.webrtc?.setUserIsSpeaking(userId, speaking);
+    }
   }
 
-  onParticipantConnected(participant) {
+  onParticipantConnected(participant: RemoteParticipant) {
     log.debug("Participant connected:", participant);
 
-    const { fvttUserId } = JSON.parse(participant.metadata);
+    const { fvttUserId } = JSON.parse(participant.metadata || "");
     const fvttUser = getGame().users?.get(fvttUserId);
 
     if (!fvttUser) {
@@ -453,11 +512,11 @@ export default class LiveKitClient {
     this.render();
   }
 
-  onParticipantDisconnected(participant) {
+  onParticipantDisconnected(participant: RemoteParticipant) {
     log.debug("Participant disconnected:", participant);
 
     // Remove the participant from the ID mapping
-    const { fvttUserId } = JSON.parse(participant.metadata);
+    const { fvttUserId } = JSON.parse(participant.metadata || "");
     this.liveKitParticipants.delete(fvttUserId);
 
     // Call a debounced render
@@ -477,8 +536,11 @@ export default class LiveKitClient {
     );
   }
 
-  onRemoteTrackMuteChanged(publication, participant) {
-    const { fvttUserId } = JSON.parse(participant.metadata);
+  onRemoteTrackMuteChanged(
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
+  ) {
+    const { fvttUserId } = JSON.parse(participant.metadata || "");
     const userCameraView = ui.webrtc?.getUserCameraView(fvttUserId);
 
     if (userCameraView) {
@@ -495,15 +557,19 @@ export default class LiveKitClient {
     }
   }
 
-  onRenderCameraViews(cameraviews, html) {
+  onRenderCameraViews(cameraviews: CameraViews, html: JQuery<HTMLElement>) {
     const cameraBox = html.find(`[data-user="${getGame().user?.id}"]`);
     const element = cameraBox.find('[data-action="configure"]');
     this.addConnectionButtons(element);
   }
 
-  async onTrackSubscribed(track, publication, participant) {
+  async onTrackSubscribed(
+    track: RemoteTrack,
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
+  ) {
     log.debug("onTrackSubscribed:", track, publication, participant);
-    const { fvttUserId } = JSON.parse(participant.metadata);
+    const { fvttUserId } = JSON.parse(participant.metadata || "");
     const videoElement = ui.webrtc?.getUserVideoElement(fvttUserId);
 
     if (!videoElement) {
@@ -519,7 +585,9 @@ export default class LiveKitClient {
     if (publication.kind === Track.Kind.Audio) {
       // Get the audio element for the user
       const audioElement = this.getUserAudioElement(fvttUserId, videoElement);
-      await this.attachAudioTrack(fvttUserId, track, audioElement);
+      if (audioElement) {
+        await this.attachAudioTrack(fvttUserId, track, audioElement);
+      }
     } else if (publication.kind === Track.Kind.Video) {
       this.attachVideoTrack(track, videoElement);
     } else {
@@ -527,16 +595,20 @@ export default class LiveKitClient {
     }
   }
 
-  async onTrackUnSubscribed(track, publication, participant) {
+  async onTrackUnSubscribed(
+    track: RemoteTrack,
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
+  ) {
     log.debug("onTrackUnSubscribed:", track, publication, participant);
-    await track.detach();
+    track.detach();
   }
 
   /**
    * Change volume control for a stream
    * @param {Event} event   The originating change event from interaction with the range input
    */
-  onVolumeChange(event) {
+  onVolumeChange(event: JQuery.ChangeEvent) {
     const input = event.currentTarget;
     const box = input.closest(".camera-view");
     const volume = AudioHelper.inputToVolume(input.value);
@@ -544,27 +616,32 @@ export default class LiveKitClient {
   }
 
   onWindowClick() {
-    log.info("User interaction; retrying A/V");
-    window.removeEventListener("click", this.windowClickListener);
-    this.render();
+    if (this.windowClickListener) {
+      window.removeEventListener("click", this.windowClickListener);
+      this.render();
+    }
   }
 
-  getVideoParams() {
+  getVideoParams(): CreateVideoTrackOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
     const canBroadcastVideo = this.avMaster.canUserBroadcastVideo(
-      getGame().user?.id
+      getGame().user?.id || ""
     );
-    return videoSrc && videoSrc !== "disabled" && canBroadcastVideo
+    return typeof videoSrc === "string" &&
+      videoSrc !== "disabled" &&
+      canBroadcastVideo
       ? {
           deviceId: { ideal: videoSrc },
-          width: { ideal: 320 },
-          height: { ideal: 240 },
+          resolution: {
+            width: { ideal: 320 },
+            height: { ideal: 240 },
+          },
         }
       : false;
   }
 
-  setAudioEnabledState(enable) {
+  setAudioEnabledState(enable: boolean) {
     if (!this.audioTrack) {
       log.debug("setAudioEnabledState called but no audio track available");
       return;
@@ -579,7 +656,7 @@ export default class LiveKitClient {
     }
   }
 
-  setConnectionButtons(connected) {
+  setConnectionButtons(connected: boolean) {
     const userCameraView = ui.webrtc?.getUserCameraView(
       getGame().user?.id || ""
     );
@@ -600,7 +677,7 @@ export default class LiveKitClient {
   }
 
   setLocalParticipantCallbacks() {
-    this.liveKitRoom.localParticipant
+    this.liveKitRoom?.localParticipant
       .on(
         ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, getGame().user?.id)
@@ -615,20 +692,22 @@ export default class LiveKitClient {
 
   setLocalTrackCallbacks() {
     // Set up local track callbacks
-    this.liveKitRoom.localParticipant.tracks.forEach((publication) => {
+    this.liveKitRoom?.localParticipant.tracks.forEach((publication) => {
       const { track } = publication;
-      track
-        .on(TrackEvent.Muted, (...args) => {
-          log.debug("Local TrackEvent Muted:", args);
-        })
-        .on(TrackEvent.Unmuted, (...args) => {
-          log.debug("Local TrackEvent Unmuted:", args);
-        });
+      if (track) {
+        track
+          .on(TrackEvent.Muted, (...args) => {
+            log.debug("Local TrackEvent Muted:", args);
+          })
+          .on(TrackEvent.Unmuted, (...args) => {
+            log.debug("Local TrackEvent Unmuted:", args);
+          });
+      }
     });
   }
 
-  setRemoteParticipantCallbacks(participant) {
-    const { fvttUserId } = JSON.parse(participant.metadata);
+  setRemoteParticipantCallbacks(participant: RemoteParticipant) {
+    const { fvttUserId } = JSON.parse(participant.metadata || "");
 
     participant
       .on(
@@ -641,6 +720,13 @@ export default class LiveKitClient {
   }
 
   setRoomCallbacks() {
+    if (!this.liveKitRoom) {
+      log.warn(
+        "Attempted to set up room callbacks before the LiveKit room is ready"
+      );
+      return;
+    }
+
     // Set up event callbacks
     this.liveKitRoom
       .on(

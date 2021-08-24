@@ -1,9 +1,16 @@
-import { connect as liveKitConnect, LogLevel, RoomState } from "livekit-client";
+import {
+  connect as liveKitConnect,
+  ConnectOptions,
+  LocalTrack,
+  LogLevel,
+  RoomState,
+} from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 
 import LiveKitClient from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
+import { ConnectionSettings } from "../types/avclient-livekit";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
@@ -12,11 +19,11 @@ import { getGame } from "./utils/helpers";
  * @param {AVSettings} settings       The audio/video settings being used
  */
 export default class LiveKitAVClient extends AVClient {
-  room: any;
-  _liveKitClient: any;
+  room: string | null;
+  _liveKitClient: LiveKitClient;
   audioBroadcastEnabled: boolean;
 
-  constructor(master, settings) {
+  constructor(master: AVMaster, settings: AVSettings) {
     super(master, settings);
 
     this._liveKitClient = new LiveKitClient(this);
@@ -30,7 +37,7 @@ export default class LiveKitAVClient extends AVClient {
    * Is audio broadcasting push-to-talk enabled?
    * @returns {boolean}
    */
-  get isVoicePTT() {
+  get isVoicePTT(): boolean {
     return this.settings.client.voice.mode === "ptt";
   }
 
@@ -38,7 +45,7 @@ export default class LiveKitAVClient extends AVClient {
    * Is audio broadcasting always enabled?
    * @returns {boolean}
    */
-  get isVoiceAlways() {
+  get isVoiceAlways(): boolean {
     return this.settings.client.voice.mode === "always";
   }
 
@@ -46,16 +53,17 @@ export default class LiveKitAVClient extends AVClient {
    * Is audio broadcasting voice-activation enabled?
    * @returns {boolean}
    */
-  get isVoiceActivated() {
-    return this.settings.client.voice.mode === "activity";
+  get isVoiceActivated(): boolean {
+    // This module does not allow for voice activation
+    return false;
   }
 
   /**
    * Is the current user muted?
    * @returns {boolean}
    */
-  get isMuted() {
-    return this.settings.client.users[getGame().user?.id || ""]?.muted;
+  get isMuted(): boolean {
+    return this.settings.client.users[getGame().user?.id || ""]?.muted || false;
   }
 
   /* -------------------------------------------- */
@@ -67,7 +75,7 @@ export default class LiveKitAVClient extends AVClient {
    * This will be called only once when the Game object is first set-up.
    * @return {Promise<void>}
    */
-  async initialize() {
+  async initialize(): Promise<void> {
     log.debug("LiveKitAVClient initialize");
 
     if (this.settings.get("client", "voice.mode") === "activity") {
@@ -89,10 +97,13 @@ export default class LiveKitAVClient extends AVClient {
    * This function should return a boolean for whether the connection attempt was successful.
    * @return {Promise<boolean>}   Was the connection attempt successful?
    */
-  async connect() {
+  async connect(): Promise<boolean> {
     log.debug("LiveKitAVClient connect");
 
-    const connectionSettings: any = this.settings.get("world", "server");
+    const connectionSettings = this.settings.get(
+      "world",
+      "server"
+    ) as ConnectionSettings;
 
     // Set a room name if one doesn't yet exist
     if (!connectionSettings.room) {
@@ -105,31 +116,46 @@ export default class LiveKitAVClient extends AVClient {
     log.debug("Meeting room name:", this.room);
 
     // Set the user's metadata
-    const metadata = {
+    const metadata = JSON.stringify({
       fvttUserId: getGame().user?.id,
-    };
+    });
+
+    const userName = getGame().user?.name;
+
+    if (!this.room || !userName) {
+      log.error(
+        "Missing required room information, cannot connect. room:",
+        this.room,
+        "username:",
+        userName
+      );
+      return false;
+    }
 
     // Get an access token
     const accessToken = this._liveKitClient.getAccessToken(
       connectionSettings.username,
       connectionSettings.password,
       this.room,
-      getGame().user?.name,
+      userName,
       metadata
     );
 
-    const localTracks: any = [];
+    const localTracks: LocalTrack[] = [];
     if (this._liveKitClient.audioTrack)
       localTracks.push(this._liveKitClient.audioTrack);
     if (this._liveKitClient.videoTrack)
       localTracks.push(this._liveKitClient.videoTrack);
 
     // Set the livekit connection options
-    const livekitConnectionOptions: any = {
+    const livekitConnectionOptions: ConnectOptions = {
       tracks: localTracks,
     };
 
-    if (getGame().settings.get(MODULE_NAME, "livekitTrace")) {
+    if (
+      getGame().settings.get(MODULE_NAME, "debug") &&
+      getGame().settings.get(MODULE_NAME, "livekitTrace")
+    ) {
       log.debug("Setting livekit trace logging");
       livekitConnectionOptions.logLevel = LogLevel.trace;
     }
@@ -173,7 +199,7 @@ export default class LiveKitAVClient extends AVClient {
    * This function should return a boolean for whether a valid disconnection occurred.
    * @return {Promise<boolean>}   Did a disconnection occur?
    */
-  async disconnect() {
+  async disconnect(): Promise<boolean> {
     log.debug("LiveKitAVClient disconnect");
     if (
       this._liveKitClient.liveKitRoom &&
@@ -196,7 +222,7 @@ export default class LiveKitAVClient extends AVClient {
    * Each object key should be a device id and the key should be a human-readable label.
    * @returns {Promise<{object}>}
    */
-  async getAudioSinks() {
+  async getAudioSinks(): Promise<Record<string, string>> {
     return this._getSourcesOfType("audiooutput");
   }
 
@@ -207,7 +233,7 @@ export default class LiveKitAVClient extends AVClient {
    * Each object key should be a device id and the key should be a human-readable label.
    * @returns {Promise<{object}>}
    */
-  async getAudioSources() {
+  async getAudioSources(): Promise<Record<string, string>> {
     return this._getSourcesOfType("audioinput");
   }
 
@@ -218,7 +244,7 @@ export default class LiveKitAVClient extends AVClient {
    * Each object key should be a device id and the key should be a human-readable label.
    * @returns {Promise<{object}>}
    */
-  async getVideoSources() {
+  async getVideoSources(): Promise<Record<string, string>> {
     return this._getSourcesOfType("videoinput");
   }
 
@@ -230,9 +256,11 @@ export default class LiveKitAVClient extends AVClient {
    * @returns {Promise<{object}>}
    * @private
    */
-  async _getSourcesOfType(kind) {
+  async _getSourcesOfType(
+    kind: MediaDeviceKind
+  ): Promise<Record<string, string>> {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.reduce((obj, device) => {
+    return devices.reduce((obj: Record<string, string>, device) => {
       if (device.kind === kind) {
         obj[device.deviceId] =
           device.label || getGame().i18n.localize("WEBRTC.UnknownDevice");
@@ -250,7 +278,7 @@ export default class LiveKitAVClient extends AVClient {
    * The current user should also be included as a connected user in addition to all peers.
    * @return {string[]}           The connected User IDs
    */
-  getConnectedUsers() {
+  getConnectedUsers(): string[] {
     const connectedUsers: string[] = Array.from(
       this._liveKitClient.liveKitParticipants.keys()
     );
@@ -267,7 +295,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {MediaStream|null}    The MediaStream for the user, or null if the user does not have
    *                                one
    */
-  getMediaStreamForUser() {
+  getMediaStreamForUser(): MediaStream | null {
     log.debug("getMediaStreamForUser called but is not used with", MODULE_NAME);
     return null;
   }
@@ -278,7 +306,7 @@ export default class LiveKitAVClient extends AVClient {
    * Is outbound audio enabled for the current user?
    * @return {boolean}
    */
-  isAudioEnabled() {
+  isAudioEnabled(): boolean {
     return this.audioBroadcastEnabled;
   }
 
@@ -288,7 +316,7 @@ export default class LiveKitAVClient extends AVClient {
    * Is outbound video enabled for the current user?
    * @return {boolean}
    */
-  isVideoEnabled() {
+  isVideoEnabled(): boolean {
     let videoTrackEnabled = false;
     if (
       this._liveKitClient.videoTrack &&
@@ -308,7 +336,7 @@ export default class LiveKitAVClient extends AVClient {
    * @param {boolean} enable        Whether the outbound audio track should be enabled (true) or
    *                                 disabled (false)
    */
-  toggleAudio(enable) {
+  toggleAudio(enable: boolean): void {
     log.debug("Toggling audio:", enable);
 
     // If "always on" broadcasting is not enabled, don't proceed
@@ -326,7 +354,7 @@ export default class LiveKitAVClient extends AVClient {
    * activation modes.
    * @param {boolean} broadcast     Whether outbound audio should be sent to connected peers or not?
    */
-  toggleBroadcast(broadcast) {
+  toggleBroadcast(broadcast: boolean): void {
     log.debug("Toggling broadcast audio:", broadcast);
 
     this.audioBroadcastEnabled = broadcast;
@@ -342,7 +370,7 @@ export default class LiveKitAVClient extends AVClient {
    * @param {boolean} enable        Whether the outbound video track should be enabled (true) or
    *                                 disabled (false)
    */
-  toggleVideo(enable) {
+  toggleVideo(enable: boolean): void {
     if (!this._liveKitClient.videoTrack) {
       log.debug("toggleVideo called but no video track available");
       return;
@@ -364,7 +392,10 @@ export default class LiveKitAVClient extends AVClient {
    * @param {string} userId                   The User ID to set to the element
    * @param {HTMLVideoElement} videoElement   The HTMLVideoElement to which the video should be set
    */
-  async setUserVideo(userId, videoElement) {
+  async setUserVideo(
+    userId: string,
+    videoElement: HTMLVideoElement
+  ): Promise<void> {
     log.debug("Setting video element:", videoElement, "for user:", userId);
 
     // Make sure the room is active first
@@ -422,19 +453,17 @@ export default class LiveKitAVClient extends AVClient {
    * Handle changes to A/V configuration settings.
    * @param {object} changed      The settings which have changed
    */
-  onSettingsChanged(changed) {
+  onSettingsChanged(changed: DeepPartial<AVSettings.Settings>): void {
     log.debug("onSettingsChanged:", changed);
     const keys = new Set(Object.keys(foundry.utils.flattenObject(changed)));
 
     // Change audio source
     const audioSourceChange = ["client.audioSrc"].some((k) => keys.has(k));
-    if (audioSourceChange)
-      this._liveKitClient.changeAudioSource(changed.client.audioSrc);
+    if (audioSourceChange) this._liveKitClient.changeAudioSource();
 
     // Change video source
     const videoSourceChange = ["client.videoSrc"].some((k) => keys.has(k));
-    if (videoSourceChange)
-      this._liveKitClient.changeVideoSource(changed.client.videoSrc);
+    if (videoSourceChange) this._liveKitClient.changeVideoSource();
 
     // Change voice broadcasting mode
     const modeChange = [

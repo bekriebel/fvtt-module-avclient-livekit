@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.3.tgz#90420f9f9c6d3987f176a19a7d8e764271a2f55d"
   integrity sha512-Fxt+AfXgjMoin2maPIYzFZnQjAXjAL0PHscM5pRTtatFqB+vZxAM9tLp2Optnuw3QOQC40jTNeGYFOMvyf7v9g==
 
-"@league-of-foundry-developers/foundry-vtt-types@^0.8.9-0":
-  version "0.8.9-0"
-  resolved "https://registry.yarnpkg.com/@league-of-foundry-developers/foundry-vtt-types/-/foundry-vtt-types-0.8.9-0.tgz#1634a0827d157d34a9e021ab0034b728e763163b"
-  integrity sha512-/0Y2AqqfsVosYuZLkwE516z2JV5QmE7JqbqHO4zG4u/GY/TeorZqNnew0XqULXIDMb1bjzhPcFoj8cxlCKuegA==
+"@league-of-foundry-developers/foundry-vtt-types@^0.8.9-2":
+  version "0.8.9-2"
+  resolved "https://registry.yarnpkg.com/@league-of-foundry-developers/foundry-vtt-types/-/foundry-vtt-types-0.8.9-2.tgz#fd0e0da8c27625be19da54979c186cf25b5de33c"
+  integrity sha512-IPPaqPoVbrAqLsYUUFLWllIOpr04Ru36wsfpnDNNWzW9JM9T6s0WyZ2P1DFrKxfojQFlAcmj7PkwY38dVK16Uw==
   dependencies:
     "@types/jquery" "~3.5.6"
     "@types/simple-peer" "~9.11.1"

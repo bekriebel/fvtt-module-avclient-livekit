@@ -3,7 +3,7 @@ import * as helpers from "./helpers";
 import { getGame } from "./helpers";
 import * as log from "./logging";
 
-export default function registerModuleSettings() {
+export default function registerModuleSettings(): void {
   helpers.registerModuleSetting({
     name: "resetRoom",
     scope: "world",
@@ -11,7 +11,7 @@ export default function registerModuleSettings() {
     default: false,
     type: Boolean,
     onChange: (value) => {
-      if (value && getGame().user?.isGM) {
+      if (value === true && getGame().user?.isGM) {
         log.warn("Resetting meeting room ID");
         getGame().settings.set(MODULE_NAME, "resetRoom", false);
         getGame().webrtc?.client.settings.set(
@@ -30,17 +30,17 @@ export default function registerModuleSettings() {
     config: true,
     default: false,
     type: Boolean,
-    onChange: (value) => log.setDebug(value),
+    onChange: () => helpers.delayReload(),
   });
 
   // Set the initial debug level
-  log.setDebug(getGame().settings.get(MODULE_NAME, "debug"));
+  log.setDebug(getGame().settings.get(MODULE_NAME, "debug") === true);
 
   // Register livekit trace logging setting
   helpers.registerModuleSetting({
     name: "livekitTrace",
     scope: "world",
-    config: getGame().settings.get(MODULE_NAME, "debug"),
+    config: getGame().settings.get(MODULE_NAME, "debug") === true,
     default: false,
     type: Boolean,
     onChange: () => helpers.delayReload(),
