@@ -105,6 +105,16 @@ export default class LiveKitAVClient extends AVClient {
       "server"
     ) as ConnectionSettings;
 
+    // Don't allow for default FVTT Signalling Server
+    if (connectionSettings.type === "FVTT") {
+      log.error("Default Foundry VTT signalling server not supported");
+      ui.notifications?.error(
+        `${getGame().i18n.localize(`${LANG_NAME}.serverTypeFVTT`)}`,
+        { permanent: true }
+      );
+      return false;
+    }
+
     // Set a room name if one doesn't yet exist
     if (!connectionSettings.room) {
       log.warn("No meeting room set, creating random name.");
@@ -174,7 +184,8 @@ export default class LiveKitAVClient extends AVClient {
       ui.notifications?.error(
         `${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${
           error.message
-        }`
+        }`,
+        { permanent: true }
       );
       this._liveKitClient.setConnectionButtons(false);
       return false;
