@@ -1,6 +1,5 @@
 {
   "name": "avclient-livekit",
-  "version": "0.0.0",
   "description": "LiveKit A/V module for FoundryVTT",
   "private": true,
   "repository": "https://github.com/bekriebel/fvtt-module-avclient-livekit",

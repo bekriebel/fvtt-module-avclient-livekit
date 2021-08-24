@@ -52,9 +52,16 @@ jobs:
           files: "module.json"
         env:
           download: https://github.com/${{ github.repository }}/releases/download/${{ needs.check_version.outputs.module_current_version }}/${{ github.event.repository.name }}.zip
+      - name: Install dependencies
+        id: install_dependencies
+        run: yarn install
+      - name: Build package
+        id: build
+        run: yarn build
       - name: Package module
+        working-directory: ./dist
         run: |
-          zip -r ./${{ github.event.repository.name }}.zip lang/ src/ CHANGELOG.md module.json README.md
+          zip -r ../${{ github.event.repository.name }}.zip *
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
