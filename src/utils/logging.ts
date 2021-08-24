@@ -9,8 +9,7 @@ import { LOG_PREFIX, MODULE_NAME } from "./constants";
  * Enabled by default and configured when game settings are available
  * @param {...*} args      Arguments to console.debug
  */
-// eslint-disable-next-line import/no-mutable-exports
-export let debug: (...args: any[]) => void = console.debug.bind(
+export let debug: (...args: unknown[]) => void = console.debug.bind(
   console,
   LOG_PREFIX
 );
@@ -20,8 +19,7 @@ export let debug: (...args: any[]) => void = console.debug.bind(
  * Enabled by default and configured when game settings are available
  * @param {...*} args      Arguments to console.info
  */
-// eslint-disable-next-line import/no-mutable-exports
-export let info: (...args: any[]) => void = console.info.bind(
+export let info: (...args: unknown[]) => void = console.info.bind(
   console,
   LOG_PREFIX
 );
@@ -31,7 +29,7 @@ export let info: (...args: any[]) => void = console.info.bind(
  * @param {...*} args      Arguments to console.warn
  */
 
-export const warn: (...args: any[]) => void = console.warn.bind(
+export const warn: (...args: unknown[]) => void = console.warn.bind(
   console,
   LOG_PREFIX
 );
@@ -44,7 +42,7 @@ export const warn: (...args: any[]) => void = console.warn.bind(
  * Display error messages on the console
  * @param {...*} args      Arguments to console.error
  */
-export const error: (...args: any[]) => void = console.error.bind(
+export const error: (...args: unknown[]) => void = console.error.bind(
   console,
   LOG_PREFIX
 );
@@ -55,8 +53,12 @@ export function setDebug(value: boolean): void {
     debug = console.debug.bind(console, LOG_PREFIX);
     info = console.info.bind(console, LOG_PREFIX);
   } else {
-    debug = () => {};
-    info = () => {};
+    debug = () => {
+      return;
+    };
+    info = () => {
+      return;
+    };
   }
 
   Hooks.callAll(`${MODULE_NAME}DebugSet`, value);

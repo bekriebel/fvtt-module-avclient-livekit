@@ -1,4 +1,3 @@
-import LiveKitAVClient from "../LiveKitAVClient";
 import { MODULE_NAME } from "./constants";
 import { getGame } from "./helpers";
 import registerModuleSettings from "./registerModuleSettings";
