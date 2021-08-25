@@ -23,7 +23,7 @@ Hooks.on(`${MODULE_NAME}DebugSet`, (value: boolean) => {
   CONFIG.debug.avclient = value;
 });
 
-Hooks.on("ready", () => {
+Hooks.on("init", () => {
   Hooks.on(
     "renderCameraViews",
     (cameraViews: CameraViews, cameraViewsElement: JQuery<HTMLElement>) => {

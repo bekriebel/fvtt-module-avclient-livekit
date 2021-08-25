@@ -290,9 +290,19 @@ export default class LiveKitAVClient extends AVClient {
    * @return {string[]}           The connected User IDs
    */
   getConnectedUsers(): string[] {
+    log.debug("getConnectedUsers");
     const connectedUsers: string[] = Array.from(
       this._liveKitClient.liveKitParticipants.keys()
     );
+
+    // If we aren't connected, still return our own ID so our video window is shown
+    if (connectedUsers.length === 0) {
+      log.debug("No connected users; adding our own user id");
+      const userId = getGame().user?.id;
+      if (userId) {
+        connectedUsers.push(userId);
+      }
+    }
 
     log.debug("connectedUsers:", connectedUsers);
     return connectedUsers;
@@ -409,19 +419,19 @@ export default class LiveKitAVClient extends AVClient {
   ): Promise<void> {
     log.debug("Setting video element:", videoElement, "for user:", userId);
 
-    // Make sure the room is active first
-    if (!this._liveKitClient.liveKitRoom) {
-      log.warn("Attempted to set user video with no active room; skipping");
-      return;
-    }
-
-    // If this if for our local user, attach our video track using LiveKit
+    // If this is for our local user, attach our video track using LiveKit
     if (userId === getGame().user?.id) {
       // Attach only our video track
       const userVideoTrack = this._liveKitClient.videoTrack;
       if (userVideoTrack && videoElement) {
         this._liveKitClient.attachVideoTrack(userVideoTrack, videoElement);
       }
+      return;
+    }
+
+    // Make sure the room is active first
+    if (!this._liveKitClient.liveKitRoom) {
+      log.warn("Attempted to set user video with no active room; skipping");
       return;
     }
 
