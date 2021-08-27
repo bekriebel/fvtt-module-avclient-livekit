@@ -34,10 +34,6 @@ export const warn: (...args: unknown[]) => void = console.warn.bind(
   LOG_PREFIX
 );
 
-// export function warn(...args) {
-//   console.warn(LOG_PREFIX, ...args);
-// }
-
 /**
  * Display error messages on the console
  * @param {...*} args      Arguments to console.error

@@ -1,10 +1,9 @@
 import { MODULE_NAME } from "./constants";
-import * as helpers from "./helpers";
-import { getGame } from "./helpers";
+import { delayReload, getGame, registerModuleSetting } from "./helpers";
 import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
-  helpers.registerModuleSetting({
+  registerModuleSetting({
     name: "resetRoom",
     scope: "world",
     config: true,
@@ -24,25 +23,25 @@ export default function registerModuleSettings(): void {
   });
 
   // Register debug logging setting
-  helpers.registerModuleSetting({
+  registerModuleSetting({
     name: "debug",
     scope: "world",
     config: true,
     default: false,
     type: Boolean,
-    onChange: () => helpers.delayReload(),
+    onChange: () => delayReload(),
   });
 
   // Set the initial debug level
   log.setDebug(getGame().settings.get(MODULE_NAME, "debug") === true);
 
   // Register livekit trace logging setting
-  helpers.registerModuleSetting({
+  registerModuleSetting({
     name: "livekitTrace",
     scope: "world",
     config: getGame().settings.get(MODULE_NAME, "debug") === true,
     default: false,
     type: Boolean,
-    onChange: () => helpers.delayReload(),
+    onChange: () => delayReload(),
   });
 }
