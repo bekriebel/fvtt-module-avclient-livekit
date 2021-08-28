@@ -4,6 +4,15 @@ import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
   registerModuleSetting({
+    name: "simulcast",
+    scope: "world",
+    config: true,
+    default: true,
+    type: Boolean,
+    onChange: () => getGame().webrtc?.connect(),
+  });
+
+  registerModuleSetting({
     name: "resetRoom",
     scope: "world",
     config: true,
