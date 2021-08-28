@@ -6,8 +6,10 @@ export default function registerModuleSettings(): void {
   registerModuleSetting({
     name: "simulcast",
     scope: "world",
-    config: true,
-    default: true,
+    // TODO: re-enable after simulcast doesn't crash the server
+    config: false,
+    // TODO: re-enable after simulcast doesn't crash the server
+    default: false,
     type: Boolean,
     onChange: () => getGame().webrtc?.connect(),
   });

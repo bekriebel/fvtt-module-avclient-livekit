@@ -20,7 +20,7 @@ import {
   TrackEvent,
   VideoTrack,
 } from "livekit-client";
-import { LANG_NAME, MODULE_NAME } from "./utils/constants";
+import { LANG_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
@@ -258,8 +258,10 @@ export default class LiveKitClient {
           await this.liveKitRoom?.localParticipant.publishTrack(
             this.videoTrack,
             {
-              simulcast:
-                getGame().settings.get(MODULE_NAME, "simulcast") === true,
+              simulcast: false,
+              // TODO: re-enable after simulcast doesn't crash the server
+              // simulcast:
+              //   getGame().settings.get(MODULE_NAME, "simulcast") === true,
             }
           );
           const userVideoElement = ui.webrtc?.getUserVideoElement(
