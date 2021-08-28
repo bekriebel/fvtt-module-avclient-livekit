@@ -14,7 +14,7 @@
     "defaults"
   ],
   "dependencies": {
-    "livekit-client": "^0.11.1",
+    "livekit-client": "^0.11.2",
     "livekit-server-sdk": "^0.5.1"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "stream-browserify": "^3.0.0",
     "terser-webpack-plugin": "^5.1.4",
     "ts-loader": "^9.2.5",
-    "typescript": "^4.3.5",
+    "typescript": "^4.4.2",
     "util": "^0.12.4",
     "webpack": "^5.51.1",
     "webpack-cli": "^4.8.0",
