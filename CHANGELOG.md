@@ -1,3 +1,7 @@
+# v0.0.4
+
+- Temporarily disable simulcast as it seems to be crashing the livekit server
+
 # v0.0.3
 
 - Add simulcast option with default enabled
