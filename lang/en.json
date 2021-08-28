@@ -9,7 +9,7 @@
   "LIVEKITAVCLIENT.onDisconnected": "Disconnected from LiveKit A/V Server",
   "LIVEKITAVCLIENT.livekitTrace": "Enable LiveKit trace logging",
   "LIVEKITAVCLIENT.livekitTraceHint": "Enables trace logging of the LiveKit client library",
-  "LIVEKITAVCLIENT.resetRoom": "Reset Meeting Room ID",
+  "LIVEKITAVCLIENT.resetRoom": "Reset meeting room ID",
   "LIVEKITAVCLIENT.resetRoomHint": "Reset the meeting room ID used for your A/V",
   "LIVEKITAVCLIENT.serverTypeFVTT": "LiveKit AVClient: Foundry VTT is not supported as a signalling server. Please set a custom signalling server under Audio/Video Configuration",
   "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)"
