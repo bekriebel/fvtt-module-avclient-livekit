@@ -175,11 +175,15 @@ export default class LiveKitClient {
     } else {
       const requestedSink = this.settings.get("client", "audioSink");
       // @ts-expect-error - setSinkId is currently an experimental method and not in the defined types
-      await audioElement.setSinkId(requestedSink).catch((error) => {
+      await audioElement.setSinkId(requestedSink).catch((error: unknown) => {
+        let message = error;
+        if (error instanceof Error) {
+          message = error.message;
+        }
         log.error(
           "An error occurred when requesting the output audio device:",
           requestedSink,
-          error.message
+          message
         );
       });
     }
@@ -397,8 +401,12 @@ export default class LiveKitClient {
     if (audioParams) {
       try {
         this.audioTrack = await createLocalAudioTrack(audioParams);
-      } catch (error) {
-        log.error("Unable to acquire local audio:", error.message);
+      } catch (error: unknown) {
+        let message = error;
+        if (error instanceof Error) {
+          message = error.message;
+        }
+        log.error("Unable to acquire local audio:", message);
       }
     }
 
@@ -425,8 +433,12 @@ export default class LiveKitClient {
     if (videoParams) {
       try {
         this.videoTrack = await createLocalVideoTrack(videoParams);
-      } catch (error) {
-        log.error("Unable to acquire local video:", error.message);
+      } catch (error: unknown) {
+        let message = error;
+        if (error instanceof Error) {
+          message = error.message;
+        }
+        log.error("Unable to acquire local video:", message);
       }
     }
 

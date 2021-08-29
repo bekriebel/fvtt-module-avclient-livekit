@@ -181,13 +181,15 @@ export default class LiveKitAVClient extends AVClient {
         livekitConnectionOptions
       );
       log.info("Connected to room", this.room);
-    } catch (error) {
-      log.error("Could not connect:", error.message);
+    } catch (error: unknown) {
+      let message = error;
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      log.error("Could not connect:", message);
       // TODO: Add some incremental back-off reconnect logic here
       ui.notifications?.error(
-        `${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${
-          error.message
-        }`,
+        `${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${message}`,
         { permanent: true }
       );
       this._liveKitClient.setConnectionButtons(false);
