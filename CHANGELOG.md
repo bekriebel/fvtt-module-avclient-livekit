@@ -1,3 +1,10 @@
+# v0.0.5
+
+- Update dependencies and supporting code
+- Don't run setAudioEnabledState when the server isn't yet connected or the state is already set correctly
+- Temporarily use a forked version of the livekit-client SDK to resolve the "mute-loop" issue
+- Add an experimental web-client for testing. This is not yet available in the main module UX
+
 # v0.0.4
 
 - Temporarily disable simulcast as it seems to be crashing the livekit server
