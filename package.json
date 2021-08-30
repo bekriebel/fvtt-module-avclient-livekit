@@ -8,13 +8,14 @@
   "scripts": {
     "watch": "webpack --watch --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "build:dev": "webpack --config webpack.dev.js"
+    "build:dev": "webpack --config webpack.dev.js",
+    "postinstall": "cd node_modules/livekit-client; yarn install; yarn build"
   },
   "browserslist": [
     "defaults"
   ],
   "dependencies": {
-    "livekit-client": "^0.11.2",
+    "livekit-client": "bekriebel/client-sdk-js#fix-track-mute-status",
     "livekit-server-sdk": "^0.5.1"
   },
   "devDependencies": {
