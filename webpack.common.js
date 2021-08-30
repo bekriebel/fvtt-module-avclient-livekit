@@ -8,6 +8,7 @@ module.exports = {
   target: "browserslist",
   entry: {
     "avclient-livekit": "./src/avclient-livekit.ts",
+    "livekit-web-client": "./src/livekit-web-client.ts",
   },
   output: {
     filename: "[name].bundle.js",
@@ -19,6 +20,7 @@ module.exports = {
       patterns: [
         { from: "css/", to: "css/" },
         { from: "lang/", to: "lang/" },
+        { from: "web-client/", to: "web-client/" },
         { from: "*.md" },
         { from: "module.json" },
         { from: "LICENSE*" },
