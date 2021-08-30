@@ -670,13 +670,23 @@ export default class LiveKitClient {
       log.debug("setAudioEnabledState called but no audio track available");
       return;
     }
+    if (this.liveKitRoom?.state !== RoomState.Connected) {
+      log.debug(
+        "setAudioEnabledState called but LiveKit room is not connected"
+      );
+      return;
+    }
 
-    if (!enable) {
+    if (!enable && !this.audioTrack.isMuted) {
       log.debug("Muting audio track", this.audioTrack);
       this.audioTrack.mute();
-    } else {
+    } else if (enable && this.audioTrack.isMuted) {
       log.debug("Un-muting audio track", this.audioTrack);
       this.audioTrack.unmute();
+    } else {
+      log.debug(
+        "setAudioEnabledState called but track is already in the current state"
+      );
     }
   }
 
