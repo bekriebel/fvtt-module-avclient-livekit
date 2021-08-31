@@ -160,9 +160,7 @@ export default class LiveKitAVClient extends AVClient {
     // Set the livekit connection options
     const livekitConnectionOptions: ConnectOptions = {
       tracks: localTracks,
-      simulcast: false,
-      // TODO: re-enable after simulcast doesn't crash the server
-      // simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
     };
 
     if (
