@@ -1,3 +1,8 @@
+# v0.0.6
+
+- Update dependencies
+- Re-enable simulcast now that LiveKit server no longer crashes when it is used
+
 # v0.0.5
 
 - Update dependencies and supporting code
