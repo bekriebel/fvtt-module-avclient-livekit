@@ -1,3 +1,8 @@
+# v0.0.7
+
+- Update dependencies
+- Switch to new fix for livekit-client "mute-loop" issue
+
 # v0.0.6
 
 - Update dependencies
