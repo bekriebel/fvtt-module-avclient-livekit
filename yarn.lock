@@ -593,6 +593,11 @@
     "@typescript-eslint/types" "4.30.0"
     eslint-visitor-keys "^2.0.0"
 
+"@typhonjs-fvtt/validate-manifest@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@typhonjs-fvtt/validate-manifest/-/validate-manifest-0.0.1.tgz#8bfb837c9e064f00a191851fdecffe0cebe08e46"
+  integrity sha512-YOZHv23UySYA1lS9VHlUt8wc+xL9eoUh9Av7BT3qjHRxKUgQiQ2nsOYatwRGvQAs2xvv+b/FJX/wIsZvL3yuVw==
+
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"

@@ -22,6 +22,7 @@
     "@league-of-foundry-developers/foundry-vtt-types": "^0.8.9-2",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
+    "@typhonjs-fvtt/validate-manifest": "^0.0.1",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^9.0.1",
     "crypto-browserify": "^3.12.0",
