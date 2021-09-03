@@ -17,7 +17,7 @@
   "version": "0.0.7",
   "minimumCoreVersion": "0.8.8",
   "compatibleCoreVersion": "0.8.9",
-  "manifestPlusVersion": "1.1.0",
+  "manifestPlusVersion": "1.2.0",
   "esmodules": ["avclient-livekit.bundle.js"],
   "styles": ["css/avclient-livekit.css"],
   "socket": true,
