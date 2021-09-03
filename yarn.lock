@@ -2071,9 +2071,9 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-livekit-client@bekriebel/client-sdk-js#fix-track-mute-status:
+livekit-client@livekit/client-sdk-js#fix-mute-loop:
   version "0.12.0"
-  resolved "https://codeload.github.com/bekriebel/client-sdk-js/tar.gz/44454143348e9cff5cceb7fbe41e4e829d3fa5e4"
+  resolved "https://codeload.github.com/livekit/client-sdk-js/tar.gz/6a05d7f5e95e11916eb33e9bae0f142bbcac8d54"
   dependencies:
     "@types/ws" "^7.4.0"
     events "^3.3.0"
