@@ -15,7 +15,7 @@
     "defaults"
   ],
   "dependencies": {
-    "livekit-client": "livekit/client-sdk-js#fix-mute-loop",
+    "livekit-client": "livekit/client-sdk-js",
     "livekit-server-sdk": "^0.5.1"
   },
   "devDependencies": {
