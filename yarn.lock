@@ -2076,9 +2076,10 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-livekit-client@livekit/client-sdk-js:
-  version "0.12.0"
-  resolved "https://codeload.github.com/livekit/client-sdk-js/tar.gz/96305c05c399b32d2f34500f33f8e1227fa4253f"
+livekit-client@^0.12.1:
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/livekit-client/-/livekit-client-0.12.1.tgz#42da2c94f4a7413edc1c7e9b9542852ff8052803"
+  integrity sha512-dMnlKnQvBaJZtYvNMQb7exbrucCMRqkw8trjKNKTMwjEEA/tlPOAeF4rvosBZy3iARSCyMrniAx8Y7arjB78EA==
   dependencies:
     "@types/ws" "^7.4.0"
     events "^3.3.0"
