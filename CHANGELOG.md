@@ -1,3 +1,7 @@
+# v0.0.8
+
+- Minor dependency updates
+
 # v0.0.7
 
 - Update dependencies
