@@ -1,3 +1,8 @@
+# v0.0.10
+
+- Disable simulcast again, due to a server side bug
+- Minor dependency updates
+
 # v0.0.9
 
 - Update livekit-client dependency to v0.12.1 with fixes for the mute-loop issue
