@@ -3,15 +3,14 @@ import { delayReload, getGame, registerModuleSetting } from "./helpers";
 import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
-  // TODO: re-enable if https://github.com/livekit/livekit-server/issues/112 gets resolved
-  // registerModuleSetting({
-  //   name: "simulcast",
-  //   scope: "world",
-  //   config: true,
-  //   default: true,
-  //   type: Boolean,
-  //   onChange: () => getGame().webrtc?.connect(),
-  // });
+  registerModuleSetting({
+    name: "simulcast",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => getGame().webrtc?.connect(),
+  });
 
   registerModuleSetting({
     name: "resetRoom",
