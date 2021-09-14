@@ -18,6 +18,7 @@ import {
   RoomState,
   Track,
   TrackEvent,
+  VideoPresets43,
   VideoTrack,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -264,6 +265,7 @@ export default class LiveKitClient {
             {
               simulcast:
                 getGame().settings.get(MODULE_NAME, "simulcast") === true,
+              videoEncoding: VideoPresets43.vga.encoding,
             }
           );
           const userVideoElement = ui.webrtc?.getUserVideoElement(

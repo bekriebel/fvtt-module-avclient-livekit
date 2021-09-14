@@ -4,6 +4,7 @@ import {
   LocalTrack,
   LogLevel,
   RoomState,
+  VideoPresets43,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
@@ -161,6 +162,7 @@ export default class LiveKitAVClient extends AVClient {
     const livekitConnectionOptions: ConnectOptions = {
       tracks: localTracks,
       simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      videoEncoding: VideoPresets43.vga.encoding,
     };
 
     if (
