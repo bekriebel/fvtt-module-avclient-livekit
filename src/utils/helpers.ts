@@ -16,7 +16,7 @@ interface DeviceInfo {
 // Module Settings object
 interface ModuleSettingsObject<T = unknown> {
   name: string;
-  scope: string;
+  scope: "client" | "world";
   config: boolean;
   default: boolean;
   type: BooleanConstructor | undefined;
