@@ -498,7 +498,7 @@ export default class LiveKitClient {
   }
 
   onParticipantConnected(participant: RemoteParticipant): void {
-    log.debug("Participant connected:", participant);
+    log.debug("onParticipantConnected:", participant);
 
     const { fvttUserId } = JSON.parse(participant.metadata || "");
     const fvttUser = getGame().users?.get(fvttUserId);
@@ -534,7 +534,7 @@ export default class LiveKitClient {
   }
 
   onParticipantDisconnected(participant: RemoteParticipant): void {
-    log.debug("Participant disconnected:", participant);
+    log.debug("onParticipantDisconnected:", participant);
 
     // Remove the participant from the ID mapping
     const { fvttUserId } = JSON.parse(participant.metadata || "");
