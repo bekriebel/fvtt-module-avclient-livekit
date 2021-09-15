@@ -12,7 +12,7 @@
   "LIVEKITAVCLIENT.resetRoom": "Reset meeting room ID",
   "LIVEKITAVCLIENT.resetRoomHint": "Reset the meeting room ID used for your A/V",
   "LIVEKITAVCLIENT.simulcast": "Simulcast enabled",
-  "LIVEKITAVCLIENT.simulcastHint": "Use simulcast video tracks with LiveKit. This may help low-resource clients and the expense of some video tracks not being sent or received by them.",
+  "LIVEKITAVCLIENT.simulcastHint": "Use simulcast video tracks with LiveKit. This may help low-resource clients and the expense of some video tracks not being sent or received by them",
   "LIVEKITAVCLIENT.serverTypeFVTT": "LiveKit AVClient: Foundry VTT is not supported as a signalling server. Please set a custom signalling server under Audio/Video Configuration",
   "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)"
 }
