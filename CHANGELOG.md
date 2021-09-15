@@ -1,3 +1,12 @@
+# v0.0.11
+
+- Allow simulcast to be enabled, but default to off. It now works, but savings aren't as high as originally thought. It may still be helpful to enable for low-resource clients, but it means that they may stop sending or receiving video if their CPU or connection cannot handle all of the streams.
+- Set a default video encoding that saves some resources but still looks good based on configured resolution
+- Allow users to disable receiving audio and or video. Not receiving video may help for users with limited CPU or bandwidth
+- Minor typescript updates
+- Minor English language fixes
+- Minor logging fixes
+
 # v0.0.10
 
 - Disable simulcast again, due to a server side bug
