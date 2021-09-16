@@ -160,10 +160,42 @@ export default class LiveKitAVClient extends AVClient {
 
     // Set the livekit connection options
     const livekitConnectionOptions: ConnectOptions = {
-      tracks: localTracks,
+      autoSubscribe: true,
       simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      tracks: localTracks,
       videoEncoding: VideoPresets43.vga.encoding,
     };
+
+    // Get disable audio/video settings
+    const disableReceivingAudio = getGame().settings.get(
+      MODULE_NAME,
+      "disableReceivingAudio"
+    );
+    const disableReceivingVideo = getGame().settings.get(
+      MODULE_NAME,
+      "disableReceivingVideo"
+    );
+
+    // Don't auto subscribe to tracks if either video or audio is disabled
+    if (disableReceivingAudio || disableReceivingVideo) {
+      livekitConnectionOptions.autoSubscribe = false;
+
+      // Send UI notifications
+      if (disableReceivingAudio) {
+        ui.notifications?.info(
+          `${getGame().i18n.localize(
+            `${LANG_NAME}.disableReceivingAudioWarning`
+          )}`
+        );
+      }
+      if (disableReceivingVideo) {
+        ui.notifications?.info(
+          `${getGame().i18n.localize(
+            `${LANG_NAME}.disableReceivingVideoWarning`
+          )}`
+        );
+      }
+    }
 
     if (
       getGame().settings.get(MODULE_NAME, "debug") &&

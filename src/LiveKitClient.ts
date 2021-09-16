@@ -529,6 +529,10 @@ export default class LiveKitClient {
     // Set up remote participant callbacks
     this.setRemoteParticipantCallbacks(participant);
 
+    participant.tracks.forEach((publication) => {
+      this.onTrackPublished(publication, participant);
+    });
+
     // Call a debounced render
     this.render();
   }
@@ -585,6 +589,47 @@ export default class LiveKitClient {
     const cameraBox = html.find(`[data-user="${getGame().user?.id}"]`);
     const element = cameraBox.find('[data-action="configure"]');
     this.addConnectionButtons(element);
+  }
+
+  onTrackPublished(
+    publication: RemoteTrackPublication,
+    participant: RemoteParticipant
+  ): void {
+    log.debug("onTrackPublished:", publication, participant);
+
+    // Get configured settings
+    const disableReceivingAudio = getGame().settings.get(
+      MODULE_NAME,
+      "disableReceivingAudio"
+    );
+    const disableReceivingVideo = getGame().settings.get(
+      MODULE_NAME,
+      "disableReceivingVideo"
+    );
+
+    // Skip if neither video or audio are disabled; tracks will be auto-subscribed
+    if (!disableReceivingAudio && !disableReceivingVideo) {
+      return;
+    }
+
+    // Subscribe to a track if its type hasn't been disabled
+    if (publication.kind === Track.Kind.Audio && !disableReceivingAudio) {
+      publication.setSubscribed(true);
+    } else if (
+      publication.kind === Track.Kind.Video &&
+      !disableReceivingVideo
+    ) {
+      publication.setSubscribed(true);
+    } else {
+      log.info(
+        "Not subscribing to",
+        publication.kind,
+        "track",
+        publication,
+        "for participant",
+        participant
+      );
+    }
   }
 
   async onTrackSubscribed(
@@ -775,9 +820,7 @@ export default class LiveKitClient {
         RoomEvent.ParticipantDisconnected,
         this.onParticipantDisconnected.bind(this)
       )
-      .on(RoomEvent.TrackPublished, (...args) => {
-        log.debug("RoomEvent TrackPublished:", args);
-      })
+      .on(RoomEvent.TrackPublished, this.onTrackPublished.bind(this))
       .on(RoomEvent.TrackSubscribed, this.onTrackSubscribed.bind(this))
       .on(RoomEvent.TrackUnpublished, (...args) => {
         log.debug("RoomEvent TrackUnpublished:", args);

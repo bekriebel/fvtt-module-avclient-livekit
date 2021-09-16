@@ -4,6 +4,24 @@ import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
   registerModuleSetting({
+    name: "disableReceivingAudio",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => getGame().webrtc?.connect(),
+  });
+
+  registerModuleSetting({
+    name: "disableReceivingVideo",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => getGame().webrtc?.connect(),
+  });
+
+  registerModuleSetting({
     name: "simulcast",
     scope: "world",
     config: true,
