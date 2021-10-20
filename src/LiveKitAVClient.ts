@@ -22,6 +22,7 @@ import { ConnectionSettings } from "../types/avclient-livekit";
 export default class LiveKitAVClient extends AVClient {
   _liveKitClient: LiveKitClient;
   room: string | null;
+  tempError: unknown;
 
   constructor(master: AVMaster, settings: AVSettings) {
     super(master, settings);
@@ -217,11 +218,23 @@ export default class LiveKitAVClient extends AVClient {
       );
       log.info("Connected to room", this.room);
     } catch (error: unknown) {
+      log.error("Could not connect:", error);
+
       let message = error;
       if (error instanceof Error) {
         message = error.message;
       }
-      log.error("Could not connect:", message);
+
+      // Check for clock related errors
+      if (
+        String(message).includes("validation failed, token is expired") ||
+        String(message).includes("validation failed, token not valid yet")
+      ) {
+        message = `${getGame().i18n.localize(
+          `${LANG_NAME}.connectErrorCheckClock`
+        )}`;
+      }
+
       // TODO: Add some incremental back-off reconnect logic here
       ui.notifications?.error(
         `${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${message}`,

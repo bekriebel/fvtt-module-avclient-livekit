@@ -1,6 +1,7 @@
 {
   "LIVEKITAVCLIENT.connect": "Connect",
   "LIVEKITAVCLIENT.connectError": "Error connecting to LiveKit Server",
+  "LIVEKITAVCLIENT.connectErrorCheckClock": "A secure token could not be created. Please check the date & time on your computer to ensure that they are set accurately",
   "LIVEKITAVCLIENT.debug": "Enable debug logging",
   "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging",
   "LIVEKITAVCLIENT.disableReceivingAudio": "Disable receiving audio",
