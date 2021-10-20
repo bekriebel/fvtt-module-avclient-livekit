@@ -9,7 +9,7 @@ import {
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 
-import LiveKitClient from "./LiveKitClient";
+import LiveKitClient, { ConnectionState, InitState } from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
 
@@ -20,15 +20,13 @@ import { ConnectionSettings } from "../types/avclient-livekit";
  * @param {AVSettings} settings       The audio/video settings being used
  */
 export default class LiveKitAVClient extends AVClient {
-  room: string | null;
   _liveKitClient: LiveKitClient;
-  audioBroadcastEnabled: boolean;
+  room: string | null;
 
   constructor(master: AVMaster, settings: AVSettings) {
     super(master, settings);
 
     this._liveKitClient = new LiveKitClient(this);
-    this.audioBroadcastEnabled = false;
     this.room = null;
   }
 
@@ -78,6 +76,7 @@ export default class LiveKitAVClient extends AVClient {
    */
   async initialize(): Promise<void> {
     log.debug("LiveKitAVClient initialize");
+    this._liveKitClient.initState = InitState.Initializing;
 
     if (this.settings.get("client", "voice.mode") === "activity") {
       log.debug(
@@ -87,6 +86,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     await this._liveKitClient.initializeLocalTracks();
+    this._liveKitClient.initState = InitState.Initialized;
   }
 
   /* -------------------------------------------- */
@@ -100,6 +100,7 @@ export default class LiveKitAVClient extends AVClient {
    */
   async connect(): Promise<boolean> {
     log.debug("LiveKitAVClient connect");
+    this._liveKitClient.connectionState = ConnectionState.Connecting;
 
     const connectionSettings = this.settings.get(
       "world",
@@ -113,6 +114,7 @@ export default class LiveKitAVClient extends AVClient {
         `${getGame().i18n.localize(`${LANG_NAME}.serverTypeFVTT`)}`,
         { permanent: true }
       );
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return false;
     }
 
@@ -140,6 +142,7 @@ export default class LiveKitAVClient extends AVClient {
         "username:",
         userName
       );
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return false;
     }
 
@@ -225,18 +228,21 @@ export default class LiveKitAVClient extends AVClient {
         { permanent: true }
       );
       this._liveKitClient.setConnectionButtons(false);
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return false;
     }
 
     // Verify that we are connected
     if (!(this._liveKitClient.liveKitRoom?.state === RoomState.Connected)) {
       log.error("Not connected to room after attempting to connect");
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return false;
     }
 
     // Set up after connection
     this._liveKitClient.onConnected();
 
+    this._liveKitClient.connectionState = ConnectionState.Connected;
     return true;
   }
 
@@ -249,15 +255,20 @@ export default class LiveKitAVClient extends AVClient {
    */
   async disconnect(): Promise<boolean> {
     log.debug("LiveKitAVClient disconnect");
+
+    // Check to make sure we are connected before trying to disconnect
     if (
       this._liveKitClient.liveKitRoom &&
       this._liveKitClient.liveKitRoom.state !== RoomState.Disconnected
     ) {
       this._liveKitClient.liveKitRoom.disconnect();
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return true;
     }
 
     // Not currently connected
+    log.warn("Not currently connected; skipping disconnect");
+    this._liveKitClient.connectionState = ConnectionState.Disconnected;
     return false;
   }
 
@@ -365,7 +376,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {boolean}
    */
   isAudioEnabled(): boolean {
-    return this.audioBroadcastEnabled;
+    return this._liveKitClient.audioBroadcastEnabled;
   }
 
   /* -------------------------------------------- */
@@ -398,7 +409,7 @@ export default class LiveKitAVClient extends AVClient {
     log.debug("Toggling audio:", enable);
 
     // If "always on" broadcasting is not enabled, don't proceed
-    if (!this.audioBroadcastEnabled || this.isVoicePTT) return;
+    if (!this._liveKitClient.audioBroadcastEnabled || this.isVoicePTT) return;
 
     // Enable active broadcasting
     this.toggleBroadcast(enable);
@@ -415,7 +426,7 @@ export default class LiveKitAVClient extends AVClient {
   toggleBroadcast(broadcast: boolean): void {
     log.debug("Toggling broadcast audio:", broadcast);
 
-    this.audioBroadcastEnabled = broadcast;
+    this._liveKitClient.audioBroadcastEnabled = broadcast;
     this._liveKitClient.setAudioEnabledState(broadcast);
   }
 

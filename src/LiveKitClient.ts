@@ -26,13 +26,28 @@ import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
 
+export enum ConnectionState {
+  Disconnected = "disconnected",
+  Connecting = "reconnecting",
+  Connected = "connected",
+}
+
+export enum InitState {
+  Uninitialized = "uninitialized",
+  Initializing = "initializing",
+  Initialized = "initialized",
+}
+
 export default class LiveKitClient {
   avMaster: AVMaster;
   liveKitAvClient: LiveKitAVClient;
   settings: AVSettings;
   render: () => void;
 
+  audioBroadcastEnabled = false;
   audioTrack: LocalAudioTrack | null = null;
+  connectionState: ConnectionState = ConnectionState.Disconnected;
+  initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
   liveKitRoom: Room | null = null;
   videoTrack: LocalVideoTrack | null = null;
@@ -487,6 +502,8 @@ export default class LiveKitClient {
 
     // Set connection buttons state
     this.setConnectionButtons(false);
+
+    this.connectionState = ConnectionState.Disconnected;
 
     // TODO: Add some incremental back-off reconnect logic here
   }
