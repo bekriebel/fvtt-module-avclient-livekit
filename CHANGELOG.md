@@ -1,3 +1,9 @@
+# v0.1.0
+
+- Prepare for initial announced release
+- Update dependencies, including livekit-client v0.13.1
+- Improve error message when a client's clock is set incorrectly
+
 # v0.0.11
 
 - Allow simulcast to be enabled, but default to off. It now works, but savings aren't as high as originally thought. It may still be helpful to enable for low-resource clients, but it means that they may stop sending or receiving video if their CPU or connection cannot handle all of the streams.
