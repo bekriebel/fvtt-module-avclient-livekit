@@ -17,7 +17,7 @@ import {
   RoomEvent,
   RoomState,
   Track,
-  TrackEvent,
+  TrackPublication,
   VideoPresets43,
   VideoTrack,
 } from "livekit-client";
@@ -484,9 +484,6 @@ export default class LiveKitClient {
     // Set up local participant callbacks
     this.setLocalParticipantCallbacks();
 
-    // Set up local track callbacks
-    this.setLocalTrackCallbacks();
-
     // Add users to participants list
     this.addAllParticipants();
 
@@ -578,10 +575,19 @@ export default class LiveKitClient {
     );
   }
 
-  onRemoteTrackMuteChanged(
-    publication: RemoteTrackPublication,
-    participant: RemoteParticipant
+  onTrackMuteChanged(
+    publication: TrackPublication,
+    participant: Participant
   ): void {
+    log.debug("onTrackMuteChanged:", publication, participant);
+
+    // Local participant
+    if (participant === this.liveKitRoom?.localParticipant) {
+      log.debug("Local", publication.kind, "track muted:", publication.isMuted);
+      return;
+    }
+
+    // Remote participant
     const { fvttUserId } = JSON.parse(participant.metadata || "");
     const userCameraView = ui.webrtc?.getUserCameraView(fvttUserId);
 
@@ -720,8 +726,8 @@ export default class LiveKitClient {
       ? {
           deviceId: { ideal: videoSrc },
           resolution: {
-            width: { ideal: 320 },
-            height: { ideal: 240 },
+            width: 320,
+            height: 240,
           },
         }
       : false;
@@ -786,22 +792,6 @@ export default class LiveKitClient {
       });
   }
 
-  setLocalTrackCallbacks(): void {
-    // Set up local track callbacks
-    this.liveKitRoom?.localParticipant.tracks.forEach((publication) => {
-      const { track } = publication;
-      if (track) {
-        track
-          .on(TrackEvent.Muted, (...args) => {
-            log.debug("Local TrackEvent Muted:", args);
-          })
-          .on(TrackEvent.Unmuted, (...args) => {
-            log.debug("Local TrackEvent Unmuted:", args);
-          });
-      }
-    });
-  }
-
   setRemoteParticipantCallbacks(participant: RemoteParticipant): void {
     const { fvttUserId } = JSON.parse(participant.metadata || "");
 
@@ -845,10 +835,13 @@ export default class LiveKitClient {
       .on(RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
       .on(RoomEvent.Disconnected, this.onDisconnected.bind(this))
       .on(RoomEvent.Reconnecting, this.onReconnecting.bind(this))
-      .on(RoomEvent.TrackMuted, this.onRemoteTrackMuteChanged.bind(this))
-      .on(RoomEvent.TrackUnmuted, this.onRemoteTrackMuteChanged.bind(this))
-      .on(RoomEvent.MetadataChanged, (...args) => {
-        log.debug("RoomEvent MetadataChanged:", args);
+      .on(RoomEvent.TrackMuted, this.onTrackMuteChanged.bind(this))
+      .on(RoomEvent.TrackUnmuted, this.onTrackMuteChanged.bind(this))
+      .on(RoomEvent.ParticipantMetadataChanged, (...args) => {
+        log.debug("RoomEvent ParticipantMetadataChanged:", args);
+      })
+      .on(RoomEvent.RoomMetadataChanged, (...args) => {
+        log.debug("RoomEvent RoomMetadataChanged:", args);
       })
       .on(RoomEvent.Reconnected, this.onReconnected.bind(this));
   }
