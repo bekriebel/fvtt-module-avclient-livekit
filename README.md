@@ -21,7 +21,12 @@ Install & enable the module then configure your LiveKit instance as the signalli
 
 ## Running your own LiveKit server
 
-_Information coming soon._
+There are several examples available for launching your own livekit server:
+
+- [LiveKit on Fly.io](https://github.com/bekriebel/livekit-flydotio)
+- [LiveKit Getting Started (Docker)](https://docs.livekit.io/guides/getting-started)
+- [Deploy to a VM (AWS/Digial Ocean)](https://docs.livekit.io/deploy/vm)
+- [Deploy to Kubernetes](https://docs.livekit.io/deploy/kubernetes)
 
 ## Debugging
 
