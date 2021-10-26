@@ -3,5 +3,11 @@
   "I18N.MAINTAINERS": "@Viriato139ac#0342",
 
   "LIVEKITAVCLIENT.debug": "Habilitar registro de errores",
-  "LIVEKITAVCLIENT.debugHint": "Habilita CONFIG.debug.av y CONFIG.debug.avclient para crear un registro de errores detallado"
+  "LIVEKITAVCLIENT.debugHint": "Habilita CONFIG.debug.av y CONFIG.debug.avclient para crear un registro de errores detallado",
+  "LIVEKITAVCLIENT.startAVBreakout": "Iniciar A/V privada",
+  "LIVEKITAVCLIENT.joinAVBreakout": "Unirse a A/V privada",
+  "LIVEKITAVCLIENT.pullToAVBreakout": "Traer a A/V privada",
+  "LIVEKITAVCLIENT.leaveAVBreakout": "Salir de A/V privada",
+  "LIVEKITAVCLIENT.removeFromAVBreakout": "Quitar de A/V privada",
+  "LIVEKITAVCLIENT.endAllAVBreakouts": "Finalizar A/V privadas"
 }

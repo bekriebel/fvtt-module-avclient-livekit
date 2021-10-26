@@ -25,6 +25,8 @@ import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
+import { SocketMessage } from "../types/avclient-livekit";
+import { addContextOptions, breakout } from "./LiveKitBreakout";
 
 export enum ConnectionState {
   Disconnected = "disconnected",
@@ -46,6 +48,7 @@ export default class LiveKitClient {
 
   audioBroadcastEnabled = false;
   audioTrack: LocalAudioTrack | null = null;
+  breakoutRoom: string | null = null;
   connectionState: ConnectionState = ConnectionState.Disconnected;
   initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
@@ -466,6 +469,11 @@ export default class LiveKitClient {
     }
   }
 
+  isUserExternal(userId: string): boolean {
+    // TODO: Implement this when adding external user support
+    return false;
+  }
+
   onAudioPlaybackStatusChanged(canPlayback: boolean): void {
     if (!canPlayback) {
       log.warn("Cannot play audio/video, waiting for user interaction");
@@ -508,6 +516,18 @@ export default class LiveKitClient {
     // TODO: Add some incremental back-off reconnect logic here
   }
 
+  onGetUserContextOptions(
+    playersElement: JQuery<HTMLElement>,
+    contextOptions: ContextMenuEntry[]
+  ): void {
+    // Don't add breakout options if AV is disabled
+    if (this.settings.get("world", "mode") === AVSettings.AV_MODES.DISABLED) {
+      return;
+    }
+
+    addContextOptions(contextOptions, this);
+  }
+
   onIsSpeakingChanged(userId: string | undefined, speaking: boolean): void {
     if (userId) {
       ui.webrtc?.setUserIsSpeaking(userId, speaking);
@@ -543,6 +563,15 @@ export default class LiveKitClient {
     // Save the participant to the ID mapping
     this.liveKitParticipants.set(fvttUserId, participant);
 
+    // Clear breakout room cache if user is joining the main conference
+    if (!this.breakoutRoom) {
+      this.settings.set(
+        "client",
+        `users.${fvttUserId}.liveKitBreakoutRoom`,
+        ""
+      );
+    }
+
     // Set up remote participant callbacks
     this.setRemoteParticipantCallbacks(participant);
 
@@ -561,6 +590,19 @@ export default class LiveKitClient {
     const { fvttUserId } = JSON.parse(participant.metadata || "");
     this.liveKitParticipants.delete(fvttUserId);
 
+    // Clear breakout room cache if user is leaving a breakout room
+    if (
+      this.settings.get("client", `users.${fvttUserId}.liveKitBreakoutRoom`) ===
+        this.liveKitAvClient.room &&
+      this.liveKitAvClient.room === this.breakoutRoom
+    ) {
+      this.settings.set(
+        "client",
+        `users.${fvttUserId}.liveKitBreakoutRoom`,
+        ""
+      );
+    }
+
     // Call a debounced render
     this.render();
   }
@@ -576,6 +618,25 @@ export default class LiveKitClient {
     ui.notifications?.warn(
       `${getGame().i18n.localize("WEBRTC.ConnectionLostWarning")}`
     );
+  }
+
+  onSocketEvent(message: SocketMessage, userId: string): void {
+    log.debug("Socket event:", message, "from:", userId);
+    switch (message.action) {
+      case "breakout":
+        // Allow only GMs to issue breakout requests. Ignore requests that aren't for us.
+        if (
+          getGame().users?.get(userId)?.isGM &&
+          (typeof message.breakoutRoom === "string" ||
+            message.breakoutRoom === null) &&
+          (!message.userId || message.userId === getGame().user?.id)
+        ) {
+          breakout(message.breakoutRoom, this);
+        }
+        break;
+      default:
+        log.warn("Unknown socket event:", message);
+    }
   }
 
   onTrackMuteChanged(

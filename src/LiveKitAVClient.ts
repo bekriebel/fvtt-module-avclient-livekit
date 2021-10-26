@@ -125,8 +125,12 @@ export default class LiveKitAVClient extends AVClient {
       this.settings.set("world", "server.room", randomID(32));
     }
 
-    // Set the room name
-    this.room = connectionSettings.room;
+    // Set the room name, using breakout room if set
+    if (this._liveKitClient.breakoutRoom) {
+      this.room = this._liveKitClient.breakoutRoom;
+    } else {
+      this.room = connectionSettings.room;
+    }
     log.debug("Meeting room name:", this.room);
 
     // Set the user's metadata

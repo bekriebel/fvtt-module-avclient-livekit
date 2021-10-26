@@ -1,3 +1,4 @@
+import { SocketMessage } from "../../types/avclient-livekit";
 import { MODULE_NAME } from "./constants";
 import { getGame } from "./helpers";
 import registerModuleSettings from "./registerModuleSettings";
@@ -15,15 +16,8 @@ Hooks.on("init", () => {
 
   // Register module settings
   registerModuleSettings();
-});
 
-Hooks.on(`${MODULE_NAME}DebugSet`, (value: boolean) => {
-  // Enable debug logging if debug setting is true
-  CONFIG.debug.av = value;
-  CONFIG.debug.avclient = value;
-});
-
-Hooks.on("init", () => {
+  // Add renderCameraViews hook after init
   Hooks.on(
     "renderCameraViews",
     (cameraViews: CameraViews, cameraViewsElement: JQuery<HTMLElement>) => {
@@ -36,3 +30,38 @@ Hooks.on("init", () => {
     }
   );
 });
+
+Hooks.on("ready", () => {
+  // Add socket listener after ready
+  getGame().socket?.on(
+    `module.${MODULE_NAME}`,
+    (message: SocketMessage, userId: string) => {
+      if (getGame()?.webrtc?.client._liveKitClient) {
+        getGame()?.webrtc?.client._liveKitClient.onSocketEvent(message, userId);
+      }
+    }
+  );
+});
+
+// Listen for DebugSet event
+Hooks.on(`${MODULE_NAME}DebugSet`, (value: boolean) => {
+  // Enable debug logging if debug setting is true
+  CONFIG.debug.av = value;
+  CONFIG.debug.avclient = value;
+});
+
+// Add context options on getUserContextOptions
+Hooks.on(
+  "getUserContextOptions",
+  async (
+    playersElement: JQuery<HTMLElement>,
+    contextOptions: ContextMenuEntry[]
+  ) => {
+    if (getGame().webrtc?.client?._liveKitClient) {
+      getGame().webrtc?.client._liveKitClient.onGetUserContextOptions(
+        playersElement,
+        contextOptions
+      );
+    }
+  }
+);

@@ -18,6 +18,13 @@ export interface ConnectionSettings {
   password: string;
 }
 
+// Custom foundry socket message
+interface SocketMessage {
+  action: "breakout";
+  userId?: string;
+  breakoutRoom?: string;
+}
+
 /**
  * Global settings
  */

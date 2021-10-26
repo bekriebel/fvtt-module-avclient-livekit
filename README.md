@@ -19,6 +19,18 @@ Install & enable the module then configure your LiveKit instance as the signalli
 **Signalling Server Username:** `ABCDEFGHIJ12345` \<Your LiveKit API Key>  
 **Signalling Server Password:** `****************` \<Your LiveKit Secret Key\>
 
+### **Breakout Rooms**
+
+A GM can now split the party!
+
+To start a breakout room, right-click on the player you would like to break out in the player list and select `Start A/V breakout`. You will join a different A/V session with that user. You can now right-click on other users and pull them into the breakout room, or start yet another breakout room with another user.
+
+![start breakout example](https://raw.githubusercontent.com/bekriebel/fvtt-module-avclient-livekit/main/images/example_start-breakout.png)
+
+Though the GM will always join the breakout room on creation, they can leave the breakout room themselves by right-clicking on their own username and selecting `Leave A/V Breakout`. Users can also leave a breakout at any time by right-clicking on their own name, and the GM can end all breakout rooms by selecting `End all A/V breakouts`.
+
+![start breakout example](https://raw.githubusercontent.com/bekriebel/fvtt-module-avclient-livekit/main/images/example_end-breakout.png)
+
 ## Running your own LiveKit server
 
 There are several examples available for launching your own livekit server:
