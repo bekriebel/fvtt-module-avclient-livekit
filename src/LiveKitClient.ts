@@ -112,7 +112,7 @@ export default class LiveKitClient {
     );
     disconnectButton.on("click", () => {
       disconnectButton.toggleClass("disabled", true);
-      this.avMaster.disconnect();
+      this.avMaster.disconnect().then(() => this.render());
     });
     element.before(disconnectButton);
 
@@ -496,6 +496,9 @@ export default class LiveKitClient {
     ui.notifications?.warn(
       `${getGame().i18n.localize(`${LANG_NAME}.onDisconnected`)}`
     );
+
+    // Clear the participant map
+    this.liveKitParticipants.clear();
 
     // Set connection buttons state
     this.setConnectionButtons(false);
