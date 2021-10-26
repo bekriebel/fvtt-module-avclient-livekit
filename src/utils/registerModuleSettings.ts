@@ -64,7 +64,7 @@ export default function registerModuleSettings(): void {
 
   // Register livekit trace logging setting
   registerModuleSetting({
-    name: "livekitTrace",
+    name: "liveKitTrace",
     scope: "world",
     config: getGame().settings.get(MODULE_NAME, "debug") === true,
     default: false,

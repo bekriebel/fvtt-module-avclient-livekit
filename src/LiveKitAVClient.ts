@@ -167,7 +167,7 @@ export default class LiveKitAVClient extends AVClient {
       localTracks.push(this._liveKitClient.videoTrack);
 
     // Set the livekit connection options
-    const livekitConnectionOptions: ConnectOptions = {
+    const liveKitConnectionOptions: ConnectOptions = {
       autoSubscribe: true,
       simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
       tracks: localTracks,
@@ -186,7 +186,7 @@ export default class LiveKitAVClient extends AVClient {
 
     // Don't auto subscribe to tracks if either video or audio is disabled
     if (disableReceivingAudio || disableReceivingVideo) {
-      livekitConnectionOptions.autoSubscribe = false;
+      liveKitConnectionOptions.autoSubscribe = false;
 
       // Send UI notifications
       if (disableReceivingAudio) {
@@ -207,10 +207,10 @@ export default class LiveKitAVClient extends AVClient {
 
     if (
       getGame().settings.get(MODULE_NAME, "debug") &&
-      getGame().settings.get(MODULE_NAME, "livekitTrace")
+      getGame().settings.get(MODULE_NAME, "liveKitTrace")
     ) {
       log.debug("Setting livekit trace logging");
-      livekitConnectionOptions.logLevel = LogLevel.trace;
+      liveKitConnectionOptions.logLevel = LogLevel.trace;
     }
 
     // Connect to the server
@@ -218,7 +218,7 @@ export default class LiveKitAVClient extends AVClient {
       this._liveKitClient.liveKitRoom = await liveKitConnect(
         `wss://${connectionSettings.url}`,
         accessToken,
-        livekitConnectionOptions
+        liveKitConnectionOptions
       );
       log.info("Connected to room", this.room);
     } catch (error: unknown) {
