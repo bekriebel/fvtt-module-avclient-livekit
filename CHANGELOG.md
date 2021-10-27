@@ -1,3 +1,9 @@
+# v0.2.0
+
+- Add breakout room support. Split the party!
+- Clean up disconnection steps
+- Update dependencies
+
 # v0.1.0
 
 - Prepare for initial announced release
