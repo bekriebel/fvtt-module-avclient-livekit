@@ -1,9 +1,9 @@
 import {
   connect as liveKitConnect,
   ConnectOptions,
-  LocalTrack,
   LogLevel,
   RoomState,
+  TrackPublishDefaults,
   VideoPresets43,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -160,18 +160,16 @@ export default class LiveKitAVClient extends AVClient {
       metadata
     );
 
-    const localTracks: LocalTrack[] = [];
-    if (this._liveKitClient.audioTrack)
-      localTracks.push(this._liveKitClient.audioTrack);
-    if (this._liveKitClient.videoTrack)
-      localTracks.push(this._liveKitClient.videoTrack);
+    // set the LiveKit publish defaults
+    const liveKitPublishDefaults: TrackPublishDefaults = {
+      videoEncoding: VideoPresets43.vga.encoding,
+      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+    };
 
     // Set the livekit connection options
     const liveKitConnectionOptions: ConnectOptions = {
       autoSubscribe: true,
-      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
-      tracks: localTracks,
-      videoEncoding: VideoPresets43.vga.encoding,
+      publishDefaults: liveKitPublishDefaults,
     };
 
     // Get disable audio/video settings
@@ -466,6 +464,17 @@ export default class LiveKitAVClient extends AVClient {
       log.debug("Muting video track", this._liveKitClient.videoTrack);
       this._liveKitClient.videoTrack.mute();
     } else {
+      // Ensure the video track is published to avoid an error when un-muting an unpublished track
+      if (
+        !this._liveKitClient.videoTrack.sid ||
+        !this._liveKitClient.liveKitRoom?.localParticipant.videoTracks.has(
+          this._liveKitClient.videoTrack.sid
+        )
+      ) {
+        log.debug("toggleVideo unmute called but video track is not published");
+        return;
+      }
+
       log.debug("Un-muting video track", this._liveKitClient.videoTrack);
       this._liveKitClient.videoTrack.unmute();
     }

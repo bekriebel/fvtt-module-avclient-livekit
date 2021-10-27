@@ -486,6 +486,14 @@ export default class LiveKitClient {
   onConnected(): void {
     log.debug("Client connected");
 
+    // Publish local tracks
+    if (this.audioTrack) {
+      this.liveKitRoom?.localParticipant.publishTrack(this.audioTrack);
+    }
+    if (this.videoTrack) {
+      this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack);
+    }
+
     // Set up room callbacks
     this.setRoomCallbacks();
 
