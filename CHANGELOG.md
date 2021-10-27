@@ -1,3 +1,8 @@
+# v0.2.1
+
+- Don't stop audio tracks when muting to avoid possible issues with bluetooth devices
+- Set FVTT compatibility to v0.7.2 - v9.224
+
 # v0.2.0
 
 - Add breakout room support. Split the party!
