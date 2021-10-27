@@ -239,10 +239,14 @@ window.muteAudio = () => {
   if (!currentRoom || !audioTrack) return;
   if (!audioTrack.isMuted) {
     appendLog("muting audio");
-    audioTrack.mute();
+    audioTrack.isMuted = true;
+    audioTrack.mediaStreamTrack.enabled = false;
+    audioTrack.emit("muted", audioTrack);
   } else {
     appendLog("unmuting audio");
-    audioTrack.unmute();
+    audioTrack.isMuted = false;
+    audioTrack.mediaStreamTrack.enabled = true;
+    audioTrack.emit("unmuted", audioTrack);
   }
 };
 
