@@ -436,9 +436,7 @@ export default class LiveKitClient {
         this.avMaster.canUserShareAudio(getGame().user?.id || "")
       )
     ) {
-      this.audioTrack.isMuted = true;
-      this.audioTrack.mediaStreamTrack.enabled = false;
-      this.audioTrack.emit("muted", this.audioTrack);
+      this.audioTrack.mute();
     }
   }
 
@@ -821,14 +819,10 @@ export default class LiveKitClient {
 
     if (!enable && !this.audioTrack.isMuted) {
       log.debug("Muting audio track", this.audioTrack);
-      this.audioTrack.isMuted = true;
-      this.audioTrack.mediaStreamTrack.enabled = false;
-      this.audioTrack.emit("muted", this.audioTrack);
+      this.audioTrack.mute();
     } else if (enable && this.audioTrack.isMuted) {
       log.debug("Un-muting audio track", this.audioTrack);
-      this.audioTrack.isMuted = false;
-      this.audioTrack.mediaStreamTrack.enabled = true;
-      this.audioTrack.emit("unmuted", this.audioTrack);
+      this.audioTrack.unmute();
     } else {
       log.debug(
         "setAudioEnabledState called but track is already in the current state"
