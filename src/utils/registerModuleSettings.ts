@@ -49,6 +49,15 @@ export default function registerModuleSettings(): void {
     },
   });
 
+  registerModuleSetting({
+    name: "useExternalAV",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => delayReload(),
+  });
+
   // Register debug logging setting
   registerModuleSetting({
     name: "debug",

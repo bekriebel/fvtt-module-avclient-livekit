@@ -86,6 +86,14 @@ export default class LiveKitAVClient extends AVClient {
       this.settings.set("client", "voice.mode", "always");
     }
 
+    // Don't fully initialize if client has enabled the option to use the external web client
+    if (getGame().settings.get(MODULE_NAME, "useExternalAV")) {
+      log.debug("useExternalAV set, not initializing LiveKitClient");
+      this._liveKitClient.useExternalAV = true;
+      this._liveKitClient.initState = InitState.Initialized;
+      return;
+    }
+
     await this._liveKitClient.initializeLocalTracks();
     this._liveKitClient.initState = InitState.Initialized;
   }
@@ -159,6 +167,13 @@ export default class LiveKitAVClient extends AVClient {
       userName,
       metadata
     );
+
+    // If useExternalAV is enabled, send a join message instead of connecting
+    if (this._liveKitClient.useExternalAV) {
+      log.debug("useExternalAV set, not connecting to LiveKit");
+      this._liveKitClient.sendJoinMessage(connectionSettings.url, accessToken);
+      return true;
+    }
 
     // set the LiveKit publish defaults
     const liveKitPublishDefaults: TrackPublishDefaults = {
@@ -354,6 +369,12 @@ export default class LiveKitAVClient extends AVClient {
    */
   getConnectedUsers(): string[] {
     log.debug("getConnectedUsers");
+
+    // If useExternalAV is enabled, return empty array
+    if (getGame().settings.get(MODULE_NAME, "useExternalAV")) {
+      return [];
+    }
+
     const connectedUsers: string[] = Array.from(
       this._liveKitClient.liveKitParticipants.keys()
     );
@@ -423,6 +444,11 @@ export default class LiveKitAVClient extends AVClient {
   toggleAudio(enable: boolean): void {
     log.debug("Toggling audio:", enable);
 
+    // If useExternalAV is enabled, return
+    if (this._liveKitClient.useExternalAV) {
+      return;
+    }
+
     // If "always on" broadcasting is not enabled, don't proceed
     if (!this._liveKitClient.audioBroadcastEnabled || this.isVoicePTT) return;
 
@@ -441,6 +467,11 @@ export default class LiveKitAVClient extends AVClient {
   toggleBroadcast(broadcast: boolean): void {
     log.debug("Toggling broadcast audio:", broadcast);
 
+    // If useExternalAV is enabled, return
+    if (this._liveKitClient.useExternalAV) {
+      return;
+    }
+
     this._liveKitClient.audioBroadcastEnabled = broadcast;
     this._liveKitClient.setAudioEnabledState(broadcast);
   }
@@ -455,6 +486,11 @@ export default class LiveKitAVClient extends AVClient {
    *                                 disabled (false)
    */
   toggleVideo(enable: boolean): void {
+    // If useExternalAV is enabled, return
+    if (this._liveKitClient.useExternalAV) {
+      return;
+    }
+
     if (!this._liveKitClient.videoTrack) {
       log.debug("toggleVideo called but no video track available");
       return;

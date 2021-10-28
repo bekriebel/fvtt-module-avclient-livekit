@@ -53,6 +53,7 @@ export default class LiveKitClient {
   initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
   liveKitRoom: Room | null = null;
+  useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
 
@@ -92,6 +93,11 @@ export default class LiveKitClient {
   }
 
   addConnectionButtons(element: JQuery<HTMLElement>): void {
+    // If useExternalAV is enabled, return
+    if (this.useExternalAV) {
+      return;
+    }
+
     if (element.length !== 1) {
       log.warn("Can't find CameraView configure element", element);
       return;
@@ -803,6 +809,33 @@ export default class LiveKitClient {
           },
         }
       : false;
+  }
+
+  sendJoinMessage(liveKitServer: string, accessToken: string) {
+    const foundryHost = window.location.href.replace(/\/game.*$/, "");
+    // Create the url for user to join the external LiveKit web client
+    const url = `${foundryHost}/modules/avclient-livekit/web-client/index.html?${liveKitServer}&${accessToken}`;
+
+    const joinDialog = new Dialog({
+      title: getGame().i18n.localize(`${LANG_NAME}.externalAVJoinTitle`),
+      content: `<p>${getGame().i18n.localize(
+        `${LANG_NAME}.externalAVJoinMessage`
+      )}</p>`,
+      buttons: {
+        join: {
+          icon: '<i class="fas fa-check"></i>',
+          label: getGame().i18n.localize(`${LANG_NAME}.externalAVJoinButton`),
+          callback: () => window.open(url),
+        },
+        ignore: {
+          icon: '<i class="fas fa-times"></i>',
+          label: getGame().i18n.localize(`${LANG_NAME}.externalAVIgnoreButton`),
+          callback: () => log.debug("Ignoring External LiveKit join request"),
+        },
+      },
+      default: "join",
+    });
+    joinDialog.render(true);
   }
 
   setAudioEnabledState(enable: boolean): void {

@@ -29,5 +29,11 @@
   "LIVEKITAVCLIENT.leavingAVBreakout": "Leaving A/V breakout room",
   "LIVEKITAVCLIENT.removeFromAVBreakout": "Remove from A/V breakout",
   "LIVEKITAVCLIENT.endAllAVBreakouts": "End all A/V breakouts",
+  "LIVEKITAVCLIENT.useExternalAV": "Use separate window for A/V",
+  "LIVEKITAVCLIENT.useExternalAVHint": "(Experimental) Opens a LiveKit web client for A/V in separate browser window",
+  "LIVEKITAVCLIENT.externalAVJoinTitle": "LiveKit Web Client",
+  "LIVEKITAVCLIENT.externalAVJoinMessage": "Join A/V with LiveKit web client?",
+  "LIVEKITAVCLIENT.externalAVJoinButton": "Join",
+  "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignore",
   "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)"
 }

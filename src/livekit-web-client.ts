@@ -1,36 +1,40 @@
 import {
   connect,
-  createLocalScreenTracks,
   CreateVideoTrackOptions,
-  LocalAudioTrack,
+  DataPacket_Kind,
   LocalTrack,
-  LocalVideoTrack,
+  LocalTrackPublication,
   LogLevel,
+  MediaDeviceFailure,
   Participant,
   ParticipantEvent,
   RemoteParticipant,
   RemoteTrack,
+  RemoteTrackPublication,
   Room,
   RoomEvent,
   Track,
-  VideoPresets,
+  TrackPublication,
+  VideoPresets43,
 } from "livekit-client";
 
 const $ = (id: string) => document.getElementById(id);
 
 declare global {
   interface Window {
-    connectWithURLParams: any;
+    connectWithFormInput: any;
     connectToRoom: any;
+    handleDeviceSelected: any;
     shareScreen: any;
-    muteVideo: any;
-    muteAudio: any;
+    toggleVideo: any;
+    toggleAudio: any;
     enterText: any;
     disconnectSignal: any;
     disconnectRoom: any;
     currentRoom: any;
     startAudio: any;
     flipVideo: any;
+    onLoad: any;
   }
 }
 
@@ -64,6 +68,7 @@ function trackSubscribed(
 
 function trackUnsubscribed(
   track: RemoteTrack | LocalTrack,
+  pub?: RemoteTrackPublication,
   participant?: Participant
 ) {
   let logName = track.name;
@@ -72,6 +77,18 @@ function trackUnsubscribed(
   }
   appendLog("track unsubscribed", logName);
   track.detach().forEach((element) => element.remove());
+}
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+function handleData(msg: Uint8Array, participant?: RemoteParticipant) {
+  const str = decoder.decode(msg);
+  const chat = <HTMLTextAreaElement>$("chat");
+  let from = "server";
+  if (participant) {
+    from = participant.identity;
+  }
+  chat.value += `${from}: ${str}\n`;
 }
 
 function handleSpeakerChanged(speakers: Participant[]) {
@@ -114,13 +131,8 @@ function participantConnected(participant: RemoteParticipant) {
   participant.on(ParticipantEvent.TrackSubscribed, (track) => {
     trackSubscribed(div, track, participant);
   });
-  participant.on(ParticipantEvent.TrackUnsubscribed, (track) => {
-    trackUnsubscribed(track, participant);
-  });
-
-  participant.tracks.forEach((publication) => {
-    if (!publication.isSubscribed) return;
-    trackSubscribed(div, publication.track!, participant);
+  participant.on(ParticipantEvent.TrackUnsubscribed, (track, pub) => {
+    trackUnsubscribed(track, pub, participant);
   });
 }
 
@@ -133,41 +145,87 @@ function participantDisconnected(participant: RemoteParticipant) {
 function handleRoomDisconnect() {
   appendLog("disconnected from room");
   setButtonsForState(false);
-  if (videoTrack) {
-    videoTrack.stop();
-    trackUnsubscribed(videoTrack);
-  }
-  if (audioTrack) {
-    audioTrack.stop();
-    trackUnsubscribed(audioTrack);
-  }
   $("local-video")!.innerHTML = "";
+
+  // clear the chat area on disconnect
+  clearChat();
+
+  // clear remote area on disconnect
+  clearRemoteArea();
+}
+
+function setButtonState(
+  buttonId: string,
+  buttonText: string,
+  isActive: boolean
+) {
+  const el = $(buttonId);
+  if (!el) return;
+
+  el.innerHTML = buttonText;
+  if (isActive) {
+    el.classList.add("active");
+  } else {
+    el.classList.remove("active");
+  }
+}
+
+function clearChat() {
+  const chat = <HTMLTextAreaElement>$("chat");
+  chat.value = "";
+}
+
+function clearRemoteArea() {
+  const el = $("remote-area");
+  if (!el) return;
+
+  while (el.firstChild) {
+    el.removeChild(el.firstChild);
+  }
 }
 
 let currentRoom: Room;
-let videoTrack: LocalVideoTrack | undefined;
-let audioTrack: LocalAudioTrack;
-let screenTrack: LocalVideoTrack | undefined;
-window.connectWithURLParams = () => {
-  const urlParams = window.location.search.substr(1).split("&");
-  const url = "wss://" + urlParams[0];
-  const token = urlParams[1];
-  appendLog("url:", url, "token:", token);
-  window.connectToRoom(url, token);
+window.connectWithFormInput = () => {
+  const url = (<HTMLInputElement>$("url")).value;
+  const token = (<HTMLInputElement>$("token")).value;
+  const simulcast = (<HTMLInputElement>$("simulcast")).checked;
+  const forceTURN = (<HTMLInputElement>$("force-turn")).checked;
+
+  window.connectToRoom(url, token, simulcast, forceTURN);
 };
 
-window.connectToRoom = async (url: string, token: string) => {
+window.connectToRoom = async (
+  url: string,
+  token: string,
+  simulcast = false,
+  forceTURN = false
+) => {
   let room: Room;
   const rtcConfig: RTCConfiguration = {};
+  if (forceTURN) {
+    rtcConfig.iceTransportPolicy = "relay";
+  }
+  const shouldPublish = (<HTMLInputElement>$("publish-option")).checked;
+
   try {
     room = await connect(url, token, {
       logLevel: LogLevel.debug,
-      audio: true,
-      video: false,
       rtcConfig,
+      audio: shouldPublish,
+      video: shouldPublish,
+      captureDefaults: {
+        videoResolution: {
+          width: 320,
+          height: 240,
+        },
+      },
+      publishDefaults: {
+        videoEncoding: VideoPresets43.vga.encoding,
+        simulcast,
+      },
     });
-  } catch (error: unknown) {
-    let message = error;
+  } catch (error) {
+    let message: any = error;
     if (error instanceof Error) {
       message = error.message;
     }
@@ -175,25 +233,46 @@ window.connectToRoom = async (url: string, token: string) => {
     return;
   }
 
-  window.currentRoom = room;
   appendLog("connected to room", room.name);
-  setButtonsForState(true);
   currentRoom = room;
   window.currentRoom = room;
+  setButtonsForState(true);
+  updateButtonsForPublishState();
 
   room
     .on(RoomEvent.ParticipantConnected, participantConnected)
     .on(RoomEvent.ParticipantDisconnected, participantDisconnected)
+    .on(RoomEvent.DataReceived, handleData)
     .on(RoomEvent.ActiveSpeakersChanged, handleSpeakerChanged)
     .on(RoomEvent.Disconnected, handleRoomDisconnect)
     .on(RoomEvent.Reconnecting, () => appendLog("Reconnecting to room"))
     .on(RoomEvent.Reconnected, () => appendLog("Successfully reconnected!"))
+    .on(RoomEvent.TrackMuted, (pub: TrackPublication, p: Participant) =>
+      appendLog("track was muted", pub.trackSid, p.identity)
+    )
+    .on(RoomEvent.TrackUnmuted, (pub: TrackPublication, p: Participant) =>
+      appendLog("track was unmuted", pub.trackSid, p.identity)
+    )
+    .on(RoomEvent.LocalTrackPublished, (pub: LocalTrackPublication) => {
+      if (pub.kind === Track.Kind.Video) {
+        attachLocalVideo();
+      }
+      updateButtonsForPublishState();
+    })
+    .on(RoomEvent.RoomMetadataChanged, (metadata) => {
+      appendLog("new metadata for room", metadata);
+    })
+    .on(RoomEvent.MediaDevicesChanged, handleDevicesChanged)
     .on(RoomEvent.AudioPlaybackStatusChanged, () => {
       if (room.canPlaybackAudio) {
         $("start-audio-button")?.setAttribute("disabled", "true");
       } else {
         $("start-audio-button")?.removeAttribute("disabled");
       }
+    })
+    .on(RoomEvent.MediaDevicesError, (e: Error) => {
+      const failure = MediaDeviceFailure.getFailure(e);
+      appendLog("media device failure", failure);
     });
 
   appendLog("room participants", room.participants.keys());
@@ -202,71 +281,65 @@ window.connectToRoom = async (url: string, token: string) => {
   });
 
   $("local-video")!.innerHTML = `${room.localParticipant.identity} (me)`;
-
-  // add already published tracks
-  currentRoom.localParticipant.tracks.forEach((publication) => {
-    if (publication.kind === Track.Kind.Video) {
-      videoTrack = <LocalVideoTrack>publication.track;
-      publishLocalVideo(videoTrack);
-    } else if (publication.kind === Track.Kind.Audio) {
-      // skip adding local audio track, to avoid your own sound
-      // only process local video tracks
-      audioTrack = <LocalAudioTrack>publication.track;
-    }
-  });
 };
 
-window.muteVideo = () => {
-  if (!currentRoom || !videoTrack) return;
+window.toggleVideo = async () => {
+  if (!currentRoom) return;
   const video = getMyVideo();
-  if (!videoTrack.isMuted) {
-    appendLog("muting video");
-    videoTrack.mute();
+  if (currentRoom.localParticipant.isCameraEnabled) {
+    appendLog("disabling video");
+    await currentRoom.localParticipant.setCameraEnabled(false);
     // hide from display
     if (video) {
       video.style.display = "none";
     }
   } else {
-    appendLog("unmuting video");
-    videoTrack.unmute();
+    appendLog("enabling video");
+    await currentRoom.localParticipant.setCameraEnabled(true);
+    attachLocalVideo();
     if (video) {
       video.style.display = "";
     }
   }
+  updateButtonsForPublishState();
 };
 
-window.muteAudio = () => {
-  if (!currentRoom || !audioTrack) return;
-  if (!audioTrack.isMuted) {
-    appendLog("muting audio");
-    audioTrack.mute();
+window.toggleAudio = async () => {
+  if (!currentRoom) return;
+  if (currentRoom.localParticipant.isMicrophoneEnabled) {
+    appendLog("disabling audio");
+    await currentRoom.localParticipant.setMicrophoneEnabled(false);
   } else {
-    appendLog("unmuting audio");
-    audioTrack.unmute();
+    appendLog("enabling audio");
+    await currentRoom.localParticipant.setMicrophoneEnabled(true);
+  }
+  updateButtonsForPublishState();
+};
+
+window.enterText = () => {
+  const textField = <HTMLInputElement>$("entry");
+  if (textField.value) {
+    const msg = encoder.encode(textField.value);
+    currentRoom.localParticipant.publishData(msg, DataPacket_Kind.RELIABLE);
+    (<HTMLTextAreaElement>(
+      $("chat")
+    )).value += `${currentRoom.localParticipant.identity} (me): ${textField.value}\n`;
+    textField.value = "";
   }
 };
 
 window.shareScreen = async () => {
-  if (screenTrack !== undefined) {
-    currentRoom.localParticipant.unpublishTrack(screenTrack);
-    screenTrack = undefined;
-    return;
-  }
+  if (!currentRoom) return;
 
-  const screenTracks = await createLocalScreenTracks({
-    audio: true,
-  });
-  screenTracks.forEach((track) => {
-    if (track instanceof LocalVideoTrack) {
-      screenTrack = track;
-      currentRoom.localParticipant.publishTrack(track, {
-        videoEncoding: VideoPresets.fhd.encoding,
-      });
-    } else {
-      // publish audio track as well
-      currentRoom.localParticipant.publishTrack(track);
-    }
-  });
+  if (currentRoom.localParticipant.isScreenShareEnabled) {
+    appendLog("stopping screen share");
+    await currentRoom.localParticipant.setScreenShareEnabled(false);
+  } else {
+    appendLog("starting screen share");
+    await currentRoom.localParticipant.setScreenShareEnabled(true);
+    appendLog("started screen share");
+  }
+  updateButtonsForPublishState();
 };
 
 window.disconnectSignal = () => {
@@ -287,31 +360,69 @@ window.startAudio = () => {
   currentRoom.startAudio();
 };
 
-let isFacingForward = true;
+let isFrontFacing = true;
 window.flipVideo = () => {
+  const videoPub = currentRoom.localParticipant.getTrack(Track.Source.Camera);
+  if (!videoPub) {
+    return;
+  }
+  if (isFrontFacing) {
+    setButtonState("flip-video-button", "Front Camera", false);
+  } else {
+    setButtonState("flip-video-button", "Back Camera", false);
+  }
+  isFrontFacing = !isFrontFacing;
+  const options: CreateVideoTrackOptions = {
+    resolution: {
+      width: 320,
+      height: 240,
+    },
+    facingMode: isFrontFacing ? "user" : "environment",
+  };
+  videoPub.videoTrack?.restartTrack(options);
+};
+
+const defaultDevices = new Map<MediaDeviceKind, string>();
+window.handleDeviceSelected = async (e: Event) => {
+  const deviceId = (<HTMLSelectElement>e.target).value;
+  const elementId = (<HTMLSelectElement>e.target).id;
+  const kind = elementMapping[elementId];
+  if (!kind) {
+    return;
+  }
+
+  defaultDevices.set(kind, deviceId);
+
+  if (currentRoom) {
+    await currentRoom.switchActiveDevice(kind, deviceId);
+  }
+};
+
+window.onLoad = () => {
+  // Set the connection values based on URL Parameters
+  setFormInputFromURLParams();
+};
+
+setTimeout(handleDevicesChanged, 100);
+
+async function attachLocalVideo() {
+  const videoPub = currentRoom.localParticipant.getTrack(Track.Source.Camera);
+  const videoTrack = videoPub?.videoTrack;
   if (!videoTrack) {
     return;
   }
-  isFacingForward = !isFacingForward;
-  const options: CreateVideoTrackOptions = {
-    resolution: VideoPresets.qhd.resolution,
-    facingMode: isFacingForward ? "user" : "environment",
-  };
-  videoTrack.restartTrack(options);
-};
 
-async function publishLocalVideo(track: LocalVideoTrack) {
-  await currentRoom.localParticipant.publishTrack(track);
-  const video = track.attach();
-  video.style.transform = "scale(-1, 1)";
-  $("local-video")!.appendChild(video);
+  if (videoTrack.attachedElements.length === 0) {
+    const video = videoTrack.attach();
+    video.style.transform = "scale(-1, 1)";
+    $("local-video")!.appendChild(video);
+  }
 }
 
 function setButtonsForState(connected: boolean) {
   const connectedSet = [
     "toggle-video-button",
-    "mute-video-button",
-    "mute-audio-button",
+    "toggle-audio-button",
     "share-screen-button",
     "disconnect-ws-button",
     "disconnect-room-button",
@@ -325,7 +436,91 @@ function setButtonsForState(connected: boolean) {
   toRemove.forEach((id) => $(id)?.removeAttribute("disabled"));
   toAdd.forEach((id) => $(id)?.setAttribute("disabled", "true"));
 }
+function setFormInputFromURLParams() {
+  const urlParams = window.location.search.substr(1).split("&");
+  const url = "wss://" + urlParams[0];
+  const token = urlParams[1];
+
+  (<HTMLInputElement>$("url")).value = url;
+  (<HTMLInputElement>$("token")).value = token;
+}
 
 function getMyVideo() {
   return <HTMLVideoElement>document.querySelector("#local-video video");
+}
+
+const elementMapping: { [k: string]: MediaDeviceKind } = {
+  "video-input": "videoinput",
+  "audio-input": "audioinput",
+  "audio-output": "audiooutput",
+};
+async function handleDevicesChanged() {
+  Promise.all(
+    Object.keys(elementMapping).map(async (id) => {
+      const kind = elementMapping[id];
+      if (!kind) {
+        return;
+      }
+      const devices = await Room.getLocalDevices(kind);
+      const element = <HTMLSelectElement>$(id);
+      populateSelect(kind, element, devices, defaultDevices.get(kind));
+    })
+  );
+}
+
+function populateSelect(
+  kind: MediaDeviceKind,
+  element: HTMLSelectElement,
+  devices: MediaDeviceInfo[],
+  selectedDeviceId?: string
+) {
+  // clear all elements
+  element.innerHTML = "";
+  const initialOption = document.createElement("option");
+  if (kind === "audioinput") {
+    initialOption.text = "Audio Input (default)";
+  } else if (kind === "videoinput") {
+    initialOption.text = "Video Input (default)";
+  } else if (kind === "audiooutput") {
+    initialOption.text = "Audio Output (default)";
+  }
+  element.appendChild(initialOption);
+
+  for (const device of devices) {
+    const option = document.createElement("option");
+    option.text = device.label;
+    option.value = device.deviceId;
+    if (device.deviceId === selectedDeviceId) {
+      option.selected = true;
+    }
+    element.appendChild(option);
+  }
+}
+
+function updateButtonsForPublishState() {
+  if (!currentRoom) {
+    return;
+  }
+  const lp = currentRoom.localParticipant;
+
+  // video
+  setButtonState(
+    "toggle-video-button",
+    `${lp.isCameraEnabled ? "Disable" : "Enable"} Video`,
+    lp.isCameraEnabled
+  );
+
+  // audio
+  setButtonState(
+    "toggle-audio-button",
+    `${lp.isMicrophoneEnabled ? "Disable" : "Enable"} Audio`,
+    lp.isMicrophoneEnabled
+  );
+
+  // screen share
+  setButtonState(
+    "share-screen-button",
+    lp.isScreenShareEnabled ? "Stop Screen Share" : "Share Screen",
+    lp.isScreenShareEnabled
+  );
 }

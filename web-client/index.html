@@ -27,73 +27,130 @@
     </style>
   </head>
 
-  <body>
+  <body onload="onLoad()">
     <div class="container">
       <div class="row">
-        <div class="col-md-8">
-          <h2>Livekit Sample App</h2>
+        <div class="col-md-12">
+          <h2>Livekit AVClient</h2>
           <br/>
           <form>
+            <div class="form-group row" style="display: none;">
+              <label for="url" class="col-md-3 col-form-label"
+                >LiveKit URL</label
+              >
+              <input
+                type="text"
+                class="form-control col-md-5"
+                id="url"
+                value="ws://localhost:7880"
+              />
+            </div>
+
+            <div class="form-group row" style="display: none;">
+              <label for="token" class="col-md-3 col-form-label">Token</label>
+              <input type="text" class="form-control col-md-5" id="token" />
+            </div>
+
+            <div class="form-group row">
+              <div class="col-md-2 offset-md-1" style="display: none;">
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="publish-option"
+                  />
+                  <label for="checkbox" class="form-check-label">
+                    Publish
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-2" style="display: none;">
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="simulcast"
+                  />
+                  <label for="checkbox" class="form-check-label">
+                    Simulcast
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-3" style="display: none;">
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="force-turn"
+                  />
+                  <label for="checkbox" class="form-check-label">
+                    Force TURN
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div class="form-group row">
               <div class="col-md-2">
                 <button
                   id="connect-button"
-                  class="btn btn-primary"
+                  class="btn btn-primary mt-1"
                   type="button"
-                  onclick="connectWithURLParams()"
+                  onclick="connectWithFormInput()"
                 >
                   Connect
                 </button>
               </div>
-              <div class="col-md-8">
+              <div class="col-md-10">
                 <button
-                  id="mute-audio-button"
-                  class="btn btn-secondary"
+                  id="toggle-audio-button"
+                  class="btn btn-secondary mt-1"
                   disabled
                   type="button"
-                  onclick="muteAudio()"
+                  onclick="toggleAudio()"
                 >
-                  Mute Audio
+                  Enable Audio
                 </button>
                 <button
-                  id="mute-video-button"
-                  class="btn btn-secondary"
+                  id="toggle-video-button"
+                  class="btn btn-secondary mt-1"
                   disabled
                   type="button"
-                  onclick="muteVideo()"
+                  onclick="toggleVideo()"
                 >
-                  Mute Video
+                  Enable Video
                 </button>
                 <button
                   id="flip-video-button"
-                  class="btn btn-secondary"
+                  class="btn btn-secondary mt-1"
                   disabled
                   type="button"
                   onclick="flipVideo()"
                 >
-                  Flip Video
+                  Back Camera
                 </button>
                 <button
                   id="share-screen-button"
-                  class="btn btn-secondary"
+                  class="btn btn-secondary mt-1"
                   disabled
                   type="button"
                   onclick="shareScreen()"
+                  style="display: none;"
                 >
                   Share Screen
                 </button>
                 <button
                   id="disconnect-ws-button"
-                  class="btn btn-warning"
+                  class="btn btn-warning mt-1"
                   disabled
                   type="button"
                   onclick="disconnectSignal()"
                 >
-                  WS reconnect
+                  WS Reconnect
                 </button>
                 <button
                   id="disconnect-room-button"
-                  class="btn btn-danger"
+                  class="btn btn-danger mt-1"
                   disabled
                   type="button"
                   onclick="disconnectRoom()"
@@ -102,17 +159,36 @@
                 </button>
                 <button
                   id="start-audio-button"
-                  class="btn btn-secondary"
+                  class="btn btn-secondary mt-1"
                   disabled
                   type="button"
                   onclick="startAudio()"
                 >
-                  Enable audio
+                  Enable Audio
                 </button>
               </div>
             </div>
 
+            <!-- video devices -->
             <div class="form-group row">
+              <div class="col-md-4">
+                <select id="video-input" class="custom-select" onchange="handleDeviceSelected(event)">
+                  <option selected>Video Input (default)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <select id="audio-input" class="custom-select" onchange="handleDeviceSelected(event)">
+                  <option selected>Audio Input (default)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <select id="audio-output" class="custom-select" onchange="handleDeviceSelected(event)">
+                  <option selected>Audio Output (default)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group row" style="display: none;">
               <textarea
                 class="form-control col-md-12"
                 id="log"
@@ -120,6 +196,28 @@
               ></textarea>
             </div>
           </form>
+        </div>
+        <div class="col-md-4" style="display: none;">
+          <h3>Chat</h3>
+          <div class="row">
+            <div class="col-md-12">
+              <textarea class="form-control" id="chat" rows="15"></textarea>
+            </div>
+          </div>
+          <div class="row mt-1">
+            <div class="col-md-10">
+              <input type="text" class="form-control" id="entry" />
+            </div>
+            <div class="col-md-1">
+              <button
+                class="btn btn-primary"
+                type="button"
+                onclick="enterText()"
+              >
+                Enter
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

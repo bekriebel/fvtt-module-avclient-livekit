@@ -9,5 +9,7 @@
   "LIVEKITAVCLIENT.pullToAVBreakout": "Traer a A/V privada",
   "LIVEKITAVCLIENT.leaveAVBreakout": "Salir de A/V privada",
   "LIVEKITAVCLIENT.removeFromAVBreakout": "Quitar de A/V privada",
-  "LIVEKITAVCLIENT.endAllAVBreakouts": "Finalizar A/V privadas"
+  "LIVEKITAVCLIENT.endAllAVBreakouts": "Finalizar A/V privadas",
+  "LIVEKITAVCLIENT.externalAVJoinButton": "Unirse",
+  "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignorar"
 }
