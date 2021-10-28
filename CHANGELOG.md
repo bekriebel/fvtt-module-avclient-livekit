@@ -1,3 +1,8 @@
+# v0.2.2
+
+- Revert workaround for bluetooth issues and update to LiveKit client v0.13.6 for proper fix
+- Add module setting to allow joining A/V using a web client in a separate browser window
+
 # v0.2.1
 
 - Don't stop audio tracks when muting to avoid possible issues with bluetooth devices
