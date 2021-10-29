@@ -934,6 +934,9 @@ export default class LiveKitClient {
       )
       .on(RoomEvent.TrackPublished, this.onTrackPublished.bind(this))
       .on(RoomEvent.TrackSubscribed, this.onTrackSubscribed.bind(this))
+      .on(RoomEvent.TrackSubscriptionFailed, (...args) => {
+        log.error("RoomEvent TrackSubscriptionFailed:", args);
+      })
       .on(RoomEvent.TrackUnpublished, (...args) => {
         log.debug("RoomEvent TrackUnpublished:", args);
       })
