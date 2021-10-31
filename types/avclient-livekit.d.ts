@@ -20,7 +20,7 @@ export interface ConnectionSettings {
 
 // Custom foundry socket message
 interface SocketMessage {
-  action: "breakout";
+  action: "breakout" | "connect" | "disconnect" | "render";
   userId?: string;
   breakoutRoom?: string;
 }

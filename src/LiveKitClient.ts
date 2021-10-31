@@ -648,6 +648,27 @@ export default class LiveKitClient {
           breakout(message.breakoutRoom, this);
         }
         break;
+      case "connect":
+        if (getGame().users?.get(userId)?.isGM) {
+          this.avMaster.connect();
+        } else {
+          log.warn("Connect socket event from non-GM user; ignoring");
+        }
+        break;
+      case "disconnect":
+        if (getGame().users?.get(userId)?.isGM) {
+          this.avMaster.disconnect().then(() => this.render());
+        } else {
+          log.warn("Disconnect socket event from non-GM user; ignoring");
+        }
+        break;
+      case "render":
+        if (getGame().users?.get(userId)?.isGM) {
+          this.render();
+        } else {
+          log.warn("Render socket event from non-GM user; ignoring");
+        }
+        break;
       default:
         log.warn("Unknown socket event:", message);
     }
