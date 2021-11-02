@@ -356,6 +356,13 @@ export default class LiveKitClient {
     return audioTrack;
   }
 
+  getParticipantFVTTUser(participant: Participant): User | undefined {
+    log.debug("getParticipantFVTTUser:", participant, participant.metadata);
+
+    const { fvttUserId } = JSON.parse(participant.metadata || "{}");
+    return getGame().users?.get(fvttUserId);
+  }
+
   getParticipantVideoTrack(userId: string): RemoteVideoTrack | null {
     let videoTrack: RemoteVideoTrack | null = null;
     this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
@@ -551,10 +558,9 @@ export default class LiveKitClient {
   onParticipantConnected(participant: RemoteParticipant): void {
     log.debug("onParticipantConnected:", participant);
 
-    const { fvttUserId } = JSON.parse(participant.metadata || "");
-    const fvttUser = getGame().users?.get(fvttUserId);
+    const fvttUser = this.getParticipantFVTTUser(participant);
 
-    if (!fvttUser) {
+    if (!fvttUser?.id) {
       log.error(
         "Joining participant",
         participant,
@@ -567,7 +573,7 @@ export default class LiveKitClient {
       // Force the user to be active. If they are signing in to meeting, they should be online.
       log.warn(
         "Joining user",
-        fvttUserId,
+        fvttUser.id,
         "is not listed as active. Setting to active."
       );
       fvttUser.active = true;
@@ -575,13 +581,13 @@ export default class LiveKitClient {
     }
 
     // Save the participant to the ID mapping
-    this.liveKitParticipants.set(fvttUserId, participant);
+    this.liveKitParticipants.set(fvttUser.id, participant);
 
     // Clear breakout room cache if user is joining the main conference
     if (!this.breakoutRoom) {
       this.settings.set(
         "client",
-        `users.${fvttUserId}.liveKitBreakoutRoom`,
+        `users.${fvttUser.id}.liveKitBreakoutRoom`,
         ""
       );
     }
@@ -601,7 +607,13 @@ export default class LiveKitClient {
     log.debug("onParticipantDisconnected:", participant);
 
     // Remove the participant from the ID mapping
-    const { fvttUserId } = JSON.parse(participant.metadata || "");
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn("Leaving participant", participant, "is not an FVTT user");
+      return;
+    }
+
     this.liveKitParticipants.delete(fvttUserId);
 
     // Clear breakout room cache if user is leaving a breakout room
@@ -687,7 +699,13 @@ export default class LiveKitClient {
     }
 
     // Remote participant
-    const { fvttUserId } = JSON.parse(participant.metadata || "");
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn("Mute change participant", participant, "is not an FVTT user");
+      return;
+    }
+
     const userCameraView = ui.webrtc?.getUserCameraView(fvttUserId);
 
     if (userCameraView) {
@@ -760,7 +778,17 @@ export default class LiveKitClient {
     participant: RemoteParticipant
   ): Promise<void> {
     log.debug("onTrackSubscribed:", track, publication, participant);
-    const { fvttUserId } = JSON.parse(participant.metadata || "");
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn(
+        "Track subscribed participant",
+        participant,
+        "is not an FVTT user"
+      );
+      return;
+    }
+
     const videoElement = ui.webrtc?.getUserVideoElement(fvttUserId);
 
     if (!videoElement) {
@@ -919,7 +947,16 @@ export default class LiveKitClient {
   }
 
   setRemoteParticipantCallbacks(participant: RemoteParticipant): void {
-    const { fvttUserId } = JSON.parse(participant.metadata || "");
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn(
+        "Participant",
+        participant,
+        "is not an FVTT user; skipping setRemoteParticipantCallbacks"
+      );
+      return;
+    }
 
     participant
       .on(
