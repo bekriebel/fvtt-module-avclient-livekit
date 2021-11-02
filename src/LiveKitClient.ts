@@ -496,16 +496,8 @@ export default class LiveKitClient {
     }
   }
 
-  onConnected(): void {
+  async onConnected(): Promise<void> {
     log.debug("Client connected");
-
-    // Publish local tracks
-    if (this.audioTrack) {
-      this.liveKitRoom?.localParticipant.publishTrack(this.audioTrack);
-    }
-    if (this.videoTrack) {
-      this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack);
-    }
 
     // Set up room callbacks
     this.setRoomCallbacks();
@@ -518,6 +510,14 @@ export default class LiveKitClient {
 
     // Set connection button state
     this.setConnectionButtons(true);
+
+    // Publish local tracks
+    if (this.audioTrack) {
+      await this.liveKitRoom?.localParticipant.publishTrack(this.audioTrack);
+    }
+    if (this.videoTrack) {
+      await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack);
+    }
   }
 
   onDisconnected(): void {

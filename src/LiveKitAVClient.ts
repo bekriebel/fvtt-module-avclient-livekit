@@ -270,7 +270,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Set up after connection
-    this._liveKitClient.onConnected();
+    await this._liveKitClient.onConnected();
 
     this._liveKitClient.connectionState = ConnectionState.Connected;
     return true;
