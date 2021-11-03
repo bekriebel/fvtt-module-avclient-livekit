@@ -1,3 +1,13 @@
+# v0.2.3
+
+- This release focuses mostly on adding debugging functions
+- Add error logging for failed track subscriptions
+- Update dependencies
+- Add ability to issue command for all other users to connect/disconnect/render with socket events. For example: `game.socket.emit("module.avclient-livekit", { action: "connect" });`
+- General code cleanup
+- Await tracks publishing during connect
+- Add screen sharing option. This is an unsupported feature designed for debugging, but can be used with a script command `game.webrtc.client._liveKitClient.shareScreen(true)`
+
 # v0.2.2
 
 - Revert workaround for bluetooth issues and update to LiveKit client v0.13.6 for proper fix
