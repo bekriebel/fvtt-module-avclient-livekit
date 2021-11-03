@@ -2,9 +2,11 @@ import { AccessToken } from "livekit-server-sdk";
 import {
   CreateAudioTrackOptions,
   createLocalAudioTrack,
+  createLocalScreenTracks,
   createLocalVideoTrack,
   CreateVideoTrackOptions,
   LocalAudioTrack,
+  LocalTrack,
   LocalVideoTrack,
   Participant,
   ParticipantEvent,
@@ -16,6 +18,7 @@ import {
   Room,
   RoomEvent,
   RoomState,
+  ScreenSharePresets,
   Track,
   TrackPublication,
   VideoPresets43,
@@ -53,6 +56,7 @@ export default class LiveKitClient {
   initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
   liveKitRoom: Room | null = null;
+  screenTracks: LocalTrack[] | null = null;
   useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
@@ -386,23 +390,24 @@ export default class LiveKitClient {
    */
   getUserAudioElement(
     userId: string,
-    videoElement: HTMLVideoElement | null = null
+    videoElement: HTMLVideoElement | null = null,
+    audioType: Track.Source
   ): HTMLAudioElement | null {
     // Find an existing audio element
     let audioElement = ui.webrtc?.element.find(
-      `.camera-view[data-user=${userId}] audio.user-audio`
+      `.camera-view[data-user=${userId}] audio.user-${audioType}-audio`
     )[0];
 
     // If one doesn't exist, create it
     if (!audioElement && videoElement) {
       audioElement = document.createElement("audio");
-      audioElement.className = "user-audio";
+      audioElement.className = `user-${audioType}-audio`;
       if (audioElement instanceof HTMLAudioElement) {
         audioElement.autoplay = true;
       }
       videoElement.after(audioElement);
 
-      // Bind volume control
+      // Bind volume control for microphone audio
       ui.webrtc?.element
         .find(`.camera-view[data-user=${userId}] .webrtc-volume-slider`)
         .on("change", this.onVolumeChange.bind(this));
@@ -803,7 +808,11 @@ export default class LiveKitClient {
 
     if (publication.kind === Track.Kind.Audio) {
       // Get the audio element for the user
-      const audioElement = this.getUserAudioElement(fvttUserId, videoElement);
+      const audioElement = this.getUserAudioElement(
+        fvttUserId,
+        videoElement,
+        publication.source
+      );
       if (audioElement) {
         await this.attachAudioTrack(fvttUserId, track, audioElement);
       }
@@ -831,7 +840,12 @@ export default class LiveKitClient {
     const input = event.currentTarget;
     const box = input.closest(".camera-view");
     const volume = AudioHelper.inputToVolume(input.value);
-    box.getElementsByTagName("audio")[0].volume = volume;
+    const audioElements: HTMLCollection = box.getElementsByTagName("audio");
+    for (const audioElement of audioElements) {
+      if (audioElement instanceof HTMLAudioElement) {
+        audioElement.volume = volume;
+      }
+    }
   }
 
   onWindowClick(): void {
@@ -1010,5 +1024,55 @@ export default class LiveKitClient {
         log.debug("RoomEvent RoomMetadataChanged:", args);
       })
       .on(RoomEvent.Reconnected, this.onReconnected.bind(this));
+  }
+
+  async shareScreen(enabled: boolean): Promise<void> {
+    log.info("shareScreen:", enabled);
+
+    if (enabled) {
+      // Get screen tracks
+      this.screenTracks = await createLocalScreenTracks({ audio: true });
+
+      this.screenTracks.forEach(async (screenTrack: LocalTrack) => {
+        log.debug("screenTrack enable:", screenTrack);
+        if (screenTrack instanceof LocalVideoTrack) {
+          // Stop our local video track
+          if (this.videoTrack) {
+            this.liveKitRoom?.localParticipant.unpublishTrack(this.videoTrack);
+          }
+
+          // Attach the screen share video to our video element
+          const userVideoElement = ui.webrtc?.getUserVideoElement(
+            getGame().user?.id || ""
+          );
+          if (userVideoElement instanceof HTMLVideoElement) {
+            this.attachVideoTrack(screenTrack, userVideoElement);
+          }
+        }
+
+        // Publish the track
+        await this.liveKitRoom?.localParticipant.publishTrack(screenTrack, {
+          audioBitrate: 160000,
+          screenShareEncoding: ScreenSharePresets.fhd_30.encoding,
+        });
+      });
+    } else {
+      this.screenTracks?.forEach(async (screenTrack: LocalTrack) => {
+        log.debug("screenTrack disable:", screenTrack);
+        // Unpublish the screen share track
+        this.liveKitRoom?.localParticipant.unpublishTrack(screenTrack);
+
+        // Restart our video track
+        if (screenTrack instanceof LocalVideoTrack && this.videoTrack) {
+          await this.liveKitRoom?.localParticipant.publishTrack(
+            this.videoTrack
+          );
+
+          if (!this.videoTrack.isMuted) {
+            this.videoTrack.unmute();
+          }
+        }
+      });
+    }
   }
 }

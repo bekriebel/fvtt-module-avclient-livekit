@@ -555,18 +555,21 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Get the audio element for the user
-    const audioElement = this._liveKitClient.getUserAudioElement(
-      userId,
-      videoElement
-    );
-
-    // Add the audio for the user
-    if (userAudioTrack && audioElement) {
-      this._liveKitClient.attachAudioTrack(
+    if (userAudioTrack) {
+      const audioElement = this._liveKitClient.getUserAudioElement(
         userId,
-        userAudioTrack,
-        audioElement
+        videoElement,
+        userAudioTrack.source
       );
+
+      // Add the audio for the user
+      if (audioElement) {
+        this._liveKitClient.attachAudioTrack(
+          userId,
+          userAudioTrack,
+          audioElement
+        );
+      }
     }
 
     // Add status indicators
