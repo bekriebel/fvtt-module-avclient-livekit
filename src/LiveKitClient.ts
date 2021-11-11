@@ -806,7 +806,7 @@ export default class LiveKitClient {
       return;
     }
 
-    if (publication.kind === Track.Kind.Audio) {
+    if (track instanceof RemoteAudioTrack) {
       // Get the audio element for the user
       const audioElement = this.getUserAudioElement(
         fvttUserId,
@@ -816,7 +816,7 @@ export default class LiveKitClient {
       if (audioElement) {
         await this.attachAudioTrack(fvttUserId, track, audioElement);
       }
-    } else if (publication.kind === Track.Kind.Video) {
+    } else if (track instanceof RemoteVideoTrack) {
       this.attachVideoTrack(track, videoElement);
     } else {
       log.warn("Unknown track type subscribed from publication", publication);
@@ -1013,6 +1013,12 @@ export default class LiveKitClient {
         log.debug("RoomEvent TrackUnpublished:", args);
       })
       .on(RoomEvent.TrackUnsubscribed, this.onTrackUnSubscribed.bind(this))
+      .on(RoomEvent.LocalTrackUnpublished, (...args) => {
+        log.debug("RoomEvent LocalTrackUnpublished:", args);
+      })
+      .on(RoomEvent.ConnectionQualityChanged, (...args) => {
+        log.debug("RoomEvent ConnectionQualityChanged:", args);
+      })
       .on(RoomEvent.Disconnected, this.onDisconnected.bind(this))
       .on(RoomEvent.Reconnecting, this.onReconnecting.bind(this))
       .on(RoomEvent.TrackMuted, this.onTrackMuteChanged.bind(this))
