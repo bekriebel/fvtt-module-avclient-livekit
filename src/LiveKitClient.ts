@@ -361,8 +361,6 @@ export default class LiveKitClient {
   }
 
   getParticipantFVTTUser(participant: Participant): User | undefined {
-    log.debug("getParticipantFVTTUser:", participant, participant.metadata);
-
     const { fvttUserId } = JSON.parse(participant.metadata || "{}");
     return getGame().users?.get(fvttUserId);
   }
@@ -853,6 +851,18 @@ export default class LiveKitClient {
       window.removeEventListener("click", this.windowClickListener);
       this.render();
     }
+  }
+
+  // TODO: Remove this once properly implemented
+  printUserConnectionQuality(): void {
+    this.liveKitParticipants.forEach((participant) => {
+      log.info(
+        "ConnectionQuality:",
+        this.getParticipantFVTTUser(participant)?.name,
+        ":",
+        participant.connectionQuality
+      );
+    });
   }
 
   getVideoParams(): CreateVideoTrackOptions | false {
