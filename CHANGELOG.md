@@ -1,3 +1,10 @@
+# v0.2.4
+
+- This release is mostly to test new events available with LiveKit server and client versions 0.14
+- Update dependencies, including livekit-client v0.14.2
+- Small updates to support new version of livekit-client, including some debug lines for new RoomEvents
+- Add temporary method for printing each user's connection quality. A future release can use this data for a proper connection quality indicator in the UI
+
 # v0.2.3
 
 - This release focuses mostly on adding debugging functions
