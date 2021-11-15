@@ -167,11 +167,11 @@ export default class LiveKitClient {
 
     indicators.muted.toggleClass(
       "hidden",
-      !this.getParticipantAudioTrack(userId)?.isMuted
+      !this.getUserAudioTrack(userId)?.isMuted
     );
     indicators.hidden.toggleClass(
       "hidden",
-      !this.getParticipantVideoTrack(userId)?.isMuted
+      !this.getUserVideoTrack(userId)?.isMuted
     );
 
     Object.values(indicators).forEach((indicator) => {
@@ -347,7 +347,12 @@ export default class LiveKitClient {
       : false;
   }
 
-  getParticipantAudioTrack(userId: string): RemoteAudioTrack | null {
+  getParticipantFVTTUser(participant: Participant): User | undefined {
+    const { fvttUserId } = JSON.parse(participant.metadata || "{}");
+    return getGame().users?.get(fvttUserId);
+  }
+
+  getUserAudioTrack(userId: string): RemoteAudioTrack | null {
     let audioTrack: RemoteAudioTrack | null = null;
     this.liveKitParticipants.get(userId)?.audioTracks.forEach((publication) => {
       if (
@@ -360,12 +365,7 @@ export default class LiveKitClient {
     return audioTrack;
   }
 
-  getParticipantFVTTUser(participant: Participant): User | undefined {
-    const { fvttUserId } = JSON.parse(participant.metadata || "{}");
-    return getGame().users?.get(fvttUserId);
-  }
-
-  getParticipantVideoTrack(userId: string): RemoteVideoTrack | null {
+  getUserVideoTrack(userId: string): RemoteVideoTrack | null {
     let videoTrack: RemoteVideoTrack | null = null;
     this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
       if (
