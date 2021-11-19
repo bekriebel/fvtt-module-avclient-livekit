@@ -1,5 +1,6 @@
 import { AccessToken } from "livekit-server-sdk";
 import {
+  ConnectionQuality,
   CreateAudioTrackOptions,
   createLocalAudioTrack,
   createLocalScreenTracks,
@@ -134,6 +135,29 @@ export default class LiveKitClient {
     } else {
       connectButton.toggleClass("hidden", false);
     }
+  }
+
+  addConnectionQualityIndicator(userId: string): void {
+    if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
+      // Connection quality indicator is not enabled
+      return;
+    }
+
+    // Get the user camera view and player name bar
+    const userCameraView = ui.webrtc?.getUserCameraView(userId);
+    const userNameBar = userCameraView?.querySelector(".player-name");
+
+    const connectionQualityIndicator = $(
+      `<span class="connection-quality-indicator unknown" title="${getGame().i18n.localize(
+        `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`
+      )}">`
+    );
+
+    if (userNameBar instanceof Element) {
+      $(userNameBar).prepend(connectionQualityIndicator);
+    }
+
+    this.setConnectionQualityIndicator(userId);
   }
 
   addStatusIndicators(userId: string): void {
@@ -541,6 +565,28 @@ export default class LiveKitClient {
     }
   }
 
+  onConnectionQualityChanged(quality: string, participant: Participant) {
+    log.debug("onConnectionQualityChanged:", quality, participant);
+
+    if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
+      // Connection quality indicator is not enabled
+      return;
+    }
+
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn(
+        "Quality changed participant",
+        participant,
+        "is not an FVTT user"
+      );
+      return;
+    }
+
+    this.setConnectionQualityIndicator(fvttUserId, quality);
+  }
+
   onDisconnected(): void {
     log.debug("Client disconnected");
     ui.notifications?.warn(
@@ -871,18 +917,6 @@ export default class LiveKitClient {
     }
   }
 
-  // TODO: Remove this once properly implemented
-  printUserConnectionQuality(): void {
-    this.liveKitParticipants.forEach((participant) => {
-      log.info(
-        "ConnectionQuality:",
-        this.getParticipantFVTTUser(participant)?.name,
-        ":",
-        participant.connectionQuality
-      );
-    });
-  }
-
   getVideoParams(): CreateVideoTrackOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
@@ -974,6 +1008,35 @@ export default class LiveKitClient {
     }
   }
 
+  setConnectionQualityIndicator(userId: string, quality?: string): void {
+    // Get the user camera view and connection quality indicator
+    const userCameraView = ui.webrtc?.getUserCameraView(userId);
+    const connectionQualityIndicator = userCameraView?.querySelector(
+      ".connection-quality-indicator"
+    );
+
+    if (!quality) {
+      quality =
+        this.liveKitParticipants.get(userId)?.connectionQuality ||
+        ConnectionQuality.Unknown;
+    }
+
+    if (connectionQualityIndicator instanceof HTMLSpanElement) {
+      // Remove all existing quality classes
+      connectionQualityIndicator.classList.remove(
+        ...Object.values(ConnectionQuality)
+      );
+
+      // Add the correct quality class
+      connectionQualityIndicator.classList.add(quality);
+
+      // Set the hover title
+      connectionQualityIndicator.title = getGame().i18n.localize(
+        `${LANG_NAME}.connectionQuality.${quality}`
+      );
+    }
+  }
+
   setLocalParticipantCallbacks(): void {
     this.liveKitRoom?.localParticipant
       .on(
@@ -1044,9 +1107,10 @@ export default class LiveKitClient {
       .on(RoomEvent.LocalTrackUnpublished, (...args) => {
         log.debug("RoomEvent LocalTrackUnpublished:", args);
       })
-      .on(RoomEvent.ConnectionQualityChanged, (...args) => {
-        log.debug("RoomEvent ConnectionQualityChanged:", args);
-      })
+      .on(
+        RoomEvent.ConnectionQualityChanged,
+        this.onConnectionQualityChanged.bind(this)
+      )
       .on(RoomEvent.Disconnected, this.onDisconnected.bind(this))
       .on(RoomEvent.Reconnecting, this.onReconnecting.bind(this))
       .on(RoomEvent.TrackMuted, this.onTrackMuteChanged.bind(this))

@@ -538,6 +538,9 @@ export default class LiveKitAVClient extends AVClient {
       if (userVideoTrack && videoElement) {
         this._liveKitClient.attachVideoTrack(userVideoTrack, videoElement);
       }
+
+      // Add connection quality indicator
+      this._liveKitClient.addConnectionQualityIndicator(userId);
       return;
     }
 
@@ -576,6 +579,9 @@ export default class LiveKitAVClient extends AVClient {
 
     // Add status indicators
     this._liveKitClient.addStatusIndicators(userId);
+
+    // Add connection quality indicator
+    this._liveKitClient.addConnectionQualityIndicator(userId);
 
     const event = new CustomEvent("webrtcVideoSet", { detail: userId });
     videoElement.dispatchEvent(event);
