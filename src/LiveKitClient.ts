@@ -56,7 +56,7 @@ export default class LiveKitClient {
   initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
   liveKitRoom: Room | null = null;
-  screenTracks: LocalTrack[] | null = null;
+  screenTracks: LocalTrack[] = [];
   useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
@@ -352,12 +352,21 @@ export default class LiveKitClient {
     return getGame().users?.get(fvttUserId);
   }
 
-  getUserAudioTrack(userId: string): RemoteAudioTrack | null {
-    let audioTrack: RemoteAudioTrack | null = null;
+  getUserAudioTrack(
+    userId: string | undefined
+  ): LocalAudioTrack | RemoteAudioTrack | null {
+    let audioTrack: LocalAudioTrack | RemoteAudioTrack | null = null;
+
+    // If the user ID is null, return a null track
+    if (!userId) {
+      return audioTrack;
+    }
+
     this.liveKitParticipants.get(userId)?.audioTracks.forEach((publication) => {
       if (
         publication.kind === Track.Kind.Audio &&
-        publication.track instanceof RemoteAudioTrack
+        (publication.track instanceof LocalAudioTrack ||
+          publication.track instanceof RemoteAudioTrack)
       ) {
         audioTrack = publication.track;
       }
@@ -365,12 +374,21 @@ export default class LiveKitClient {
     return audioTrack;
   }
 
-  getUserVideoTrack(userId: string): RemoteVideoTrack | null {
-    let videoTrack: RemoteVideoTrack | null = null;
+  getUserVideoTrack(
+    userId: string | undefined
+  ): LocalVideoTrack | RemoteVideoTrack | null {
+    let videoTrack: LocalVideoTrack | RemoteVideoTrack | null = null;
+
+    // If the user ID is null, return a null track
+    if (!userId) {
+      return videoTrack;
+    }
+
     this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
       if (
         publication.kind === Track.Kind.Video &&
-        publication.track instanceof RemoteVideoTrack
+        (publication.track instanceof LocalVideoTrack ||
+          publication.track instanceof RemoteVideoTrack)
       ) {
         videoTrack = publication.track;
       }
@@ -1073,7 +1091,7 @@ export default class LiveKitClient {
         });
       });
     } else {
-      this.screenTracks?.forEach(async (screenTrack: LocalTrack) => {
+      this.screenTracks.forEach(async (screenTrack: LocalTrack) => {
         log.debug("screenTrack disable:", screenTrack);
         // Unpublish the screen share track
         this.liveKitRoom?.localParticipant.unpublishTrack(screenTrack);

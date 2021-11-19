@@ -2,6 +2,7 @@ import {
   connect as liveKitConnect,
   ConnectOptions,
   LogLevel,
+  RemoteAudioTrack,
   RoomState,
   TrackPublishDefaults,
   VideoPresets43,
@@ -555,7 +556,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Get the audio element for the user
-    if (userAudioTrack) {
+    if (userAudioTrack instanceof RemoteAudioTrack) {
       const audioElement = this._liveKitClient.getUserAudioElement(
         userId,
         videoElement,
