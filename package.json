@@ -14,16 +14,16 @@
     "defaults"
   ],
   "dependencies": {
-    "livekit-client": "^0.14.2",
+    "livekit-client": "^0.14.3",
     "livekit-server-sdk": "^0.5.6"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^0.8.9-7",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
     "@typhonjs-fvtt/validate-manifest": "^0.0.1",
     "buffer": "^6.0.3",
-    "copy-webpack-plugin": "^9.0.1",
+    "copy-webpack-plugin": "^10.0.0",
     "crypto-browserify": "^3.12.0",
     "eslint": "^8.2.0",
     "process": "^0.11.10",
@@ -31,9 +31,9 @@
     "stream-browserify": "^3.0.0",
     "terser-webpack-plugin": "^5.2.5",
     "ts-loader": "^9.2.6",
-    "typescript": "^4.4.4",
+    "typescript": "^4.5.2",
     "util": "^0.12.4",
-    "webpack": "^5.64.0",
+    "webpack": "^5.64.1",
     "webpack-cli": "^4.9.1",
     "webpack-merge": "^5.8.0"
   }
