@@ -292,7 +292,8 @@ export default class LiveKitAVClient extends AVClient {
       this._liveKitClient.liveKitRoom &&
       this._liveKitClient.liveKitRoom.state !== RoomState.Disconnected
     ) {
-      this._liveKitClient.liveKitRoom.disconnect();
+      // Disconnect from the room, but don't stop tracks in case we are reconnecting again soon
+      this._liveKitClient.liveKitRoom.disconnect(false);
       this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return true;
     }
