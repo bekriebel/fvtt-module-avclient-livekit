@@ -4,6 +4,7 @@
 - Don't stop local tracks when disconnecting from a room. This makes reconnecting and switching to a breakout room faster and a bit more stable
 - Minor code cleanups
 - Update dependencies, including livekit-client v0.14.3
+- Updated Spanish translation and configuration strings (thanks to José E. Lozano - @lozalojo!)
 
 # v0.2.4
 
