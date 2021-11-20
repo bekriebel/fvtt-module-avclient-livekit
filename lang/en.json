@@ -42,7 +42,7 @@
   "LIVEKITAVCLIENT.externalAVJoinButton": "Join",
   "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignore",
   "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)",
-  "WEBRTC.WebRTCServerURL": "LiveKit server address",
+  "WEBRTC.WebRTCServerURL": "LiveKit Server Address",
   "WEBRTC.WebRTCServerUsername": "LiveKit API Key",
   "WEBRTC.WebRTCServerPassword": "LiveKit Secret Key"
 }
