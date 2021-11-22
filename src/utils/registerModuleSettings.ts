@@ -4,6 +4,15 @@ import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
   registerModuleSetting({
+    name: "displayConnectionQuality",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+    onChange: () => getGame().webrtc?.render(),
+  });
+
+  registerModuleSetting({
     name: "disableReceivingAudio",
     scope: "client",
     config: true,
@@ -31,6 +40,15 @@ export default function registerModuleSettings(): void {
   });
 
   registerModuleSetting({
+    name: "useExternalAV",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => delayReload(),
+  });
+
+  registerModuleSetting({
     name: "resetRoom",
     scope: "world",
     config: true,
@@ -47,15 +65,6 @@ export default function registerModuleSettings(): void {
         );
       }
     },
-  });
-
-  registerModuleSetting({
-    name: "useExternalAV",
-    scope: "client",
-    config: true,
-    default: false,
-    type: Boolean,
-    onChange: () => delayReload(),
   });
 
   // Register debug logging setting

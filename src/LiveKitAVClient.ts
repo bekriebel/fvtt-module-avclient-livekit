@@ -2,6 +2,7 @@ import {
   connect as liveKitConnect,
   ConnectOptions,
   LogLevel,
+  RemoteAudioTrack,
   RoomState,
   TrackPublishDefaults,
   VideoPresets43,
@@ -291,7 +292,8 @@ export default class LiveKitAVClient extends AVClient {
       this._liveKitClient.liveKitRoom &&
       this._liveKitClient.liveKitRoom.state !== RoomState.Disconnected
     ) {
-      this._liveKitClient.liveKitRoom.disconnect();
+      // Disconnect from the room, but don't stop tracks in case we are reconnecting again soon
+      this._liveKitClient.liveKitRoom.disconnect(false);
       this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return true;
     }
@@ -536,6 +538,9 @@ export default class LiveKitAVClient extends AVClient {
       if (userVideoTrack && videoElement) {
         this._liveKitClient.attachVideoTrack(userVideoTrack, videoElement);
       }
+
+      // Add connection quality indicator
+      this._liveKitClient.addConnectionQualityIndicator(userId);
       return;
     }
 
@@ -546,8 +551,8 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // For all other users, get their video and audio tracks
-    const userAudioTrack = this._liveKitClient.getParticipantAudioTrack(userId);
-    const userVideoTrack = this._liveKitClient.getParticipantVideoTrack(userId);
+    const userAudioTrack = this._liveKitClient.getUserAudioTrack(userId);
+    const userVideoTrack = this._liveKitClient.getUserVideoTrack(userId);
 
     // Add the video for the user
     if (userVideoTrack) {
@@ -555,7 +560,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Get the audio element for the user
-    if (userAudioTrack) {
+    if (userAudioTrack instanceof RemoteAudioTrack) {
       const audioElement = this._liveKitClient.getUserAudioElement(
         userId,
         videoElement,
@@ -574,6 +579,9 @@ export default class LiveKitAVClient extends AVClient {
 
     // Add status indicators
     this._liveKitClient.addStatusIndicators(userId);
+
+    // Add connection quality indicator
+    this._liveKitClient.addConnectionQualityIndicator(userId);
 
     const event = new CustomEvent("webrtcVideoSet", { detail: userId });
     videoElement.dispatchEvent(event);

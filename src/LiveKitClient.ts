@@ -1,5 +1,6 @@
 import { AccessToken } from "livekit-server-sdk";
 import {
+  ConnectionQuality,
   CreateAudioTrackOptions,
   createLocalAudioTrack,
   createLocalScreenTracks,
@@ -56,7 +57,7 @@ export default class LiveKitClient {
   initState: InitState = InitState.Uninitialized;
   liveKitParticipants: Map<string, Participant> = new Map();
   liveKitRoom: Room | null = null;
-  screenTracks: LocalTrack[] | null = null;
+  screenTracks: LocalTrack[] = [];
   useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
@@ -136,6 +137,29 @@ export default class LiveKitClient {
     }
   }
 
+  addConnectionQualityIndicator(userId: string): void {
+    if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
+      // Connection quality indicator is not enabled
+      return;
+    }
+
+    // Get the user camera view and player name bar
+    const userCameraView = ui.webrtc?.getUserCameraView(userId);
+    const userNameBar = userCameraView?.querySelector(".player-name");
+
+    const connectionQualityIndicator = $(
+      `<span class="connection-quality-indicator unknown" title="${getGame().i18n.localize(
+        `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`
+      )}">`
+    );
+
+    if (userNameBar instanceof Element) {
+      $(userNameBar).prepend(connectionQualityIndicator);
+    }
+
+    this.setConnectionQualityIndicator(userId);
+  }
+
   addStatusIndicators(userId: string): void {
     // Get the user camera view and notification bar
     const userCameraView = ui.webrtc?.getUserCameraView(userId);
@@ -167,11 +191,11 @@ export default class LiveKitClient {
 
     indicators.muted.toggleClass(
       "hidden",
-      !this.getParticipantAudioTrack(userId)?.isMuted
+      !this.getUserAudioTrack(userId)?.isMuted
     );
     indicators.hidden.toggleClass(
       "hidden",
-      !this.getParticipantVideoTrack(userId)?.isMuted
+      !this.getUserVideoTrack(userId)?.isMuted
     );
 
     Object.values(indicators).forEach((indicator) => {
@@ -347,12 +371,26 @@ export default class LiveKitClient {
       : false;
   }
 
-  getParticipantAudioTrack(userId: string): RemoteAudioTrack | null {
-    let audioTrack: RemoteAudioTrack | null = null;
+  getParticipantFVTTUser(participant: Participant): User | undefined {
+    const { fvttUserId } = JSON.parse(participant.metadata || "{}");
+    return getGame().users?.get(fvttUserId);
+  }
+
+  getUserAudioTrack(
+    userId: string | undefined
+  ): LocalAudioTrack | RemoteAudioTrack | null {
+    let audioTrack: LocalAudioTrack | RemoteAudioTrack | null = null;
+
+    // If the user ID is null, return a null track
+    if (!userId) {
+      return audioTrack;
+    }
+
     this.liveKitParticipants.get(userId)?.audioTracks.forEach((publication) => {
       if (
         publication.kind === Track.Kind.Audio &&
-        publication.track instanceof RemoteAudioTrack
+        (publication.track instanceof LocalAudioTrack ||
+          publication.track instanceof RemoteAudioTrack)
       ) {
         audioTrack = publication.track;
       }
@@ -360,17 +398,21 @@ export default class LiveKitClient {
     return audioTrack;
   }
 
-  getParticipantFVTTUser(participant: Participant): User | undefined {
-    const { fvttUserId } = JSON.parse(participant.metadata || "{}");
-    return getGame().users?.get(fvttUserId);
-  }
+  getUserVideoTrack(
+    userId: string | undefined
+  ): LocalVideoTrack | RemoteVideoTrack | null {
+    let videoTrack: LocalVideoTrack | RemoteVideoTrack | null = null;
 
-  getParticipantVideoTrack(userId: string): RemoteVideoTrack | null {
-    let videoTrack: RemoteVideoTrack | null = null;
+    // If the user ID is null, return a null track
+    if (!userId) {
+      return videoTrack;
+    }
+
     this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
       if (
         publication.kind === Track.Kind.Video &&
-        publication.track instanceof RemoteVideoTrack
+        (publication.track instanceof LocalVideoTrack ||
+          publication.track instanceof RemoteVideoTrack)
       ) {
         videoTrack = publication.track;
       }
@@ -521,6 +563,28 @@ export default class LiveKitClient {
     if (this.videoTrack) {
       await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack);
     }
+  }
+
+  onConnectionQualityChanged(quality: string, participant: Participant) {
+    log.debug("onConnectionQualityChanged:", quality, participant);
+
+    if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
+      // Connection quality indicator is not enabled
+      return;
+    }
+
+    const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+
+    if (!fvttUserId) {
+      log.warn(
+        "Quality changed participant",
+        participant,
+        "is not an FVTT user"
+      );
+      return;
+    }
+
+    this.setConnectionQualityIndicator(fvttUserId, quality);
   }
 
   onDisconnected(): void {
@@ -853,18 +917,6 @@ export default class LiveKitClient {
     }
   }
 
-  // TODO: Remove this once properly implemented
-  printUserConnectionQuality(): void {
-    this.liveKitParticipants.forEach((participant) => {
-      log.info(
-        "ConnectionQuality:",
-        this.getParticipantFVTTUser(participant)?.name,
-        ":",
-        participant.connectionQuality
-      );
-    });
-  }
-
   getVideoParams(): CreateVideoTrackOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
@@ -956,6 +1008,35 @@ export default class LiveKitClient {
     }
   }
 
+  setConnectionQualityIndicator(userId: string, quality?: string): void {
+    // Get the user camera view and connection quality indicator
+    const userCameraView = ui.webrtc?.getUserCameraView(userId);
+    const connectionQualityIndicator = userCameraView?.querySelector(
+      ".connection-quality-indicator"
+    );
+
+    if (!quality) {
+      quality =
+        this.liveKitParticipants.get(userId)?.connectionQuality ||
+        ConnectionQuality.Unknown;
+    }
+
+    if (connectionQualityIndicator instanceof HTMLSpanElement) {
+      // Remove all existing quality classes
+      connectionQualityIndicator.classList.remove(
+        ...Object.values(ConnectionQuality)
+      );
+
+      // Add the correct quality class
+      connectionQualityIndicator.classList.add(quality);
+
+      // Set the hover title
+      connectionQualityIndicator.title = getGame().i18n.localize(
+        `${LANG_NAME}.connectionQuality.${quality}`
+      );
+    }
+  }
+
   setLocalParticipantCallbacks(): void {
     this.liveKitRoom?.localParticipant
       .on(
@@ -1026,9 +1107,10 @@ export default class LiveKitClient {
       .on(RoomEvent.LocalTrackUnpublished, (...args) => {
         log.debug("RoomEvent LocalTrackUnpublished:", args);
       })
-      .on(RoomEvent.ConnectionQualityChanged, (...args) => {
-        log.debug("RoomEvent ConnectionQualityChanged:", args);
-      })
+      .on(
+        RoomEvent.ConnectionQualityChanged,
+        this.onConnectionQualityChanged.bind(this)
+      )
       .on(RoomEvent.Disconnected, this.onDisconnected.bind(this))
       .on(RoomEvent.Reconnecting, this.onReconnecting.bind(this))
       .on(RoomEvent.TrackMuted, this.onTrackMuteChanged.bind(this))
@@ -1073,7 +1155,7 @@ export default class LiveKitClient {
         });
       });
     } else {
-      this.screenTracks?.forEach(async (screenTrack: LocalTrack) => {
+      this.screenTracks.forEach(async (screenTrack: LocalTrack) => {
         log.debug("screenTrack disable:", screenTrack);
         // Unpublish the screen share track
         this.liveKitRoom?.localParticipant.unpublishTrack(screenTrack);

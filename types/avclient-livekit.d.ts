@@ -4,18 +4,19 @@ import LiveKitAVClient from "../src/LiveKitAVClient";
  * Interfaces
  */
 
-// Custom voice modes to remove ACTIVITY
-interface LiveKitVoiceModes {
-  ALWAYS: "always";
-  PTT: "ptt";
-}
-
-export interface ConnectionSettings {
+// LiveKit connection settings
+interface ConnectionSettings {
   type: string;
   url: string;
   room: string;
   username: string;
   password: string;
+}
+
+// Custom voice modes to remove ACTIVITY
+interface LiveKitVoiceModes {
+  ALWAYS: "always";
+  PTT: "ptt";
 }
 
 // Custom foundry socket message

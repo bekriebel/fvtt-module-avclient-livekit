@@ -10,6 +10,30 @@
   pointer-events: none;
 }
 
+.camera-view .connection-quality-indicator {
+  height: 12px;
+  width: 12px;
+  border: 1px solid #f0f0e0;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.camera-view .connection-quality-indicator.excellent {
+  background-color: green;
+}
+
+.camera-view .connection-quality-indicator.good {
+  background-color: yellow;
+}
+
+.camera-view .connection-quality-indicator.poor {
+  background-color: firebrick;
+}
+
+.camera-view .connection-quality-indicator.unknown {
+  background-color: #f0f0e0;
+}
+
 .camera-view .status-remote-hidden,
 .camera-view .status-remote-muted {
   font-size: 20px;
