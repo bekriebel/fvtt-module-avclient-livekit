@@ -1,3 +1,12 @@
+# v0.3.0
+
+- Update compatibility for FoundryVTT v9.231
+- Handle our own Settings template now that the core version does not provide the settings we need
+- Force server type to custom since FVTT is not a valid option
+- Minor english language updates
+- Spanish translation updates thanks to @lozalojo
+- Dependency updates
+
 # v0.2.5
 
 - Add a connection quality indicator using LiveKit's connection quality metrics. This can be disabled as a client module setting
