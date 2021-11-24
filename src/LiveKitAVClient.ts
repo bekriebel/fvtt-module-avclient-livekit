@@ -13,6 +13,7 @@ import * as log from "./utils/logging";
 import LiveKitClient, { ConnectionState, InitState } from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
+import LiveKitAVConfig from "./LiveKitAVConfig";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
@@ -30,6 +31,7 @@ export default class LiveKitAVClient extends AVClient {
 
     this._liveKitClient = new LiveKitClient(this);
     this.room = null;
+    this.master.config = new LiveKitAVConfig(master);
   }
 
   /* -------------------------------------------- */
@@ -117,11 +119,25 @@ export default class LiveKitAVClient extends AVClient {
       "server"
     ) as ConnectionSettings;
 
-    // Don't allow for default FVTT Signalling Server
-    if (connectionSettings.type === "FVTT") {
-      log.error("Default Foundry VTT signalling server not supported");
+    // Force connection type to custom
+    if (connectionSettings.type !== "custom" && getGame().user?.isGM) {
+      this.settings.set("world", "server.type", "custom");
+      // For versions before v9, return immediate since a reconnect will occur
+      if (!this._liveKitClient.isVersion9) {
+        return false;
+      }
+    }
+
+    if (
+      getGame().user?.isGM &&
+      (connectionSettings.url === "" ||
+        connectionSettings.url === "" ||
+        connectionSettings.password === "")
+    ) {
+      this.master.config.render(true);
+      log.error("LiveKit connection information missing");
       ui.notifications?.error(
-        `${getGame().i18n.localize(`${LANG_NAME}.serverTypeFVTT`)}`,
+        `${getGame().i18n.localize(`${LANG_NAME}.connectionInfoMissing`)}`,
         { permanent: true }
       );
       this._liveKitClient.connectionState = ConnectionState.Disconnected;
@@ -402,8 +418,30 @@ export default class LiveKitAVClient extends AVClient {
    * @return {MediaStream|null}    The MediaStream for the user, or null if the user does not have
    *                                one
    */
-  getMediaStreamForUser(): MediaStream | null {
-    log.debug("getMediaStreamForUser called but is not used with", MODULE_NAME);
+  getMediaStreamForUser(userId: string): MediaStream | null {
+    log.debug(
+      "getMediaStreamForUser called for",
+      userId,
+      "but is not used with",
+      MODULE_NAME
+    );
+    return null;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Provide a MediaStream for monitoring a given user's voice volume levels.
+   * @param {string} userId       The User ID.
+   * @returns {MediaStream|null}  The MediaStream for the user, or null if the user does not have one.
+   */
+  getLevelsStreamForUser(userId: string): MediaStream | null {
+    log.debug(
+      "getLevelsStreamForUser called for",
+      userId,
+      "but is not used with",
+      MODULE_NAME
+    );
     return null;
   }
 
@@ -414,7 +452,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {boolean}
    */
   isAudioEnabled(): boolean {
-    return this._liveKitClient.audioBroadcastEnabled;
+    return !!this._liveKitClient.audioTrack;
   }
 
   /* -------------------------------------------- */
@@ -424,14 +462,7 @@ export default class LiveKitAVClient extends AVClient {
    * @return {boolean}
    */
   isVideoEnabled(): boolean {
-    let videoTrackEnabled = false;
-    if (
-      this._liveKitClient.videoTrack &&
-      !this._liveKitClient.videoTrack.isMuted
-    ) {
-      videoTrackEnabled = true;
-    }
-    return videoTrackEnabled;
+    return !!this._liveKitClient.videoTrack;
   }
 
   /* -------------------------------------------- */
@@ -516,6 +547,7 @@ export default class LiveKitAVClient extends AVClient {
       log.debug("Un-muting video track", this._liveKitClient.videoTrack);
       this._liveKitClient.videoTrack.unmute();
     }
+    this.master.render();
   }
 
   /* -------------------------------------------- */
@@ -599,12 +631,23 @@ export default class LiveKitAVClient extends AVClient {
     log.debug("onSettingsChanged:", changed);
     const keys = new Set(Object.keys(foundry.utils.flattenObject(changed)));
 
+    // Change in the server configuration; reconnect
+    const serverChange = [
+      "world.server.url",
+      "world.server.username",
+      "world.server.password",
+      "world.server.room",
+    ].some((k) => keys.has(k));
+    if (serverChange) {
+      this.master.connect();
+    }
+
     // Change audio source
-    const audioSourceChange = ["client.audioSrc"].some((k) => keys.has(k));
+    const audioSourceChange = keys.has("client.audioSrc");
     if (audioSourceChange) this._liveKitClient.changeAudioSource();
 
     // Change video source
-    const videoSourceChange = ["client.videoSrc"].some((k) => keys.has(k));
+    const videoSourceChange = keys.has("client.videoSrc");
     if (videoSourceChange) this._liveKitClient.changeVideoSource();
 
     // Change voice broadcasting mode

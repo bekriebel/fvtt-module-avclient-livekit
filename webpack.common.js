@@ -20,6 +20,7 @@ module.exports = {
       patterns: [
         { from: "css/", to: "css/" },
         { from: "lang/", to: "lang/" },
+        { from: "templates/", to: "templates/" },
         { from: "web-client/", to: "web-client/" },
         { from: "*.md" },
         { from: "module.json" },

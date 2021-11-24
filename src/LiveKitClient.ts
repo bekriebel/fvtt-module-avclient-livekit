@@ -62,6 +62,12 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
 
+  // Is the FVTT server version 9. TODO: Remove if we drop support for lower versions
+  isVersion9: boolean = isNewerVersion(
+    getGame().version || getGame().data.version,
+    "9.224"
+  );
+
   constructor(liveKitAvClient: LiveKitAVClient) {
     this.avMaster = liveKitAvClient.master;
     this.liveKitAvClient = liveKitAvClient;
@@ -161,6 +167,11 @@ export default class LiveKitClient {
   }
 
   addStatusIndicators(userId: string): void {
+    if (this.isVersion9) {
+      // This is no longer needed in v9
+      return;
+    }
+
     // Get the user camera view and notification bar
     const userCameraView = ui.webrtc?.getUserCameraView(userId);
     const userNotificationBar =
@@ -283,12 +294,15 @@ export default class LiveKitClient {
         this.liveKitRoom?.localParticipant.unpublishTrack(this.audioTrack);
         this.audioTrack.stop();
         this.audioTrack = null;
+        getGame().user?.broadcastActivity({ av: { muted: true } });
       } else {
         await this.initializeAudioTrack();
         if (this.audioTrack) {
           await this.liveKitRoom?.localParticipant.publishTrack(
             this.audioTrack
           );
+          getGame().user?.broadcastActivity({ av: { muted: false } });
+          this.avMaster.render();
         }
       }
     } else {
@@ -309,6 +323,7 @@ export default class LiveKitClient {
         this.videoTrack.detach();
         this.videoTrack.stop();
         this.videoTrack = null;
+        getGame().user?.broadcastActivity({ av: { hidden: true } });
       } else {
         await this.initializeVideoTrack();
         if (this.videoTrack) {
@@ -326,6 +341,8 @@ export default class LiveKitClient {
           if (userVideoElement instanceof HTMLVideoElement) {
             this.attachVideoTrack(this.videoTrack, userVideoElement);
           }
+          getGame().user?.broadcastActivity({ av: { hidden: false } });
+          this.avMaster.render();
         }
       }
     } else {

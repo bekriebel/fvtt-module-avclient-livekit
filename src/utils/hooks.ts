@@ -1,4 +1,5 @@
 import { SocketMessage } from "../../types/avclient-livekit";
+import LiveKitAVConfig from "../LiveKitAVConfig";
 import { MODULE_NAME } from "./constants";
 import { getGame } from "./helpers";
 import registerModuleSettings from "./registerModuleSettings";
@@ -41,6 +42,17 @@ Hooks.on("ready", () => {
       }
     }
   );
+
+  // Override the default settings menu with our own
+  // WebRTC Control Menu
+  getGame().settings.registerMenu("core", "webrtc", {
+    name: "WEBRTC.Title",
+    label: "WEBRTC.MenuLabel",
+    hint: "WEBRTC.MenuHint",
+    icon: "fas fa-headset",
+    type: LiveKitAVConfig,
+    restricted: false,
+  });
 });
 
 // Listen for DebugSet event
