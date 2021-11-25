@@ -153,6 +153,11 @@ export default class LiveKitClient {
     const userCameraView = ui.webrtc?.getUserCameraView(userId);
     const userNameBar = userCameraView?.querySelector(".player-name");
 
+    if (userCameraView?.querySelector(".connection-quality-indicator")) {
+      // Connection quality indicator already exists
+      return;
+    }
+
     const connectionQualityIndicator = $(
       `<span class="connection-quality-indicator unknown" title="${getGame().i18n.localize(
         `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`
@@ -288,7 +293,8 @@ export default class LiveKitClient {
   async changeAudioSource(): Promise<void> {
     if (
       !this.audioTrack ||
-      this.settings.get("client", "audioSrc") === "disabled"
+      this.settings.get("client", "audioSrc") === "disabled" ||
+      !this.avMaster.canUserBroadcastAudio(getGame().user?.id || "")
     ) {
       if (this.audioTrack) {
         this.liveKitRoom?.localParticipant.unpublishTrack(this.audioTrack);
@@ -316,7 +322,8 @@ export default class LiveKitClient {
   async changeVideoSource(): Promise<void> {
     if (
       !this.videoTrack ||
-      this.settings.get("client", "videoSrc") === "disabled"
+      this.settings.get("client", "videoSrc") === "disabled" ||
+      !this.avMaster.canUserBroadcastVideo(getGame().user?.id || "")
     ) {
       if (this.videoTrack) {
         this.liveKitRoom?.localParticipant.unpublishTrack(this.videoTrack);

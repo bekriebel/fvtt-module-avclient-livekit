@@ -670,4 +670,16 @@ export default class LiveKitAVClient extends AVClient {
     if (audioSourceChange || videoSourceChange || renderChange)
       this.master.render();
   }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Replace the local stream for each connected peer with a re-generated MediaStream
+   * @returns {Promise<Array>} (Really returns {Promise<void>})
+   */
+  async updateLocalStream(): Promise<void> {
+    log.debug("updateLocalStream");
+    await this._liveKitClient.changeAudioSource();
+    await this._liveKitClient.changeVideoSource();
+  }
 }
