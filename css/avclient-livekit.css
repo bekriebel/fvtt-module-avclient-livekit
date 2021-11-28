@@ -57,3 +57,7 @@
 .camera-view .status-remote-ptt.active {
   color: greenyellow;
 }
+
+.camera-view .control-bar.left {
+  z-index: 30;
+}

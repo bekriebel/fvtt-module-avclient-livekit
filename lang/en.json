@@ -2,6 +2,7 @@
   "LIVEKITAVCLIENT.connect": "Connect",
   "LIVEKITAVCLIENT.connectError": "Error connecting to LiveKit Server",
   "LIVEKITAVCLIENT.connectErrorCheckClock": "A secure token could not be created. Please check the date & time on your computer to ensure that they are set accurately",
+  "LIVEKITAVCLIENT.connectionInfoMissing": "LiveKit connection information missing; please provide a Server Address, API Key, and Secret",
   "LIVEKITAVCLIENT.connectionQuality.excellent": "Excellent connection quality",
   "LIVEKITAVCLIENT.connectionQuality.good": "Good connection quality",
   "LIVEKITAVCLIENT.connectionQuality.poor": "Poor connection quality",
@@ -26,7 +27,6 @@
   "LIVEKITAVCLIENT.resetRoomHint": "Reset the meeting room ID used for your A/V",
   "LIVEKITAVCLIENT.simulcast": "Simulcast enabled",
   "LIVEKITAVCLIENT.simulcastHint": "Use simulcast video tracks with LiveKit. This may help low-resource clients and the expense of some video tracks not being sent or received by them",
-  "LIVEKITAVCLIENT.serverTypeFVTT": "LiveKit AVClient: Foundry VTT is not supported as a signalling server. Please set a custom signalling server under Audio/Video Configuration",
   "LIVEKITAVCLIENT.startAVBreakout": "Start A/V breakout",
   "LIVEKITAVCLIENT.joinAVBreakout": "Join A/V breakout",
   "LIVEKITAVCLIENT.joiningAVBreakout": "Joining A/V breakout room",
@@ -42,7 +42,7 @@
   "LIVEKITAVCLIENT.externalAVJoinButton": "Join",
   "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignore",
   "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)",
-  "WEBRTC.WebRTCServerURL": "LiveKit server address",
+  "WEBRTC.WebRTCServerURL": "LiveKit Server Address",
   "WEBRTC.WebRTCServerUsername": "LiveKit API Key",
   "WEBRTC.WebRTCServerPassword": "LiveKit Secret Key"
 }

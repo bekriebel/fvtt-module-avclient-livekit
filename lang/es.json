@@ -29,7 +29,6 @@
   "LIVEKITAVCLIENT.resetRoomHint": "Reinicia el ID de la sala que se usa para la A/V",
   "LIVEKITAVCLIENT.simulcast": "Simulcast habilitado",
   "LIVEKITAVCLIENT.simulcastHint": "Usa pistas de vídeo simulcast con LiveKit. Puede ser útil en clientes con pocos recursos, a costa de que no reciban o envíen algunas pistas de vídeo",
-  "LIVEKITAVCLIENT.serverTypeFVTT": "LiveKit AVClient: No se puede usar Foundry VTT como signalling server. Por favor, especifique un signalling server personalizado en la configuración de Audio/Video",
   "LIVEKITAVCLIENT.startAVBreakout": "Iniciar A/V privada",
   "LIVEKITAVCLIENT.joinAVBreakout": "Unirse a A/V privada",
   "LIVEKITAVCLIENT.joiningAVBreakout": "Uniéndose a A/V privada",
