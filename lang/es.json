@@ -5,6 +5,7 @@
   "LIVEKITAVCLIENT.connect": "Conectar",
   "LIVEKITAVCLIENT.connectError": "Error al conectar al Servidor LiveKit",
   "LIVEKITAVCLIENT.connectErrorCheckClock": "No se ha podido crear un token seguro. Por favor, asegúrese de que la fecha y la hora de su sistema son correctas",
+  "LIVEKITAVCLIENT.connectionInfoMissing": "Información de la conexión al servidor LiveKit no disponible; por favor, especifique una dirección del servidor, una clave API y la palabra secreta",
   "LIVEKITAVCLIENT.connectionQuality.excellent": "Calidad de conexión excelente",
   "LIVEKITAVCLIENT.connectionQuality.good": "Calidad de conexión buena",
   "LIVEKITAVCLIENT.connectionQuality.poor": "Calidad de conexión pobre",
