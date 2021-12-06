@@ -14,11 +14,9 @@ You can install this module by using the following manifest URL: https://github.
 
 Install & enable the module then configure for your LiveKit instance under Audio/Video Configuration:
 
-**Choose Signalling Server:** `Custom Server`  
-**LiveKit server address:** `rtc.example.com` \<Your LiveKit server address\>  
+**LiveKit Server Address:** `rtc.example.com` \<Your LiveKit server address\>  
 **LiveKit API Key:** `ABCDEFGHIJ12345` \<Your LiveKit API Key>  
-**LiveKit Secret Key:** `****************` \<Your LiveKit Secret Key\>  
-**Relay Server Configuration:** `Provided by Signalling Server`
+**LiveKit Secret Key:** `****************` \<Your LiveKit Secret Key\>
 
 ### **Breakout Rooms**
 
