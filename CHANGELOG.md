@@ -1,3 +1,9 @@
+# v0.3.2
+
+- Spanish translation updates thanks to @lozalojo
+- Set FVTT compatibility to v9
+- Update README for current settings page text
+
 # v0.3.1
 
 - Add missing method needed for v9
