@@ -1,4 +1,3 @@
-import { AccessToken } from "livekit-server-sdk";
 import {
   ConnectionQuality,
   CreateAudioTrackOptions,
@@ -26,6 +25,7 @@ import {
   VideoTrack,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
+import * as jwt from "jsonwebtoken";
 import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
@@ -360,6 +360,14 @@ export default class LiveKitClient {
     }
   }
 
+  /**
+   * Creates a new AccessToken and returns it as a signed JWT
+   * @param apiKey API Key
+   * @param apiSecret Secret
+   * @param roomName The LiveKit room to join
+   * @param userName Display name of the FVTT user
+   * @param metadata User metadata, including the FVTT User ID
+   */
   getAccessToken(
     apiKey: string,
     secretKey: string,
@@ -367,14 +375,28 @@ export default class LiveKitClient {
     userName: string,
     metadata: string
   ): string {
-    const accessToken = new AccessToken(apiKey, secretKey, {
-      ttl: "10h",
-      identity: userName,
-      metadata: metadata,
-    });
-    accessToken.addGrant({ roomJoin: true, room: roomName });
+    // Set ths signing options
+    const signOpts: jwt.SignOptions = {
+      issuer: apiKey, // The configured API Key
+      expiresIn: "10h", // Expire after 12 hours
+      jwtid: userName, // Use the username for the JWT ID
+      subject: userName, // Use the username fot the JWT Subject
+      notBefore: "-15m", // Give us a 15 minute buffer in case the user's clock is set incorrectly
+      noTimestamp: true, // Don't set a timestamp since we are backdating the token
+    };
 
-    const accessTokenJwt = accessToken.toJwt();
+    // Set the payload to be signed, including the permission to join the room and the user metadata
+    const tokenPayload = {
+      video: {
+        // LiveKit permission grants
+        roomJoin: true,
+        room: roomName,
+      },
+      metadata: metadata,
+    };
+
+    // Sign and return the JWT
+    const accessTokenJwt = jwt.sign(tokenPayload, secretKey, signOpts);
     log.debug("AccessToken:", accessTokenJwt);
     return accessTokenJwt;
   }
