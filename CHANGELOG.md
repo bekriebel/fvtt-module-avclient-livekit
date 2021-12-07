@@ -1,3 +1,8 @@
+# v0.3.3 - Let's do the time warp again
+
+- Allow for a 15 minute variance between the LiveKit server clock and the user's clock. This will hopefully reduce the number of cases where a user's clock being off by a couple of minutes causes the connection to fail.
+- Update dependencies
+
 # v0.3.2
 
 - Spanish translation updates thanks to @lozalojo
