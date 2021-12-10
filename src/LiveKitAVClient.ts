@@ -674,8 +674,7 @@ export default class LiveKitAVClient extends AVClient {
   /* -------------------------------------------- */
 
   /**
-   * Replace the local stream for each connected peer with a re-generated MediaStream
-   * @returns {Promise<Array>} (Really returns {Promise<void>})
+   * Replace the local stream for each connected peer with a re-generated MediaStream.
    */
   async updateLocalStream(): Promise<void> {
     log.debug("updateLocalStream");
