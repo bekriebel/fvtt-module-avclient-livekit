@@ -1,6 +1,6 @@
 {
   "KEYBINDINGS.PTTKeyNotes": "This is now configured in the Game Settings - Configure Controls page.",
-  "KEYBINDINGS.PTTKeyConfigureControls": "See  the Configure Controls setting page",
+  "KEYBINDINGS.PTTKeyConfigureControls": "See the Configure Controls settings page",
   "LIVEKITAVCLIENT.connect": "Connect",
   "LIVEKITAVCLIENT.connectError": "Error connecting to LiveKit Server",
   "LIVEKITAVCLIENT.connectErrorCheckClock": "A secure token could not be created. Please check the date & time on your computer to ensure that they are set accurately",
