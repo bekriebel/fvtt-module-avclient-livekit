@@ -264,7 +264,11 @@ export default class LiveKitClient {
     userAudioTrack.attach(audioElement);
 
     // Set the parameters
-    audioElement.volume = this.settings.getUser(userId)?.volume || 1.0;
+    let userVolume = this.settings.getUser(userId)?.volume;
+    if (typeof userVolume === "undefined") {
+      userVolume = 1.0;
+    }
+    audioElement.volume = userVolume;
     audioElement.muted = this.settings.get("client", "muteAll") === true;
   }
 
