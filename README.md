@@ -34,10 +34,11 @@ Though the GM will always join the breakout room on creation, they can leave the
 
 There are several examples available for launching your own livekit server:
 
-- [LiveKit on Fly.io](https://github.com/bekriebel/livekit-flydotio)
 - [LiveKit Getting Started (Docker)](https://docs.livekit.io/guides/getting-started)
 - [Deploy to a VM (AWS/Digial Ocean)](https://docs.livekit.io/deploy/vm)
 - [Deploy to Kubernetes](https://docs.livekit.io/deploy/kubernetes)
+
+Though newer versions may work, the current recommended LiveKit server version is v0.14.2. This has had the most extensive testing done with the module and matches the current client SDK version that the module is using.
 
 ## Debugging
 
