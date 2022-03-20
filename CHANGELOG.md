@@ -1,3 +1,10 @@
+# v0.3.5
+
+- Spanish translation updates thanks to @lozalojo
+- Minor adjustment of the PTT Configure Controls string
+- Fix volume setting on refresh when volume is set to 0
+- Update documentation for LiveKit server recommendations
+
 # v0.3.4
 
 - Remove the PTT key settings from the Audio/Video Configuration page. This is now set under the Game Settings - Configure Controls page
