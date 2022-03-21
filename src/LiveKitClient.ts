@@ -1,10 +1,9 @@
 import {
+  AudioCaptureOptions,
   ConnectionQuality,
-  CreateAudioTrackOptions,
   createLocalAudioTrack,
   createLocalScreenTracks,
   createLocalVideoTrack,
-  CreateVideoTrackOptions,
   LocalAudioTrack,
   LocalTrack,
   LocalVideoTrack,
@@ -18,10 +17,9 @@ import {
   Room,
   RoomEvent,
   RoomState,
-  ScreenSharePresets,
   Track,
   TrackPublication,
-  VideoPresets43,
+  VideoCaptureOptions,
   VideoTrack,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -64,7 +62,7 @@ export default class LiveKitClient {
 
   // Is the FVTT server version 9. TODO: Remove if we drop support for lower versions
   isVersion9: boolean = isNewerVersion(
-    getGame().version || getGame().data.version,
+    getGame().version || getGame().data.version || 0,
     "9.224"
   );
 
@@ -343,7 +341,10 @@ export default class LiveKitClient {
             {
               simulcast:
                 getGame().settings.get(MODULE_NAME, "simulcast") === true,
-              videoEncoding: VideoPresets43.vga.encoding,
+              videoEncoding: {
+                maxBitrate: 300_000,
+                maxFramerate: 30,
+              },
             }
           );
           const userVideoElement = ui.webrtc?.getUserVideoElement(
@@ -405,7 +406,7 @@ export default class LiveKitClient {
     return accessTokenJwt;
   }
 
-  getAudioParams(): CreateAudioTrackOptions | false {
+  getAudioParams(): AudioCaptureOptions | false {
     // Determine whether the user can send audio
     const audioSrc = this.settings.get("client", "audioSrc");
     const canBroadcastAudio = this.avMaster.canUserBroadcastAudio(
@@ -579,6 +580,7 @@ export default class LiveKitClient {
 
   isUserExternal(userId: string): boolean {
     // TODO: Implement this when adding external user support
+    log.debug("isUserExternal not yet implemented; userId:", userId);
     return false;
   }
 
@@ -823,18 +825,29 @@ export default class LiveKitClient {
       return;
     }
 
-    const userCameraView = ui.webrtc?.getUserCameraView(fvttUserId);
-
-    if (userCameraView) {
-      let uiIndicator;
+    if (this.isVersion9) {
       if (publication.kind === Track.Kind.Audio) {
-        uiIndicator = userCameraView.querySelector(".status-remote-muted");
+        this.avMaster.settings.handleUserActivity(fvttUserId, {
+          muted: publication.isMuted,
+        });
       } else if (publication.kind === Track.Kind.Video) {
-        uiIndicator = userCameraView.querySelector(".status-remote-hidden");
+        this.avMaster.settings.handleUserActivity(fvttUserId, {
+          hidden: publication.isMuted,
+        });
       }
+    } else {
+      const userCameraView = ui.webrtc?.getUserCameraView(fvttUserId);
+      if (userCameraView) {
+        let uiIndicator;
+        if (publication.kind === Track.Kind.Audio) {
+          uiIndicator = userCameraView.querySelector(".status-remote-muted");
+        } else if (publication.kind === Track.Kind.Video) {
+          uiIndicator = userCameraView.querySelector(".status-remote-hidden");
+        }
 
-      if (uiIndicator) {
-        uiIndicator.classList.toggle("hidden", !publication.isMuted);
+        if (uiIndicator) {
+          uiIndicator.classList.toggle("hidden", !publication.isMuted);
+        }
       }
     }
   }
@@ -967,7 +980,7 @@ export default class LiveKitClient {
     }
   }
 
-  getVideoParams(): CreateVideoTrackOptions | false {
+  getVideoParams(): VideoCaptureOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
     const canBroadcastVideo = this.avMaster.canUserBroadcastVideo(
@@ -989,7 +1002,11 @@ export default class LiveKitClient {
   sendJoinMessage(liveKitServer: string, accessToken: string) {
     const foundryHost = window.location.href.replace(/\/game.*$/, "");
     // Create the url for user to join the external LiveKit web client
-    const url = `${foundryHost}/modules/avclient-livekit/web-client/index.html?${liveKitServer}&${accessToken}`;
+    const params = new URLSearchParams({
+      url: `wss://${liveKitServer}`,
+      token: accessToken,
+    });
+    const url = `${foundryHost}/modules/avclient-livekit/web-client/index.html?${params.toString()}`;
 
     const joinDialog = new Dialog({
       title: getGame().i18n.localize(`${LANG_NAME}.externalAVJoinTitle`),
@@ -1201,7 +1218,10 @@ export default class LiveKitClient {
         // Publish the track
         await this.liveKitRoom?.localParticipant.publishTrack(screenTrack, {
           audioBitrate: 160000,
-          screenShareEncoding: ScreenSharePresets.fhd_30.encoding,
+          screenShareEncoding: {
+            maxBitrate: 300_000,
+            maxFramerate: 30,
+          },
         });
       });
     } else {

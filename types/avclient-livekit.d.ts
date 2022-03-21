@@ -45,27 +45,3 @@ declare global {
     clientClass: typeof LiveKitAVClient;
   }
 }
-
-/**
- * FVTT v9 types
- * TODO: Remove when foundry-vtt-types is updated to support v9
- */
-interface AVSettingsData {
-  muted?: boolean;
-  hidden?: boolean;
-  speaking?: boolean;
-}
-
-declare global {
-  interface AVSettings {
-    activity: Record<string, AVSettingsData>;
-  }
-  interface Game {
-    version: string;
-  }
-  namespace User {
-    interface ActivityData {
-      av: AVSettingsData;
-    }
-  }
-}

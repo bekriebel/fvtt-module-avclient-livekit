@@ -1,12 +1,11 @@
 import {
   connect as liveKitConnect,
   ConnectOptions,
-  LogLevel,
   RemoteAudioTrack,
   RoomState,
   TrackPublishDefaults,
-  VideoPresets43,
 } from "livekit-client";
+
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 
@@ -14,6 +13,7 @@ import LiveKitClient, { ConnectionState, InitState } from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
 import LiveKitAVConfig from "./LiveKitAVConfig";
+import { LogLevel } from "livekit-client/dist/logger";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
@@ -93,6 +93,12 @@ export default class LiveKitAVClient extends AVClient {
     if (getGame().settings.get(MODULE_NAME, "useExternalAV")) {
       log.debug("useExternalAV set, not initializing LiveKitClient");
       this._liveKitClient.useExternalAV = true;
+
+      // Broadcast ourselves as unmuted and not hidden since the client will not be handling these calls
+      getGame().user?.broadcastActivity({
+        av: { hidden: false, muted: false },
+      });
+
       this._liveKitClient.initState = InitState.Initialized;
       return;
     }
@@ -194,7 +200,10 @@ export default class LiveKitAVClient extends AVClient {
 
     // set the LiveKit publish defaults
     const liveKitPublishDefaults: TrackPublishDefaults = {
-      videoEncoding: VideoPresets43.vga.encoding,
+      videoEncoding: {
+        maxBitrate: 300_000,
+        maxFramerate: 30,
+      },
       simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
     };
 

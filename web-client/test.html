@@ -21,10 +21,10 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-md-12">
-          <h2>Livekit AVClient</h2>
+        <div class="col-md-8">
+          <h2>Livekit Sample App</h2>
           <br />
-          <div id="connect-area" style="display: none">
+          <div id="connect-area">
             <div>
               <b>LiveKit URL</b>
             </div>
@@ -46,7 +46,7 @@
 
           <!-- connect options -->
           <div id="options-area">
-            <div style="display: none">
+            <div>
               <input
                 type="checkbox"
                 class="form-check-input"
@@ -88,13 +88,13 @@
                 AdaptiveStream
               </label>
             </div>
-            <div style="display: none">
+            <div>
               <input type="checkbox" class="form-check-input" id="force-turn" />
               <label for="force-turn" class="form-check-label">
                 Force TURN
               </label>
             </div>
-            <div style="display: none">
+            <div>
               <input
                 type="checkbox"
                 class="form-check-input"
@@ -164,14 +164,13 @@
                 disabled
                 type="button"
                 onclick="appActions.shareScreen()"
-                style="display: none"
               >
                 Share Screen
               </button>
               <select
                 id="simulate-scenario"
                 class="custom-select"
-                style="width: auto; display: none"
+                style="width: auto"
                 onchange="appActions.handleScenario(event)"
               >
                 <option value="" selected>Simulate</option>
@@ -232,7 +231,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4" style="display: none">
+        <div class="col-md-4">
           <h3>Chat</h3>
           <div id="chat-area">
             <textarea class="form-control" id="chat" rows="9"></textarea>

@@ -38,7 +38,7 @@ There are several examples available for launching your own livekit server:
 - [Deploy to a VM (AWS/Digial Ocean)](https://docs.livekit.io/deploy/vm)
 - [Deploy to Kubernetes](https://docs.livekit.io/deploy/kubernetes)
 
-Though newer versions may work, the current recommended LiveKit server version is v0.14.2. This has had the most extensive testing done with the module and matches the current client SDK version that the module is using.
+Though newer versions may work, the current recommended LiveKit server version is v0.15.6. This has had the most extensive testing done with the module and matches the current client SDK version that the module is using.
 
 ## Debugging
 
