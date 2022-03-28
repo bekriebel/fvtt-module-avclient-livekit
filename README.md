@@ -40,6 +40,8 @@ There are several examples available for launching your own livekit server:
 
 Though newer versions may work, the current recommended LiveKit server version is v0.15.6. This has had the most extensive testing done with the module and matches the current client SDK version that the module is using.
 
+> :warning: **Duck DNS and Ad blockers**: Several ad blockers seem to block websocket connections to Duck DNS URLs. If you are using Duck DNS for your LiveKit Server domain name, you and your users may need to whitelist the domain name in ad blocking extensions.
+
 ## Debugging
 
 By default, debug logs are disabled. If additional logs are needed for troubleshooting, `Enable debug logging` can be turned on under the module settings. For even more logging of the LiveKit connection, LiveKit trace logging can be enabled after debugging logging is turned on by setting `Enable LiveKit trace logging` under module settings.
