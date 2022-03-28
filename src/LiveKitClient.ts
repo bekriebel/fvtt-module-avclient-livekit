@@ -427,6 +427,11 @@ export default class LiveKitClient {
     return getGame().users?.get(fvttUserId);
   }
 
+  getParticipantUseExternalAV(participant: Participant): boolean {
+    const { useExternalAV } = JSON.parse(participant.metadata || "{ false }");
+    return useExternalAV;
+  }
+
   getUserAudioTrack(
     userId: string | undefined
   ): LocalAudioTrack | RemoteAudioTrack | null {
@@ -819,13 +824,14 @@ export default class LiveKitClient {
 
     // Remote participant
     const fvttUserId = this.getParticipantFVTTUser(participant)?.id;
+    const useExternalAV = this.getParticipantUseExternalAV(participant);
 
     if (!fvttUserId) {
       log.warn("Mute change participant", participant, "is not an FVTT user");
       return;
     }
 
-    if (this.isVersion9) {
+    if (this.isVersion9 && useExternalAV) {
       if (publication.kind === Track.Kind.Audio) {
         this.avMaster.settings.handleUserActivity(fvttUserId, {
           muted: publication.isMuted,

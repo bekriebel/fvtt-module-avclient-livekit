@@ -167,6 +167,7 @@ export default class LiveKitAVClient extends AVClient {
     // Set the user's metadata
     const metadata = JSON.stringify({
       fvttUserId: getGame().user?.id,
+      useExternalAV: this._liveKitClient.useExternalAV,
     });
 
     const userName = getGame().user?.name;
