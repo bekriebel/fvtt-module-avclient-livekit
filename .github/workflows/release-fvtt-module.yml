@@ -72,7 +72,7 @@ jobs:
           release_name: Release ${{ needs.check_version.outputs.module_current_version }}
           body: ${{ steps.changelog.outputs.changelog }}
           draft: false
-          prerelease: false
+          prerelease: true
       - name: Upload module zip
         id: upload-module-zip
         uses: actions/upload-release-asset@v1
