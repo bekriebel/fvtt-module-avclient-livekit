@@ -2,8 +2,6 @@
   "I18N.LANGUAGE": "Español",
   "I18N.MAINTAINERS": "@Viriato139ac#0342",
 
-  "KEYBINDINGS.PTTKeyNotes": "Ahora se configura en Opciones - Configurar controles",
-  "KEYBINDINGS.PTTKeyConfigureControls": "Consulte los ajustes disponibles en Configurar controles",
   "LIVEKITAVCLIENT.connect": "Conectar",
   "LIVEKITAVCLIENT.connectError": "Error al conectar al Servidor LiveKit",
   "LIVEKITAVCLIENT.connectErrorCheckClock": "No se ha podido crear un token seguro. Por favor, asegúrese de que la fecha y la hora de su sistema son correctas",

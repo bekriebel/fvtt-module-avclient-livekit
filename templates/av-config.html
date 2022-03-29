@@ -57,12 +57,7 @@
         </div>
 
         {{#if isVersion9}}
-        <div class="form-group">
-            <label>{{localize "KEYBINDINGS.PTTKey"}}:</label>
-            <input type="text" value="{{ localize 'KEYBINDINGS.PTTKeyConfigureControls' }}" disabled/>
-            <!-- <input type="hidden" name="client.voice.pttKey" value="{{settings.client.voice.pttKey}}"> -->
-            <p class="notes">{{ localize "KEYBINDINGS.PTTKeyNotes" }}</p>
-        </div>
+        <!-- TODO: remove this when we drop support for < v9 -->
         {{else}}
         <div class="form-group">
             <label>{{localize "WEBRTC.PTTKey"}}:</label>
