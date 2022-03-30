@@ -203,11 +203,7 @@ export default class LiveKitAVClient extends AVClient {
     // set the LiveKit publish defaults
     const liveKitPublishDefaults: TrackPublishDefaults = {
       simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
-      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h180],
-      videoEncoding: {
-        maxBitrate: 300_000,
-        maxFramerate: 30,
-      },
+      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
     };
 
     // Set the livekit connection options

@@ -342,11 +342,7 @@ export default class LiveKitClient {
             {
               simulcast:
                 getGame().settings.get(MODULE_NAME, "simulcast") === true,
-              videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h180],
-              videoEncoding: {
-                maxBitrate: 300_000,
-                maxFramerate: 30,
-              },
+              videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
             }
           );
           const userVideoElement = ui.webrtc?.getUserVideoElement(
@@ -620,7 +616,10 @@ export default class LiveKitClient {
       await this.liveKitRoom?.localParticipant.publishTrack(this.audioTrack);
     }
     if (this.videoTrack) {
-      await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack);
+      await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack, {
+        simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+        videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
+      });
     }
   }
 
@@ -994,15 +993,19 @@ export default class LiveKitClient {
     const canBroadcastVideo = this.avMaster.canUserBroadcastVideo(
       getGame().user?.id || ""
     );
+
+    // Set resolution higher if simulcast is enabled
+    let videoResolution = VideoPresets43.h240.resolution;
+    if (getGame().settings.get(MODULE_NAME, "simulcast") === true) {
+      videoResolution = VideoPresets43.h720.resolution;
+    }
+
     return typeof videoSrc === "string" &&
       videoSrc !== "disabled" &&
       canBroadcastVideo
       ? {
           deviceId: { ideal: videoSrc },
-          resolution: {
-            width: 320,
-            height: 240,
-          },
+          resolution: videoResolution,
         }
       : false;
   }
@@ -1226,10 +1229,6 @@ export default class LiveKitClient {
         // Publish the track
         await this.liveKitRoom?.localParticipant.publishTrack(screenTrack, {
           audioBitrate: 160000,
-          screenShareEncoding: {
-            maxBitrate: 300_000,
-            maxFramerate: 30,
-          },
         });
       });
     } else {

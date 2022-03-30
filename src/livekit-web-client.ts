@@ -63,26 +63,15 @@ const appActions = {
     updateSearchParams(url, token);
 
     const roomOpts: RoomOptions = {
-      adaptiveStream: adaptiveStream
-        ? {
-            pixelDensity: "screen",
-          }
-        : false,
+      adaptiveStream: adaptiveStream,
       dynacast,
       publishDefaults: {
         simulcast,
-        videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h180],
-        videoEncoding: {
-          maxBitrate: 300_000,
-          maxFramerate: 30,
-        },
+        videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
         videoCodec: preferredCodec,
       },
       videoCaptureDefaults: {
-        resolution: {
-          width: 320,
-          height: 240,
-        },
+        resolution: VideoPresets43.h720.resolution,
       },
     };
 
@@ -241,10 +230,7 @@ const appActions = {
     }
     state.isFrontFacing = !state.isFrontFacing;
     const options: VideoCaptureOptions = {
-      resolution: {
-        width: 320,
-        height: 240,
-      },
+      resolution: VideoPresets43.h720.resolution,
       facingMode: state.isFrontFacing ? "user" : "environment",
     };
     videoPub.videoTrack?.restartTrack(options);
