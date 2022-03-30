@@ -20,6 +20,7 @@ import {
   Track,
   TrackPublication,
   VideoCaptureOptions,
+  VideoPresets43,
   VideoTrack,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -341,6 +342,7 @@ export default class LiveKitClient {
             {
               simulcast:
                 getGame().settings.get(MODULE_NAME, "simulcast") === true,
+              videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h180],
               videoEncoding: {
                 maxBitrate: 300_000,
                 maxFramerate: 30,

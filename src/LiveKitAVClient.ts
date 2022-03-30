@@ -4,6 +4,7 @@ import {
   RemoteAudioTrack,
   RoomState,
   TrackPublishDefaults,
+  VideoPresets43,
 } from "livekit-client";
 
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -201,16 +202,19 @@ export default class LiveKitAVClient extends AVClient {
 
     // set the LiveKit publish defaults
     const liveKitPublishDefaults: TrackPublishDefaults = {
+      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h180],
       videoEncoding: {
         maxBitrate: 300_000,
         maxFramerate: 30,
       },
-      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
     };
 
     // Set the livekit connection options
     const liveKitConnectionOptions: ConnectOptions = {
       autoSubscribe: true,
+      adaptiveStream: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      dynacast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
       publishDefaults: liveKitPublishDefaults,
     };
 
