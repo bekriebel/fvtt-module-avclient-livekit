@@ -33,7 +33,7 @@ export default function registerModuleSettings(): void {
   registerModuleSetting({
     name: "simulcast",
     scope: "world",
-    config: true,
+    config: false,
     default: true,
     type: Boolean,
     onChange: () => getGame().webrtc?.connect(),

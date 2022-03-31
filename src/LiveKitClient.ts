@@ -1251,6 +1251,8 @@ export default class LiveKitClient {
   }
 
   get simulcastEnabled(): boolean {
-    return getGame().settings.get(MODULE_NAME, "simulcast") === true;
+    // Set simulcast to always enabled for testing of this functionality
+    // return getGame().settings.get(MODULE_NAME, "simulcast") === true;
+    return true;
   }
 }
