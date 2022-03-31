@@ -1,3 +1,15 @@
+# v0.4.0
+
+- Update dependencies, including LiveKit JS Client SDK v0.17.5
+- Update to support FVTT v10
+- Update to support new LiveKit version
+- Add warning about using Duck DNS to README
+- Update workflow to initially tag new releases as prerelease
+- Remove PTT Key from settings to match current FVTT versions
+- Enable new Simulcast, Dynacast, and Adaptive Stream settings from LiveKit
+- Allow for higher resolution with auto scaling based on camera view sizes
+- Fix and update experimental web client
+
 # v0.3.5
 
 - Spanish translation updates thanks to @lozalojo
