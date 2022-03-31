@@ -202,15 +202,15 @@ export default class LiveKitAVClient extends AVClient {
 
     // set the LiveKit publish defaults
     const liveKitPublishDefaults: TrackPublishDefaults = {
-      simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      simulcast: this._liveKitClient.simulcastEnabled,
       videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
     };
 
     // Set the livekit connection options
     const liveKitConnectionOptions: ConnectOptions = {
       autoSubscribe: true,
-      adaptiveStream: getGame().settings.get(MODULE_NAME, "simulcast") === true,
-      dynacast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+      adaptiveStream: this._liveKitClient.simulcastEnabled,
+      dynacast: this._liveKitClient.simulcastEnabled,
       publishDefaults: liveKitPublishDefaults,
     };
 

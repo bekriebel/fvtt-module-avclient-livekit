@@ -340,8 +340,7 @@ export default class LiveKitClient {
           await this.liveKitRoom?.localParticipant.publishTrack(
             this.videoTrack,
             {
-              simulcast:
-                getGame().settings.get(MODULE_NAME, "simulcast") === true,
+              simulcast: this.simulcastEnabled,
               videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
             }
           );
@@ -617,7 +616,7 @@ export default class LiveKitClient {
     }
     if (this.videoTrack) {
       await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack, {
-        simulcast: getGame().settings.get(MODULE_NAME, "simulcast") === true,
+        simulcast: this.simulcastEnabled,
         videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
       });
     }
@@ -996,7 +995,7 @@ export default class LiveKitClient {
 
     // Set resolution higher if simulcast is enabled
     let videoResolution = VideoPresets43.h240.resolution;
-    if (getGame().settings.get(MODULE_NAME, "simulcast") === true) {
+    if (this.simulcastEnabled) {
       videoResolution = VideoPresets43.h720.resolution;
     }
 
@@ -1249,5 +1248,9 @@ export default class LiveKitClient {
         }
       });
     }
+  }
+
+  get simulcastEnabled(): boolean {
+    return getGame().settings.get(MODULE_NAME, "simulcast") === true;
   }
 }
