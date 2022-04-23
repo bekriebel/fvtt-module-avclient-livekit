@@ -138,7 +138,7 @@ export default class LiveKitAVClient extends AVClient {
     if (
       getGame().user?.isGM &&
       (connectionSettings.url === "" ||
-        connectionSettings.url === "" ||
+        connectionSettings.username === "" ||
         connectionSettings.password === "")
     ) {
       this.master.config.render(true);
