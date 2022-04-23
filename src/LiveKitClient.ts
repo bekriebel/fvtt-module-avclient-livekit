@@ -370,13 +370,13 @@ export default class LiveKitClient {
    * @param userName Display name of the FVTT user
    * @param metadata User metadata, including the FVTT User ID
    */
-  getAccessToken(
+  async getAccessToken(
     apiKey: string,
     secretKey: string,
     roomName: string,
     userName: string,
     metadata: string
-  ): string {
+  ): Promise<string> {
     // Set ths signing options
     const signOpts: jwt.SignOptions = {
       issuer: apiKey, // The configured API Key
