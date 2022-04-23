@@ -185,7 +185,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Get an access token
-    const accessToken = this._liveKitClient.getAccessToken(
+    const accessToken = await this._liveKitClient.getAccessToken(
       connectionSettings.username, // The LiveKit API Key
       connectionSettings.password, // The LiveKit Secret Key
       this.room,
