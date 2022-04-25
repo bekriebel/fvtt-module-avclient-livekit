@@ -14,10 +14,8 @@
       integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
       crossorigin="anonymous"
     />
-
     <link rel="stylesheet" href="styles.css" />
   </head>
-
   <body>
     <div class="container">
       <div class="row">
@@ -198,6 +196,17 @@
               >
                 Start Audio
               </button>
+              <select
+                id="preferred-quality"
+                class="custom-select"
+                style="width: auto"
+                onchange="appActions.handlePreferredQuality(event)"
+              >
+                <option value="" selected>PreferredQuality</option>
+                <option value="high">high</option>
+                <option value="medium">medium</option>
+                <option value="low">low</option>
+              </select>
             </div>
           </div>
 

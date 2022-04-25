@@ -1,6 +1,7 @@
 import {
   connect as liveKitConnect,
   ConnectOptions,
+  LogLevel,
   RemoteAudioTrack,
   RoomState,
   TrackPublishDefaults,
@@ -14,7 +15,6 @@ import LiveKitClient, { ConnectionState, InitState } from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
 import LiveKitAVConfig from "./LiveKitAVConfig";
-import { LogLevel } from "livekit-client/dist/logger";
 
 /**
  * An AVClient implementation that uses WebRTC and the LiveKit library.
