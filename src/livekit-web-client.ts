@@ -17,6 +17,8 @@ import {
   VideoCaptureOptions,
   VideoPresets43,
   VideoCodec,
+  VideoQuality,
+  LogLevel,
 } from "livekit-client";
 
 const $ = (id: string) => document.getElementById(id);
@@ -59,7 +61,7 @@ const appActions = {
     const preferredCodec = (<HTMLSelectElement>$("preferred-codec"))
       .value as VideoCodec;
 
-    setLogLevel("debug");
+    setLogLevel(LogLevel.debug);
     updateSearchParams(url, token);
 
     const roomOpts: RoomOptions = {
@@ -165,9 +167,9 @@ const appActions = {
         `successfully connected to ${room.name} in ${Math.round(elapsed)}ms`,
         room.engine.connectedServerAddress
       );
-    } catch (error) {
+    } catch (error: any) {
       let message: any = error;
-      if (error instanceof Error) {
+      if (error.message) {
         message = error.message;
       }
       appendLog("could not connect:", message);
@@ -307,6 +309,31 @@ const appActions = {
       await currentRoom.switchActiveDevice(kind, deviceId);
     }
   },
+
+  handlePreferredQuality: (e: Event) => {
+    const quality = (<HTMLSelectElement>e.target).value;
+    let q = VideoQuality.HIGH;
+    switch (quality) {
+      case "low":
+        q = VideoQuality.LOW;
+        break;
+      case "medium":
+        q = VideoQuality.MEDIUM;
+        break;
+      case "high":
+        q = VideoQuality.HIGH;
+        break;
+      default:
+        break;
+    }
+    if (currentRoom) {
+      currentRoom.participants.forEach((participant) => {
+        participant.tracks.forEach((track) => {
+          track.setVideoQuality(q);
+        });
+      });
+    }
+  },
 };
 
 declare global {
@@ -439,6 +466,13 @@ function renderParticipant(participant: Participant, remove = false) {
           <span id="mic-${identity}" class="mic-on"></span>
         </div>
       </div>
+      ${
+        participant instanceof RemoteParticipant &&
+        `<div class="volume-control">
+        <input id="volume-${identity}" type="range" min="0" max="1" step="0.1" value="1" orient="vertical" />
+      </div>`
+      }
+      
     `;
     container.appendChild(div);
 
@@ -476,6 +510,15 @@ function renderParticipant(participant: Participant, remove = false) {
     div!.classList.add("speaking");
   } else {
     div!.classList.remove("speaking");
+  }
+
+  if (participant instanceof RemoteParticipant) {
+    const volumeSlider = <HTMLInputElement>$(`volume-${identity}`);
+    volumeSlider.addEventListener("input", (ev) => {
+      participant.setVolume(
+        Number.parseFloat((ev.target as HTMLInputElement).value)
+      );
+    });
   }
 
   const cameraEnabled =
@@ -720,3 +763,9 @@ function updateButtonsForPublishState() {
     lp.isScreenShareEnabled
   );
 }
+
+async function acquireDeviceList() {
+  handleDevicesChanged();
+}
+
+acquireDeviceList();

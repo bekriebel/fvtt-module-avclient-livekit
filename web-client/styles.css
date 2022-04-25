@@ -8,11 +8,12 @@
 }
 
 #options-area {
-  display: grid;
-  grid-template-columns: repeat(4, fit-content(120px)) auto;
+  display: flex;
+  flex-wrap: wrap;
   margin-left: 1.25rem;
   margin-right: 1.25rem;
-  grid-gap: 3rem;
+  column-gap: 3rem;
+  row-gap: 1rem;
   margin-bottom: 10px;
 }
 
@@ -142,4 +143,19 @@
 
 .participant .connection-poor {
   color: red;
+}
+
+.participant .volume-control {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  display: flex;
+  z-index: 4;
+  height: 100%;
+}
+
+.participant .volume-control > input {
+  width: 16px;
+  height: 40%;
+  -webkit-appearance: slider-vertical; /* Chromium */
 }
