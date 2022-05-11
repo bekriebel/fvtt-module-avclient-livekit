@@ -451,6 +451,34 @@ export default class LiveKitClient {
     return audioTrack;
   }
 
+  getUserStatistics(userId: string): string {
+    const participant = this.liveKitParticipants.get(userId);
+    let totalBitrate = 0;
+    if (!participant) {
+      return "";
+    }
+
+    for (const t of participant.tracks.values()) {
+      if (t.track) {
+        totalBitrate += t.track.currentBitrate;
+      }
+    }
+    let bitrate = "";
+    if (totalBitrate > 0) {
+      bitrate = `${Math.round(totalBitrate / 1024).toLocaleString()} kbps`;
+    }
+
+    return bitrate;
+  }
+
+  getAllUserStatistics(): Map<string, string> {
+    const userStatistics: Map<string, string> = new Map();
+    this.liveKitParticipants.forEach((participant, userId) => {
+      userStatistics.set(userId, this.getUserStatistics(userId));
+    });
+    return userStatistics;
+  }
+
   getUserVideoTrack(
     userId: string | undefined
   ): LocalVideoTrack | RemoteVideoTrack | null {
