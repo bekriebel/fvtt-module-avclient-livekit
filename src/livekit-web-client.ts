@@ -38,6 +38,8 @@ const storedToken = searchParams.get("token") ?? "";
 (<HTMLInputElement>$("url")).value = storedUrl;
 (<HTMLInputElement>$("token")).value = storedToken;
 
+let infoHidden = false;
+
 function updateSearchParams(url: string, token: string) {
   const params = new URLSearchParams({ url, token });
   window.history.replaceState(
@@ -334,6 +336,10 @@ const appActions = {
       });
     }
   },
+
+  hideInfo: () => {
+    infoHidden = true;
+  },
 };
 
 declare global {
@@ -456,9 +462,13 @@ function renderParticipant(participant: Participant, remove = false) {
         <div id="name-${identity}" class="name">
         </div>
         <div style="text-align: center;">
-          <span id="size-${identity}" class="size">
+          <span id="size-${identity}" ${
+      infoHidden ? 'style="display: none"' : ""
+    } class="size">
           </span>
-          <span id="bitrate-${identity}" class="bitrate">
+          <span id="bitrate-${identity}" ${
+      infoHidden ? 'style="display: none"' : ""
+    } class="bitrate">
           </span>
         </div>
         <div class="right">
