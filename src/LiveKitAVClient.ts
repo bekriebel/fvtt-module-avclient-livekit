@@ -138,6 +138,23 @@ export default class LiveKitAVClient extends AVClient {
       }
     }
 
+    // Fix the URL if a protocol has been specified
+    const uriRegExp = new RegExp("^([a-zA-Z\\d]+://)+(.*)$");
+    if (connectionSettings.url.match(uriRegExp)) {
+      log.warn(
+        "Protocol included in server URL:",
+        connectionSettings.url,
+        "; removing protocol"
+      );
+      connectionSettings.url = connectionSettings.url.replace(uriRegExp, "$2");
+      this.settings.set("world", "server.url", connectionSettings.url);
+      // For versions before v9, return immediate since a reconnect will occur
+      if (!this._liveKitClient.isVersion9) {
+        return false;
+      }
+    }
+
+    // Check for connection settings
     if (
       getGame().user?.isGM &&
       (connectionSettings.url === "" ||
