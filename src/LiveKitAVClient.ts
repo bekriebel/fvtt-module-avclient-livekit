@@ -1,11 +1,9 @@
 import {
-  connect as liveKitConnect,
-  ConnectOptions,
   LogLevel,
   RemoteAudioTrack,
+  RoomConnectOptions,
   RoomState,
-  TrackPublishDefaults,
-  VideoPresets43,
+  setLogLevel,
 } from "livekit-client";
 
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -104,7 +102,12 @@ export default class LiveKitAVClient extends AVClient {
       return;
     }
 
+    // Initialize the room
+    await this._liveKitClient.initializeRoom();
+
+    // Initialize the local tracks
     await this._liveKitClient.initializeLocalTracks();
+
     this._liveKitClient.initState = InitState.Initialized;
   }
 
@@ -200,18 +203,9 @@ export default class LiveKitAVClient extends AVClient {
       return true;
     }
 
-    // set the LiveKit publish defaults
-    const liveKitPublishDefaults: TrackPublishDefaults = {
-      simulcast: this._liveKitClient.simulcastEnabled,
-      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
-    };
-
-    // Set the livekit connection options
-    const liveKitConnectionOptions: ConnectOptions = {
+    // Set the livekit room options
+    const liveKitRoomConnectOptions: RoomConnectOptions = {
       autoSubscribe: true,
-      adaptiveStream: this._liveKitClient.simulcastEnabled,
-      dynacast: this._liveKitClient.simulcastEnabled,
-      publishDefaults: liveKitPublishDefaults,
     };
 
     // Get disable audio/video settings
@@ -226,7 +220,7 @@ export default class LiveKitAVClient extends AVClient {
 
     // Don't auto subscribe to tracks if either video or audio is disabled
     if (disableReceivingAudio || disableReceivingVideo) {
-      liveKitConnectionOptions.autoSubscribe = false;
+      liveKitRoomConnectOptions.autoSubscribe = false;
 
       // Send UI notifications
       if (disableReceivingAudio) {
@@ -250,15 +244,15 @@ export default class LiveKitAVClient extends AVClient {
       getGame().settings.get(MODULE_NAME, "liveKitTrace")
     ) {
       log.debug("Setting livekit trace logging");
-      liveKitConnectionOptions.logLevel = LogLevel.trace;
+      setLogLevel(LogLevel.trace);
     }
 
     // Connect to the server
     try {
-      this._liveKitClient.liveKitRoom = await liveKitConnect(
+      await this._liveKitClient.liveKitRoom?.connect(
         `wss://${connectionSettings.url}`,
         accessToken,
-        liveKitConnectionOptions
+        liveKitRoomConnectOptions
       );
       log.info("Connected to room", this.room);
     } catch (error: unknown) {

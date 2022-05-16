@@ -16,9 +16,11 @@ import {
   RemoteVideoTrack,
   Room,
   RoomEvent,
+  RoomOptions,
   RoomState,
   Track,
   TrackPublication,
+  TrackPublishDefaults,
   VideoCaptureOptions,
   VideoPresets43,
   VideoTrack,
@@ -608,6 +610,27 @@ export default class LiveKitClient {
     }
   }
 
+  async initializeRoom(): Promise<void> {
+    // set the LiveKit publish defaults
+    const liveKitPublishDefaults: TrackPublishDefaults = {
+      simulcast: this.simulcastEnabled,
+      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
+    };
+
+    // Set the livekit room options
+    const liveKitRoomOptions: RoomOptions = {
+      adaptiveStream: this.simulcastEnabled,
+      dynacast: this.simulcastEnabled,
+      publishDefaults: liveKitPublishDefaults,
+    };
+
+    // Create and configure the room
+    this.liveKitRoom = new Room(liveKitRoomOptions);
+
+    // Set up room callbacks
+    this.setRoomCallbacks();
+  }
+
   isUserExternal(userId: string): boolean {
     // TODO: Implement this when adding external user support
     log.debug("isUserExternal not yet implemented; userId:", userId);
@@ -625,9 +648,6 @@ export default class LiveKitClient {
 
   async onConnected(): Promise<void> {
     log.debug("Client connected");
-
-    // Set up room callbacks
-    this.setRoomCallbacks();
 
     // Set up local participant callbacks
     this.setLocalParticipantCallbacks();
