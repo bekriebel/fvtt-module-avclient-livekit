@@ -30,7 +30,11 @@ import * as jwt from "jsonwebtoken";
 import * as log from "./utils/logging";
 import { getGame } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
-import { SocketMessage } from "../types/avclient-livekit";
+import {
+  LiveKitServerType,
+  LiveKitServerTypes,
+  SocketMessage,
+} from "../types/avclient-livekit";
 import { addContextOptions, breakout } from "./LiveKitBreakout";
 
 export enum ConnectionState {
@@ -68,6 +72,24 @@ export default class LiveKitClient {
     getGame().version || getGame().data.version || 0,
     "9.224"
   );
+
+  liveKitServerTypes: LiveKitServerTypes = {
+    custom: {
+      key: "custom",
+      label: `${LANG_NAME}.serverTypeCustom`,
+      urlRequired: true,
+      usernameRequired: true,
+      passwordRequired: true,
+    },
+    tavern: {
+      key: "tavern",
+      label: `${LANG_NAME}.serverTypeTavern`,
+      url: "livekit.tavern.at",
+      urlRequired: false,
+      usernameRequired: true,
+      passwordRequired: true,
+    },
+  };
 
   constructor(liveKitAvClient: LiveKitAVClient) {
     this.avMaster = liveKitAvClient.master;
@@ -170,6 +192,33 @@ export default class LiveKitClient {
     }
 
     this.setConnectionQualityIndicator(userId);
+  }
+
+  isLiveKitServerType(
+    liveKitServerType: LiveKitServerType
+  ): liveKitServerType is LiveKitServerType {
+    if (
+      typeof liveKitServerType.key !== "string" ||
+      typeof liveKitServerType.label !== "string" ||
+      typeof liveKitServerType.urlRequired !== "boolean" ||
+      typeof liveKitServerType.usernameRequired !== "boolean" ||
+      typeof liveKitServerType.passwordRequired !== "boolean"
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  addLiveKitServerType(liveKitServerType: LiveKitServerType): boolean {
+    if (!this.isLiveKitServerType(liveKitServerType)) {
+      log.error(
+        "Attempted to add a LiveKitServerType that does not meet the requirements:",
+        liveKitServerType
+      );
+      return false;
+    }
+    this.liveKitServerTypes[liveKitServerType.key] = liveKitServerType;
+    return true;
   }
 
   addStatusIndicators(userId: string): void {

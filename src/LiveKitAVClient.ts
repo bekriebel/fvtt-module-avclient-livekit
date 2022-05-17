@@ -129,14 +129,13 @@ export default class LiveKitAVClient extends AVClient {
       "server"
     ) as ConnectionSettings;
 
-    // Force connection type to custom
-    if (connectionSettings.type !== "custom" && getGame().user?.isGM) {
-      this.settings.set("world", "server.type", "custom");
-      // For versions before v9, return immediate since a reconnect will occur
-      if (!this._liveKitClient.isVersion9) {
-        return false;
-      }
+    const liveKitServerTypeKey = this.settings.get("world", "livekit.type");
+    let liveKitServerType = null;
+    if (typeof liveKitServerTypeKey === "string") {
+      liveKitServerType =
+        this._liveKitClient.liveKitServerTypes[liveKitServerTypeKey];
     }
+    log.warn("liveKitServerType", liveKitServerType);
 
     // Fix the URL if a protocol has been specified
     const uriRegExp = new RegExp("^([a-zA-Z\\d]+://)+(.*)$");
@@ -204,14 +203,26 @@ export default class LiveKitAVClient extends AVClient {
       return false;
     }
 
-    // Get an access token
-    const accessToken = await this._liveKitClient.getAccessToken(
-      connectionSettings.username, // The LiveKit API Key
-      connectionSettings.password, // The LiveKit Secret Key
-      this.room,
-      userName,
-      metadata
-    );
+    let accessToken = "";
+
+    if (liveKitServerType?.tokenFunction !== undefined) {
+      accessToken = await liveKitServerType.tokenFunction(
+        connectionSettings.username, // The LiveKit API Key
+        connectionSettings.password, // The LiveKit Secret Key
+        this.room,
+        userName,
+        metadata
+      );
+    } else {
+      // Get an access token
+      accessToken = await this._liveKitClient.getAccessToken(
+        connectionSettings.username, // The LiveKit API Key
+        connectionSettings.password, // The LiveKit Secret Key
+        this.room,
+        userName,
+        metadata
+      );
+    }
 
     // If useExternalAV is enabled, send a join message instead of connecting
     if (this._liveKitClient.useExternalAV) {
@@ -654,6 +665,7 @@ export default class LiveKitAVClient extends AVClient {
 
     // Change in the server configuration; reconnect
     const serverChange = [
+      "world.livekit.type",
       "world.server.url",
       "world.server.username",
       "world.server.password",
