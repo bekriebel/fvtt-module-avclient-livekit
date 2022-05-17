@@ -213,7 +213,12 @@ export default class LiveKitAVClient extends AVClient {
         this.room,
         userName,
         metadata
-      );
+      ).catch(() => "");
+      if (!accessToken) {
+        log.error("Could not get access token from custom server ", liveKitServerType.label || liveKitServerType.key);
+        this._liveKitClient.connectionState = ConnectionState.Disconnected;
+        return false;
+      }
     } else {
       // Get an access token
       accessToken = await this._liveKitClient.getAccessToken(
