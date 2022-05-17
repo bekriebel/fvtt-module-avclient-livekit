@@ -99,6 +99,7 @@ export default class LiveKitAVClient extends AVClient {
       });
 
       this._liveKitClient.initState = InitState.Initialized;
+      Hooks.callAll("liveKitClientInitialized", this);
       return;
     }
 
@@ -109,6 +110,7 @@ export default class LiveKitAVClient extends AVClient {
     await this._liveKitClient.initializeLocalTracks();
 
     this._liveKitClient.initState = InitState.Initialized;
+    Hooks.callAll("liveKitClientInitialized", this);
   }
 
   /* -------------------------------------------- */
@@ -129,13 +131,37 @@ export default class LiveKitAVClient extends AVClient {
       "server"
     ) as ConnectionSettings;
 
-    // Force connection type to custom
-    if (connectionSettings.type !== "custom" && getGame().user?.isGM) {
-      this.settings.set("world", "server.type", "custom");
-      // For versions before v9, return immediate since a reconnect will occur
-      if (!this._liveKitClient.isVersion9) {
-        return false;
-      }
+    const liveKitServerTypeKey = this.settings.get("world", "livekit.type");
+    if (liveKitServerTypeKey === undefined && getGame().user?.isGM) {
+      // Set the initial value to the default
+      log.warn(
+        "livekit.type setting not found; defaulting to",
+        this._liveKitClient.defaultLiveKitServerType.key
+      );
+      this.settings.set(
+        "world",
+        "livekit.type",
+        this._liveKitClient.defaultLiveKitServerType.key
+      );
+      // Return because a reconnect will occur
+      return false;
+    }
+
+    let liveKitServerType = this._liveKitClient.defaultLiveKitServerType;
+    if (
+      typeof liveKitServerTypeKey === "string" &&
+      this._liveKitClient.liveKitServerTypes[liveKitServerTypeKey]
+        ?.tokenFunction instanceof Function
+    ) {
+      liveKitServerType =
+        this._liveKitClient.liveKitServerTypes[liveKitServerTypeKey];
+    } else {
+      log.warn(
+        "liveKitServerType",
+        liveKitServerTypeKey,
+        "not found; defaulting to",
+        this._liveKitClient.defaultLiveKitServerType.key
+      );
     }
 
     // Fix the URL if a protocol has been specified
@@ -157,9 +183,11 @@ export default class LiveKitAVClient extends AVClient {
     // Check for connection settings
     if (
       getGame().user?.isGM &&
-      (connectionSettings.url === "" ||
-        connectionSettings.username === "" ||
-        connectionSettings.password === "")
+      ((liveKitServerType.urlRequired && connectionSettings.url === "") ||
+        (liveKitServerType.usernameRequired &&
+          connectionSettings.username === "") ||
+        (liveKitServerType.passwordRequired &&
+          connectionSettings.password === ""))
     ) {
       this.master.config.render(true);
       log.error("LiveKit connection information missing");
@@ -204,19 +232,61 @@ export default class LiveKitAVClient extends AVClient {
       return false;
     }
 
-    // Get an access token
-    const accessToken = await this._liveKitClient.getAccessToken(
-      connectionSettings.username, // The LiveKit API Key
-      connectionSettings.password, // The LiveKit Secret Key
-      this.room,
-      userName,
-      metadata
-    );
+    const accessToken = await liveKitServerType
+      .tokenFunction(
+        connectionSettings.username, // The LiveKit API Key
+        connectionSettings.password, // The LiveKit Secret Key
+        this.room,
+        userName,
+        metadata
+      )
+      .catch((error: unknown) => {
+        let message = error;
+        if (error instanceof Error) {
+          message = error.message;
+        }
+        log.error(
+          "An error occurred when calling tokenFunction for liveKitServerType:",
+          liveKitServerType,
+          message
+        );
+        return "";
+      });
+
+    if (!accessToken) {
+      log.error(
+        "Could not get access token",
+        liveKitServerType.label || liveKitServerType.key
+      );
+      ui.notifications?.error(
+        `${getGame().i18n.localize(`${LANG_NAME}.tokenError`)}`,
+        { permanent: true }
+      );
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
+      return false;
+    }
+
+    const liveKitAddress = liveKitServerType.urlRequired
+      ? connectionSettings.url
+      : liveKitServerType.url;
+
+    if (typeof liveKitAddress !== "string") {
+      const message = `${getGame().i18n.localize(
+        liveKitServerType.label
+      )} doesn't provide a URL`;
+      log.error(message, liveKitServerType);
+      ui.notifications?.error(
+        `${getGame().i18n.localize(`${LANG_NAME}.connectError`)}: ${message}`,
+        { permanent: true }
+      );
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
+      return false;
+    }
 
     // If useExternalAV is enabled, send a join message instead of connecting
     if (this._liveKitClient.useExternalAV) {
       log.debug("useExternalAV set, not connecting to LiveKit");
-      this._liveKitClient.sendJoinMessage(connectionSettings.url, accessToken);
+      this._liveKitClient.sendJoinMessage(liveKitAddress, accessToken);
       return true;
     }
 
@@ -267,7 +337,7 @@ export default class LiveKitAVClient extends AVClient {
     // Connect to the server
     try {
       await this._liveKitClient.liveKitRoom?.connect(
-        `wss://${connectionSettings.url}`,
+        `wss://${liveKitAddress}`,
         accessToken,
         liveKitRoomConnectOptions
       );
@@ -654,6 +724,7 @@ export default class LiveKitAVClient extends AVClient {
 
     // Change in the server configuration; reconnect
     const serverChange = [
+      "world.livekit.type",
       "world.server.url",
       "world.server.username",
       "world.server.password",

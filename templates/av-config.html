@@ -87,23 +87,23 @@
     <!-- Server Tab -->
     {{#if user.isGM}}
     <div class="tab" data-tab="server">
-        <!-- <div class="form-group">
-            <label>{{localize "WEBRTC.WebRTCServer"}}:</label>
-            <select name="world.server.type">
-                {{selectOptions serverTypes selected=settings.world.server.type localize=true}}
+        <div class="form-group">
+            <label>{{localize "LIVEKITAVCLIENT.serverType"}}:</label>
+            <select name="world.livekit.type">
+                {{selectOptions liveKitServerTypes selected=settings.world.livekit.type nameAttr="key" labelAttr="label" localize=true}}
             </select>
-        </div> -->
+        </div>
         
         <div class="webrtc-custom-server-config">
-            <div class="form-group">
+            <div class="form-group livekit-url">
                 <label>{{localize "WEBRTC.WebRTCServerURL"}}:</label>
                 <input type="text" name="world.server.url" value="{{settings.world.server.url}}" />
             </div>
-            <div class="form-group">
+            <div class="form-group livekit-username">
                 <label>{{localize "WEBRTC.WebRTCServerUsername"}}:</label>
                 <input type="text" name="world.server.username" value="{{settings.world.server.username}}" />
             </div>
-            <div class="form-group">
+            <div class="form-group livekit-password">
                 <label>{{localize "WEBRTC.WebRTCServerPassword"}}:</label>
                 <input type="password" name="world.server.password" value="{{settings.world.server.password}}" />
             </div>
