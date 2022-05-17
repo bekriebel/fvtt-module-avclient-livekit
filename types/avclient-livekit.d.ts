@@ -13,6 +13,30 @@ interface ConnectionSettings {
   password: string;
 }
 
+interface LiveKitServerType {
+  key: string;
+  label: string;
+  url?: string;
+  urlRequired: boolean;
+  usernameRequired: boolean;
+  passwordRequired: boolean;
+  tokenFunction: LiveKitTokenFunction;
+}
+
+interface LiveKitServerTypes {
+  [key: string]: LiveKitServerType;
+}
+
+interface LiveKitTokenFunction {
+  (
+    apiKey: string,
+    secretKey: string,
+    roomName: string,
+    userName: string,
+    metadata: string
+  ): Promise<string>;
+}
+
 // Custom voice modes to remove ACTIVITY
 interface LiveKitVoiceModes {
   ALWAYS: "always";
