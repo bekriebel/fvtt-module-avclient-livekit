@@ -2,14 +2,14 @@ import {
   LogLevel,
   RemoteAudioTrack,
   RoomConnectOptions,
-  RoomState,
+  ConnectionState,
   setLogLevel,
 } from "livekit-client";
 
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 
-import LiveKitClient, { ConnectionState, InitState } from "./LiveKitClient";
+import LiveKitClient, { InitState } from "./LiveKitClient";
 import { getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
 import LiveKitAVConfig from "./LiveKitAVConfig";
@@ -371,7 +371,9 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Verify that we are connected
-    if (!(this._liveKitClient.liveKitRoom?.state === RoomState.Connected)) {
+    if (
+      !(this._liveKitClient.liveKitRoom?.state === ConnectionState.Connected)
+    ) {
       log.error("Not connected to room after attempting to connect");
       this._liveKitClient.connectionState = ConnectionState.Disconnected;
       return false;
@@ -397,7 +399,7 @@ export default class LiveKitAVClient extends AVClient {
     // Check to make sure we are connected before trying to disconnect
     if (
       this._liveKitClient.liveKitRoom &&
-      this._liveKitClient.liveKitRoom.state !== RoomState.Disconnected
+      this._liveKitClient.liveKitRoom.state !== ConnectionState.Disconnected
     ) {
       // Disconnect from the room, but don't stop tracks in case we are reconnecting again soon
       this._liveKitClient.liveKitRoom.disconnect(false);

@@ -10,7 +10,7 @@ import {
   RoomConnectOptions,
   RoomEvent,
   RoomOptions,
-  RoomState,
+  ConnectionState,
   setLogLevel,
   Track,
   TrackPublication,
@@ -588,7 +588,7 @@ function renderParticipant(participant: Participant, remove = false) {
 
 function renderScreenShare() {
   const div = $("screenshare-area")!;
-  if (!currentRoom || currentRoom.state !== RoomState.Connected) {
+  if (!currentRoom || currentRoom.state !== ConnectionState.Connected) {
     div.style.display = "none";
     return;
   }
@@ -625,7 +625,7 @@ function renderScreenShare() {
 }
 
 function renderBitrate() {
-  if (!currentRoom || currentRoom.state !== RoomState.Connected) {
+  if (!currentRoom || currentRoom.state !== ConnectionState.Connected) {
     return;
   }
   const participants: Participant[] = [...currentRoom.participants.values()];
