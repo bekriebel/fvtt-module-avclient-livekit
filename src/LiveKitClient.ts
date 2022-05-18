@@ -17,7 +17,7 @@ import {
   Room,
   RoomEvent,
   RoomOptions,
-  RoomState,
+  ConnectionState,
   Track,
   TrackPublication,
   TrackPublishDefaults,
@@ -36,12 +36,6 @@ import {
   SocketMessage,
 } from "../types/avclient-livekit";
 import { addContextOptions, breakout } from "./LiveKitBreakout";
-
-export enum ConnectionState {
-  Disconnected = "disconnected",
-  Connecting = "reconnecting",
-  Connected = "connected",
-}
 
 export enum InitState {
   Uninitialized = "uninitialized",
@@ -163,7 +157,7 @@ export default class LiveKitClient {
     });
     element.before(disconnectButton);
 
-    if (this.liveKitRoom?.state === RoomState.Connected) {
+    if (this.liveKitRoom?.state === ConnectionState.Connected) {
       disconnectButton.toggleClass("hidden", false);
     } else {
       connectButton.toggleClass("hidden", false);
@@ -1154,7 +1148,7 @@ export default class LiveKitClient {
       log.debug("setAudioEnabledState called but no audio track available");
       return;
     }
-    if (this.liveKitRoom?.state !== RoomState.Connected) {
+    if (this.liveKitRoom?.state !== ConnectionState.Connected) {
       log.debug(
         "setAudioEnabledState called but LiveKit room is not connected"
       );
@@ -1229,8 +1223,8 @@ export default class LiveKitClient {
         ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, getGame().user?.id)
       )
-      .on(ParticipantEvent.MetadataChanged, (...args) => {
-        log.debug("Local ParticipantEvent MetadataChanged:", args);
+      .on(ParticipantEvent.ParticipantMetadataChanged, (...args) => {
+        log.debug("Local ParticipantEvent ParticipantMetadataChanged:", args);
       })
       .on(ParticipantEvent.TrackPublished, (...args) => {
         log.debug("Local ParticipantEvent TrackPublished:", args);
@@ -1254,8 +1248,8 @@ export default class LiveKitClient {
         ParticipantEvent.IsSpeakingChanged,
         this.onIsSpeakingChanged.bind(this, fvttUserId)
       )
-      .on(ParticipantEvent.MetadataChanged, (...args) => {
-        log.debug("Remote ParticipantEvent MetadataChanged:", args);
+      .on(ParticipantEvent.ParticipantMetadataChanged, (...args) => {
+        log.debug("Remote ParticipantEvent ParticipantMetadataChanged:", args);
       });
   }
 
