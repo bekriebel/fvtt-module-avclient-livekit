@@ -1,3 +1,15 @@
+# v0.5.0
+
+- Update dependencies, including LiveKit JS Client SDK v1.0.0
+- Fix typo in connection info check (Thanks @kakaroto!)
+- Make getAccessToken async (Thanks @kakaroto!)
+- Add debugging method to return user track statistics
+- Hide debug info in the experimental web client
+- Split room creation and connection logic to support newer JS Client SDKs
+- Automatically remove the protocol from provided LiveKit Server Addresses
+- Add logic for LiveKit Server types
+- Add an At the Tavern LiveKit Server type
+
 # v0.4.0
 
 - Update dependencies, including LiveKit JS Client SDK v0.17.5
