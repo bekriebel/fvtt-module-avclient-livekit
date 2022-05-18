@@ -15,16 +15,16 @@
   ],
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
-    "livekit-client": "^0.18.6"
+    "livekit-client": "^1.0.0"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.268.2",
     "@types/jsonwebtoken": "^8.5.8",
-    "@typescript-eslint/eslint-plugin": "^5.24.0",
-    "@typescript-eslint/parser": "^5.24.0",
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
     "@typhonjs-fvtt/validate-manifest": "^0.0.1",
     "buffer": "^6.0.3",
-    "copy-webpack-plugin": "^10.2.4",
+    "copy-webpack-plugin": "^11.0.0",
     "crypto-browserify": "^3.12.0",
     "eslint": "^8.15.0",
     "process": "^0.11.10",
