@@ -10,13 +10,30 @@ I am providing access to a LiveKit server cluster that I am maintaining to anyon
 
 You can install this module by using the following manifest URL: https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json
 
-## How to use
+## Configuration
 
 Install & enable the module then configure for your LiveKit instance under Audio/Video Configuration:
 
 **LiveKit Server Address:** `rtc.example.com` \<Your LiveKit server address\>  
 **LiveKit API Key:** `ABCDEFGHIJ12345` \<Your LiveKit API Key>  
 **LiveKit Secret Key:** `****************` \<Your LiveKit Secret Key\>
+
+## Features
+
+LiveKit AVClient provides a number of features beyond the A/V option built into Foundry:
+
+- Uses a Selective Forwarding Unit (SFU) architecture instead of Mesh. This means each user only has to send their their audio and video once instead of needing to connect to every other user in the game.
+- LiveKit server connections work in more network environments.
+- [Breakout Rooms](#breakout-rooms) allow you to split the party!
+- Adaptive Streaming and Dynamic Broadcasting reduce bandwidth and CPU usage based on video window size and available system resources.
+- Opus DTX reduces bandwidth used by audio tracks when a user isn't speaking.
+- A Connection Quality Indicator shows if a user's connection is having trouble.
+- An optional external web client can be used to open audio and video in a separate tab, or even separate device (including mobile).
+- The ability for individual users to disable receiving video in case they are on very limited connections.
+- Actively maintained and tested against the latest versions of FoundryVTT.
+- Additional features planned for future releases!
+
+## How to use
 
 ### **Breakout Rooms**
 
