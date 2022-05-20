@@ -2,9 +2,11 @@
 
 A replacement for the native SimplePeer / EasyRTC A/V client in FoundryVTT. The module uses [LiveKit](https://livekit.io/) platform to provide Audio & Video communication between players.
 
-**Note:** _At the moment there is no public LiveKit signalling server. You must configure a custom signalling server under Audio/Video communication._
+**Note:** _At the moment there are no public LiveKit servers. You must configure a custom signalling server under Audio/Video communication or use one of the following options:_
 
-I am providing access to a LiveKit server cluster that I am maintaining to anyone who subscribes to my [Patreon](https://www.patreon.com/bekit) at at least a $5 per month level. If there is interest, I will look into providing other forms of payment for this, but I will need to charge a fee to help pay for the infrastructure and my time to maintain it.
+[At the Tavern](https://tavern.at) is providing access to a multi-region LiveKit server cluster that we maintain to anyone who subscribes to our [Patreon](https://www.patreon.com/bekit) at at least a $5 USD per month level. The fee is used to cover the cost of the server cluster and contribute toward further development of this module.
+
+[Forge](https://forge-vtt.com/) users can make use of the Forge's LiveKit servers with no additional configuration required.
 
 ## Installation
 
@@ -14,6 +16,7 @@ You can install this module by using the following manifest URL: https://github.
 
 Install & enable the module then configure for your LiveKit instance under Audio/Video Configuration:
 
+**LiveKit Server:** Select an available option or _Custom_ for your own server  
 **LiveKit Server Address:** `rtc.example.com` \<Your LiveKit server address\>  
 **LiveKit API Key:** `ABCDEFGHIJ12345` \<Your LiveKit API Key>  
 **LiveKit Secret Key:** `****************` \<Your LiveKit Secret Key\>
