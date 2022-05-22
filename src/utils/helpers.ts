@@ -46,6 +46,16 @@ export const delayReload: () => void = debounce(
 export const sleep: (delay: number) => Promise<void> = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay));
 
+export function callWhenReady(fnToCall: () => unknown): void {
+  if (getGame().ready) {
+    log.debug("callWhenReady now", fnToCall);
+    fnToCall();
+  } else {
+    log.debug("callWhenReady ready", fnToCall);
+    Hooks.once("ready", fnToCall);
+  }
+}
+
 /**
  * Transform the device info array from enumerated devices into an object with {id: label} keys
  * @param {Array} list    The list of devices

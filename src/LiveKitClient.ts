@@ -98,6 +98,8 @@ export default class LiveKitClient {
       this.avMaster.render.bind(this.liveKitAvClient),
       2000
     );
+
+    Hooks.callAll("liveKitClientAvailable", this);
   }
 
   /* -------------------------------------------- */

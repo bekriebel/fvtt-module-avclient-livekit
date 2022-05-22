@@ -10,7 +10,7 @@ import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
 
 import LiveKitClient, { InitState } from "./LiveKitClient";
-import { getGame } from "./utils/helpers";
+import { callWhenReady, getGame } from "./utils/helpers";
 import { ConnectionSettings } from "../types/avclient-livekit";
 import LiveKitAVConfig from "./LiveKitAVConfig";
 
@@ -138,11 +138,13 @@ export default class LiveKitAVClient extends AVClient {
         "livekit.type setting not found; defaulting to",
         this._liveKitClient.defaultLiveKitServerType.key
       );
-      this.settings.set(
-        "world",
-        "livekit.type",
-        this._liveKitClient.defaultLiveKitServerType.key
-      );
+      callWhenReady(() => {
+        this.settings.set(
+          "world",
+          "livekit.type",
+          this._liveKitClient.defaultLiveKitServerType.key
+        );
+      });
       // Return because a reconnect will occur
       return false;
     }
@@ -173,7 +175,9 @@ export default class LiveKitAVClient extends AVClient {
         "; removing protocol"
       );
       connectionSettings.url = connectionSettings.url.replace(uriRegExp, "$2");
-      this.settings.set("world", "server.url", connectionSettings.url);
+      callWhenReady(() => {
+        this.settings.set("world", "server.url", connectionSettings.url);
+      });
       // For versions before v9, return immediate since a reconnect will occur
       if (!this._liveKitClient.isVersion9) {
         return false;
@@ -202,7 +206,11 @@ export default class LiveKitAVClient extends AVClient {
     // Set a room name if one doesn't yet exist
     if (!connectionSettings.room) {
       log.warn("No meeting room set, creating random name.");
-      this.settings.set("world", "server.room", randomID(32));
+      callWhenReady(() => {
+        this.settings.set("world", "server.room", randomID(32));
+      });
+      // Return because a reconnect will occur
+      return false;
     }
 
     // Set the room name, using breakout room if set
