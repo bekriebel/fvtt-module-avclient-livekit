@@ -99,7 +99,7 @@ export default class LiveKitAVClient extends AVClient {
       });
 
       this._liveKitClient.initState = InitState.Initialized;
-      Hooks.callAll("liveKitClientInitialized", this);
+      Hooks.callAll("liveKitClientInitialized", this._liveKitClient);
       return;
     }
 
@@ -110,7 +110,7 @@ export default class LiveKitAVClient extends AVClient {
     await this._liveKitClient.initializeLocalTracks();
 
     this._liveKitClient.initState = InitState.Initialized;
-    Hooks.callAll("liveKitClientInitialized", this);
+    Hooks.callAll("liveKitClientInitialized", this._liveKitClient);
   }
 
   /* -------------------------------------------- */
