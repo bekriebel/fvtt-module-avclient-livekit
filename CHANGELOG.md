@@ -1,3 +1,8 @@
+# v0.5.2
+
+- Set minimum FVTT compatible version to v9.238
+- Update dependencies, including livekit-client v1.0.1
+
 # v0.5.1
 
 - Update README to add a features section
