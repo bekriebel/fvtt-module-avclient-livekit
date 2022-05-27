@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
-    "livekit-client": "^1.0.0"
+    "livekit-client": "^1.0.1"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.269.0",

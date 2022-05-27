@@ -984,9 +984,9 @@ callsites@^3.0.0:
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
 
 caniuse-lite@^1.0.30001332:
-  version "1.0.30001343"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001343.tgz#8e1107e30d9a4d2f63782b48ae0a3ce34e2f9c2a"
-  integrity sha512-8KeCrAtPMabo/XW14B+R9sZYoClx1n0b+WYgwDKZPtWR3TcdvWzdSy7mPyFEmR5WU1St9v1PW6sdO5dkFOEzfA==
+  version "1.0.30001344"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001344.tgz#8a1e7fdc4db9c2ec79a05e9fd68eb93a761888bb"
+  integrity sha512-0ZFjnlCaXNOAYcV7i+TtdKBp0L/3XEU2MF/x6Du1lrh+SRX4IfzIVL4HNJg5pB2PmFb8rszIGyOvsZnqqRoc2g==
 
 chalk@^4.0.0, chalk@^4.1.0:
   version "4.1.2"
@@ -1183,9 +1183,9 @@ ecdsa-sig-formatter@1.0.11:
     safe-buffer "^5.0.1"
 
 electron-to-chromium@^1.4.118:
-  version "1.4.140"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.140.tgz#1b5836b7244aff341a11c8efd63dfe003dee4a19"
-  integrity sha512-NLz5va823QfJBYOO/hLV4AfU4Crmkl/6Hl2pH3qdJcmi0ySZ3YTWHxOlDm3uJOFBEPy3pIhu8gKQo6prQTWKKA==
+  version "1.4.141"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.141.tgz#4dd9119e8a99f1c83c51dfcf1bed79ea541f08d6"
+  integrity sha512-mfBcbqc0qc6RlxrsIgLG2wCqkiPAjEezHxGTu7p3dHHFOurH4EjS9rFZndX5axC8264rI1Pcbw8uQP39oZckeA==
 
 elliptic@^6.5.3:
   version "6.5.4"
@@ -2017,10 +2017,10 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-livekit-client@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/livekit-client/-/livekit-client-1.0.0.tgz#14a0bc5c68341ce20854ff5b52c1fa3dceb6c17c"
-  integrity sha512-UGcN1/B8LvBOy0bz1IPmntS91HTMLOjiZtCJJ2PcE/DhU4yS8g+A0CCTtZiCI3d51cjzLOQcY71G1I35uDBXZA==
+livekit-client@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/livekit-client/-/livekit-client-1.0.1.tgz#f7b604e38526650df8c4549a29dccbf92313bce4"
+  integrity sha512-Dtj9Xg4ZNeXF71Fo9SxntipFlRv4Fgyy01zSuT38H7OnHivftiljaCZ4OI6rGo73KBWXh7s4NrIyAN6U1Nv4cw==
   dependencies:
     events "^3.3.0"
     loglevel "^1.8.0"
