@@ -27,7 +27,9 @@
   "LIVEKITAVCLIENT.resetRoomHint": "Reset the meeting room ID used for your A/V",
   "LIVEKITAVCLIENT.serverType": "LiveKit Server",
   "LIVEKITAVCLIENT.serverTypeCustom": "Custom",
+  "LIVEKITAVCLIENT.serverDetailsCustom": "<a href=\"https://github.com/bekriebel/fvtt-module-avclient-livekit#running-your-own-livekit-server\">Running your own LiveKit server</a>",
   "LIVEKITAVCLIENT.serverTypeTavern": "At the Tavern Patreon",
+  "LIVEKITAVCLIENT.serverDetailsTavern": "Subscribe to the <a href=\"https://tavern.at/patreon\">At the Tavern Patreon</a>",
   "LIVEKITAVCLIENT.simulcast": "Simulcast enabled",
   "LIVEKITAVCLIENT.simulcastHint": "Use simulcast video tracks with LiveKit. This may help low-resource clients and the expense of some video tracks not being sent or received by them",
   "LIVEKITAVCLIENT.tokenError": "Could not generate LiveKit access token",
@@ -45,7 +47,10 @@
   "LIVEKITAVCLIENT.externalAVJoinMessage": "Join A/V with LiveKit web client?",
   "LIVEKITAVCLIENT.externalAVJoinButton": "Join",
   "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignore",
-  "WEBRTC.FVTTSignalingServer": "Foundry VTT (Not supported)",
+  "LIVEKITAVCLIENT.liveKitServerURL": "LiveKit Server Address",
+  "LIVEKITAVCLIENT.liveKitServerDetails": "LiveKit Server Details",
+  "LIVEKITAVCLIENT.liveKitServerAPIKey": "LiveKit API Key",
+  "LIVEKITAVCLIENT.liveKitServerSecretKey": "LiveKit Secret Key",
   "WEBRTC.TooltipEnableUserVideo": "Enable User Video",
   "WEBRTC.TooltipDisableUserVideo": "Disable User Video",
   "WEBRTC.TooltipEnableUserAudio": "Enable User Audio",
@@ -53,8 +58,5 @@
   "WEBRTC.WarningCannotBroadcastUserVideo": "You cannot enable the user's camera because they to not have permission to broadcast their video feed.",
   "WEBRTC.WarningCannotBroadcastUserAudio": "You cannot enable the user's microphone because they to not have permission to broadcast their audio feed.",
   "WEBRTC.WarningCannotEnableUserVideo": "You cannot enable the user's camera because they have hidden themselves.",
-  "WEBRTC.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves.",
-  "WEBRTC.WebRTCServerURL": "LiveKit Server Address",
-  "WEBRTC.WebRTCServerUsername": "LiveKit API Key",
-  "WEBRTC.WebRTCServerPassword": "LiveKit Secret Key"
+  "WEBRTC.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves."
 }

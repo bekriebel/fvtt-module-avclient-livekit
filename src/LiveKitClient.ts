@@ -71,6 +71,7 @@ export default class LiveKitClient {
     custom: {
       key: "custom",
       label: `${LANG_NAME}.serverTypeCustom`,
+      details: `${LANG_NAME}.serverDetailsCustom`,
       urlRequired: true,
       usernameRequired: true,
       passwordRequired: true,
@@ -79,6 +80,7 @@ export default class LiveKitClient {
     tavern: {
       key: "tavern",
       label: `${LANG_NAME}.serverTypeTavern`,
+      details: `${LANG_NAME}.serverDetailsTavern`,
       url: "livekit.tavern.at",
       urlRequired: false,
       usernameRequired: true,

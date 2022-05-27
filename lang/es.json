@@ -44,8 +44,7 @@
   "LIVEKITAVCLIENT.externalAVJoinMessage": "¿Unirse a A/V con el cliente web de LiveKit?",
   "LIVEKITAVCLIENT.externalAVJoinButton": "Unirse",
   "LIVEKITAVCLIENT.externalAVIgnoreButton": "Ignorar",
-  "WEBRTC.FVTTSignalingServer": "Foundry VTT (no soportado)",
-  "WEBRTC.WebRTCServerURL": "Dirección servidor LiveKit",
-  "WEBRTC.WebRTCServerUsername": "Clave API LiveKit",
-  "WEBRTC.WebRTCServerPassword": "Clave secreta LiveKit"
+  "LIVEKITAVCLIENT.liveKitServerURL": "Dirección servidor LiveKit",
+  "LIVEKITAVCLIENT.liveKitServerAPIKey": "Clave API LiveKit",
+  "LIVEKITAVCLIENT.liveKitServerSecretKey": "Clave secreta LiveKit"
 }

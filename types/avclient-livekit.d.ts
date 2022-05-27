@@ -16,6 +16,7 @@ interface ConnectionSettings {
 interface LiveKitServerType {
   key: string;
   label: string;
+  details?: string;
   url?: string;
   urlRequired: boolean;
   usernameRequired: boolean;

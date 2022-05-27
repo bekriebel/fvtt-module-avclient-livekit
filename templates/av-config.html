@@ -93,43 +93,25 @@
                 {{selectOptions liveKitServerTypes selected=settings.world.livekit.type nameAttr="key" labelAttr="label" localize=true}}
             </select>
         </div>
-        
+        <div class="form-group livekit-details">
+            <label>{{localize "LIVEKITAVCLIENT.liveKitServerDetails"}}:</label>
+            <p></p>
+        </div>
+
         <div class="webrtc-custom-server-config">
             <div class="form-group livekit-url">
-                <label>{{localize "WEBRTC.WebRTCServerURL"}}:</label>
+                <label>{{localize "LIVEKITAVCLIENT.liveKitServerURL"}}:</label>
                 <input type="text" name="world.server.url" value="{{settings.world.server.url}}" />
             </div>
             <div class="form-group livekit-username">
-                <label>{{localize "WEBRTC.WebRTCServerUsername"}}:</label>
+                <label>{{localize "LIVEKITAVCLIENT.liveKitServerAPIKey"}}:</label>
                 <input type="text" name="world.server.username" value="{{settings.world.server.username}}" />
             </div>
             <div class="form-group livekit-password">
-                <label>{{localize "WEBRTC.WebRTCServerPassword"}}:</label>
+                <label>{{localize "LIVEKITAVCLIENT.liveKitServerSecretKey"}}:</label>
                 <input type="password" name="world.server.password" value="{{settings.world.server.password}}" />
             </div>
         </div>
-
-        <!-- <div class="form-group">
-            <label>{{localize "WEBRTC.WebRTCTurnServer"}}:</label>
-            <select name="world.turn.type">
-                {{selectOptions turnTypes selected=settings.world.turn.type localize=true}}
-            </select>
-        </div>
-
-        <div class="webrtc-custom-turn-config">
-            <div class="form-group">
-                <label>{{localize "WEBRTC.WebRTCTURNURL"}}:</label>
-                <input type="text" name="world.turn.url" value="{{settings.world.turn.url}}" />
-            </div>
-            <div class="form-group">
-                <label>{{localize "WEBRTC.WebRTCTurnUsername"}}:</label>
-                <input type="text" name="world.turn.username" value="{{settings.world.turn.username}}" />
-            </div>
-            <div class="form-group">
-                <label>{{localize "WEBRTC.WebRTCTurnPassword"}}:</label>
-                <input type="password" name="world.turn.password" value="{{settings.world.turn.password}}" />
-            </div>
-        </div> -->
     </div>
     {{/if}}
 

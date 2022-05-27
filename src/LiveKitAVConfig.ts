@@ -55,6 +55,16 @@ export default class LiveKitAVConfig extends AVConfig {
       }
 
       this._setConfigSectionVisible(
+        ".livekit-details",
+        liveKitServerType.details !== undefined
+      );
+      if (liveKitServerType.details !== undefined) {
+        this._setSectionParagraphHtml(
+          ".livekit-details",
+          getGame().i18n.localize(liveKitServerType.details)
+        );
+      }
+      this._setConfigSectionVisible(
         ".livekit-url",
         liveKitServerType.urlRequired
       );
@@ -82,6 +92,16 @@ export default class LiveKitAVConfig extends AVConfig {
       return;
     }
 
+    this._setConfigSectionVisible(
+      ".livekit-details",
+      liveKitServerType.details !== undefined
+    );
+    if (liveKitServerType.details !== undefined) {
+      this._setSectionParagraphHtml(
+        ".livekit-details",
+        getGame().i18n.localize(liveKitServerType.details)
+      );
+    }
     this._setConfigSectionVisible(
       ".livekit-url",
       liveKitServerType.urlRequired
@@ -116,6 +136,13 @@ export default class LiveKitAVConfig extends AVConfig {
     const section = this.element.find(selector);
     if (section) {
       section.find("input").val(value);
+    }
+  }
+
+  _setSectionParagraphHtml(selector: string, value = "") {
+    const section = this.element.find(selector);
+    if (section) {
+      section.find("p").html(value);
     }
   }
 }
