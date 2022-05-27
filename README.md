@@ -33,6 +33,7 @@ LiveKit AVClient provides a number of features beyond the A/V option built into 
 - A Connection Quality Indicator shows if a user's connection is having trouble.
 - An optional external web client can be used to open audio and video in a separate tab, or even separate device (including mobile).
 - The ability for individual users to disable receiving video in case they are on very limited connections.
+- The ability to individually hide or mute users only for yourself.
 - Actively maintained and tested against the latest versions of FoundryVTT.
 - Additional features planned for future releases!
 
