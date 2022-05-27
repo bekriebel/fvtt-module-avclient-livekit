@@ -17,7 +17,6 @@ export default class LiveKitAVConfig extends AVConfig {
     const data = await super.getData(options);
 
     return mergeObject(data, {
-      isVersion9: getGame().webrtc?.client._liveKitClient.isVersion9,
       liveKitServerTypes:
         getGame().webrtc?.client._liveKitClient.liveKitServerTypes,
     });

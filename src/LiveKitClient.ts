@@ -61,12 +61,6 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
 
-  // Is the FVTT server version 9. TODO: Remove if we drop support for lower versions
-  isVersion9: boolean = isNewerVersion(
-    getGame().version || getGame().data.version || 0,
-    "9.224"
-  );
-
   liveKitServerTypes: LiveKitServerTypes = {
     custom: {
       key: "custom",
@@ -213,56 +207,6 @@ export default class LiveKitClient {
     }
     this.liveKitServerTypes[liveKitServerType.key] = liveKitServerType;
     return true;
-  }
-
-  addStatusIndicators(userId: string): void {
-    if (this.isVersion9) {
-      // This is no longer needed in v9
-      return;
-    }
-
-    // Get the user camera view and notification bar
-    const userCameraView = ui.webrtc?.getUserCameraView(userId);
-    const userNotificationBar =
-      userCameraView?.querySelector(".notification-bar");
-
-    // Add indicators
-    const indicators = {
-      ptt: $(
-        `<i class="fas fa-podcast fa-fw status-remote-ptt hidden" title="${getGame().i18n.localize(
-          "WEBRTC.VoiceModePtt"
-        )}"></i>`
-      ),
-      muted: $(
-        `<i class="fas fa-microphone-alt-slash fa-fw status-remote-muted hidden" title="${getGame().i18n.localize(
-          `${LANG_NAME}.indicatorMuted`
-        )}"></i>`
-      ),
-      hidden: $(
-        `<i class="fas fa-eye-slash fa-fw status-remote-hidden hidden" title="${getGame().i18n.localize(
-          `${LANG_NAME}.indicatorHidden`
-        )}"></i>`
-      ),
-    };
-
-    // TODO: We aren't tracking PTT properly yet. Set this after we are.
-    // const voiceMode = something;
-    // indicators.ptt.toggleClass("hidden", !(voiceMode === "ptt"));
-
-    indicators.muted.toggleClass(
-      "hidden",
-      !this.getUserAudioTrack(userId)?.isMuted
-    );
-    indicators.hidden.toggleClass(
-      "hidden",
-      !this.getUserVideoTrack(userId)?.isMuted
-    );
-
-    Object.values(indicators).forEach((indicator) => {
-      if (userNotificationBar instanceof Element) {
-        $(userNotificationBar).append(indicator);
-      }
-    });
   }
 
   async attachAudioTrack(
@@ -938,7 +882,7 @@ export default class LiveKitClient {
       return;
     }
 
-    if (this.isVersion9 && useExternalAV) {
+    if (useExternalAV) {
       if (publication.kind === Track.Kind.Audio) {
         this.avMaster.settings.handleUserActivity(fvttUserId, {
           muted: publication.isMuted,

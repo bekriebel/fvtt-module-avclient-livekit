@@ -178,10 +178,6 @@ export default class LiveKitAVClient extends AVClient {
       callWhenReady(() => {
         this.settings.set("world", "server.url", connectionSettings.url);
       });
-      // For versions before v9, return immediate since a reconnect will occur
-      if (!this._liveKitClient.isVersion9) {
-        return false;
-      }
     }
 
     // Check for connection settings
@@ -710,9 +706,6 @@ export default class LiveKitAVClient extends AVClient {
         );
       }
     }
-
-    // Add status indicators
-    this._liveKitClient.addStatusIndicators(userId);
 
     // Add connection quality indicator
     this._liveKitClient.addConnectionQualityIndicator(userId);
