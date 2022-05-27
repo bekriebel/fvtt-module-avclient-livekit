@@ -1,3 +1,15 @@
+# v0.5.1
+
+- Update README to add a features section
+- Update README to list The Forge as having hosted servers
+- Update dependencies
+- Update settings applications to run more reliably
+- Add new liveKitClientAvailable hook
+- Update liveKitClientInitialized hook to pass the LiveKitClient object
+- Take control of the CameraViews UI for customization
+- Add the ability to hide or mute individual users from the CameraViews
+- Add the ability to include server details to custom LiveKit Server Types
+
 # v0.5.0
 
 - Update dependencies, including LiveKit JS Client SDK v1.0.0
