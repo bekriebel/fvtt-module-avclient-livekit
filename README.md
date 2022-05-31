@@ -73,5 +73,5 @@ See [CHANGELOG](/CHANGELOG.md)
 
 ## Support my work
 
-[![Become a Patron](https://img.shields.io/badge/support-patreon-orange.svg?logo=patreon)](https://www.patreon.com/bekit)
+[![Become a Patron](https://img.shields.io/badge/support-patreon-orange.svg?logo=patreon)](https://tavern.at/patreon)
 [![Donate via Ko-Fi](https://img.shields.io/badge/donate-ko--fi-red.svg?logo=ko-fi)](https://ko-fi.com/bekit)
