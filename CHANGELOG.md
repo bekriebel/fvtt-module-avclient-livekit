@@ -1,3 +1,8 @@
+# v0.5.3
+
+- Temporarily disable custom CameraViews with FVTT v10 until I can update to support the new layout
+- Update dependencies, including livekit-client v1.0.4
+
 # v0.5.2
 
 - Set minimum FVTT compatible version to v9.238
