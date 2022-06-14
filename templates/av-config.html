@@ -55,6 +55,13 @@
             </select>
             <p class="notes">{{ localize "WEBRTC.VoiceModeNotes" }}</p>
         </div>
+
+        {{#if isVersion10AV}}
+        <div class="form-group">
+            <label>{{localize "WEBRTC.BorderColors"}}</label>
+            <input type="checkbox" name="client.borderColors" {{checked settings.client.borderColors}}>
+        </div>
+        {{/if}}
     </div>
 
     <!-- Devices Tab -->

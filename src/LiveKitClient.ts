@@ -28,7 +28,7 @@ import {
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as jwt from "jsonwebtoken";
 import * as log from "./utils/logging";
-import { getGame } from "./utils/helpers";
+import { getGame, isVersion10AV } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
 import {
   LiveKitServerType,
@@ -163,6 +163,12 @@ export default class LiveKitClient {
   }
 
   addConnectionQualityIndicator(userId: string): void {
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      log.debug("Connection quality indicator not yet supported in v10");
+      return;
+    }
+
     if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
       // Connection quality indicator is not enabled
       return;

@@ -1,5 +1,5 @@
 import LiveKitClient from "./LiveKitClient";
-import { getGame } from "./utils/helpers";
+import { getGame, isVersion10AV } from "./utils/helpers";
 import * as log from "./utils/logging";
 
 export default class LiveKitAVConfig extends AVConfig {
@@ -17,6 +17,7 @@ export default class LiveKitAVConfig extends AVConfig {
     const data = await super.getData(options);
 
     return mergeObject(data, {
+      isVersion10AV: isVersion10AV(),
       liveKitServerTypes:
         getGame().webrtc?.client._liveKitClient.liveKitServerTypes,
     });

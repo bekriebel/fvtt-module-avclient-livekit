@@ -1,4 +1,4 @@
-import { getGame } from "./utils/helpers";
+import { getGame, isVersion10AV } from "./utils/helpers";
 
 /**
  * The Camera UI View that displays all the camera feeds as individual video elements.
@@ -10,6 +10,12 @@ import { getGame } from "./utils/helpers";
 export default class LiveKitCameraViews extends CameraViews {
   /** @override */
   static get defaultOptions(): ApplicationOptions {
+    // Disable custom camera views for v10
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      return super.defaultOptions;
+    }
+
     return mergeObject(super.defaultOptions, {
       template: "modules/avclient-livekit/templates/camera-views.html",
     });
@@ -26,6 +32,12 @@ export default class LiveKitCameraViews extends CameraViews {
    */
   /** @override */
   async _onClickControl(event: JQuery.ClickEvent): Promise<void> {
+    // Disable custom camera views for v10
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      return super._onClickControl(event);
+    }
+
     event.preventDefault();
 
     // Reference relevant data
@@ -192,6 +204,12 @@ export default class LiveKitCameraViews extends CameraViews {
    */
   /** @override */
   _refreshView(view: HTMLElement): void {
+    // Disable custom camera views for v10
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      return super._refreshView(view);
+    }
+
     const userId = view.dataset.user || "";
     const isSelf = getGame().user?.id === userId;
     const clientSettings = getGame().webrtc?.settings.client;
@@ -285,6 +303,12 @@ export default class LiveKitCameraViews extends CameraViews {
    */
   /** @override */
   _getToggleIcon(action: string, state: boolean) {
+    // Disable custom camera views for v10
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      return super._getToggleIcon(action, state);
+    }
+
     const actionMapping: {
       [key: string]: [string, string];
     } = {
@@ -314,6 +338,12 @@ export default class LiveKitCameraViews extends CameraViews {
    */
   /** @override */
   _getToggleTooltip(action: string, state: boolean) {
+    // Disable custom camera views for v10
+    // TODO: re-enable if fixed for v10
+    if (isVersion10AV()) {
+      return super._getToggleTooltip(action, state);
+    }
+
     const actionMapping: {
       [key: string]: [string, string];
     } = {
