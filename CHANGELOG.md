@@ -1,3 +1,8 @@
+# 0.5.4
+
+- Spanish translation updates thanks to @lozalojo
+- Update dependencies, including livekit-client v1.1.1
+
 # v0.5.3
 
 - Temporarily disable custom CameraViews with FVTT v10 until I can update to support the new layout
