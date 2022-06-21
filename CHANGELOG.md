@@ -1,3 +1,7 @@
+# 0.5.5
+
+- Update dependencies, including livekit-client v1.1.2
+
 # 0.5.4
 
 - Spanish translation updates thanks to @lozalojo
