@@ -703,7 +703,6 @@ export default class LiveKitClient {
   }
 
   onDisconnected(reason?: DisconnectReason): void {
-    reason = DisconnectReason.JOIN_FAILURE;
     log.debug("Client disconnected", { reason });
     let disconnectWarning = `${getGame().i18n.localize(
       `${LANG_NAME}.onDisconnected`

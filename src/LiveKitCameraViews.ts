@@ -298,7 +298,7 @@ export default class LiveKitCameraViews extends CameraViews {
    *
    * @param {string} action     The named av-control button action
    * @param {boolean} state     The CURRENT action state.
-   * @return {string}           The icon that represents the NEXT action state.
+   * @returns {string}           The icon that represents the NEXT action state.
    * @private
    */
   /** @override */
@@ -333,7 +333,7 @@ export default class LiveKitCameraViews extends CameraViews {
    *
    * @param {string} action     The named av-control button action
    * @param {boolean} state     The CURRENT action state.
-   * @return {string}           The icon that represents the NEXT action state.
+   * @returns {string}           The icon that represents the NEXT action state.
    * @private
    */
   /** @override */

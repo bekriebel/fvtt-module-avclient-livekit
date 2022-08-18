@@ -75,7 +75,7 @@ export default class LiveKitAVClient extends AVClient {
   /**
    * One-time initialization actions that should be performed for this client implementation.
    * This will be called only once when the Game object is first set-up.
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async initialize(): Promise<void> {
     log.debug("LiveKitAVClient initialize");
@@ -120,7 +120,7 @@ export default class LiveKitAVClient extends AVClient {
    * Any parameters needed in order to establish the connection should be drawn from the settings
    * object.
    * This function should return a boolean for whether the connection attempt was successful.
-   * @return {Promise<boolean>}   Was the connection attempt successful?
+   * @returns {Promise<boolean>}   Was the connection attempt successful?
    */
   async connect(): Promise<boolean> {
     log.debug("LiveKitAVClient connect");
@@ -395,7 +395,7 @@ export default class LiveKitAVClient extends AVClient {
   /**
    * Disconnect from any servers or services which are used to provide audio/video functionality.
    * This function should return a boolean for whether a valid disconnection occurred.
-   * @return {Promise<boolean>}   Did a disconnection occur?
+   * @returns {Promise<boolean>}   Did a disconnection occur?
    */
   async disconnect(): Promise<boolean> {
     log.debug("LiveKitAVClient disconnect");
@@ -480,7 +480,7 @@ export default class LiveKitAVClient extends AVClient {
   /**
    * Return an array of Foundry User IDs which are currently connected to A/V.
    * The current user should also be included as a connected user in addition to all peers.
-   * @return {string[]}           The connected User IDs
+   * @returns {string[]}          The connected User IDs
    */
   getConnectedUsers(): string[] {
     log.debug("getConnectedUsers");
@@ -512,8 +512,7 @@ export default class LiveKitAVClient extends AVClient {
   /**
    * Provide a MediaStream instance for a given user ID
    * @param {string} userId        The User id
-   * @return {MediaStream|null}    The MediaStream for the user, or null if the user does not have
-   *                                one
+   * @returns {MediaStream|null}   The MediaStream for the user, or null if the user does not have one
    */
   getMediaStreamForUser(userId: string): MediaStream | null {
     log.debug(
@@ -546,7 +545,7 @@ export default class LiveKitAVClient extends AVClient {
 
   /**
    * Is outbound audio enabled for the current user?
-   * @return {boolean}
+   * @returns {boolean}
    */
   isAudioEnabled(): boolean {
     return !!this._liveKitClient.audioTrack;
@@ -556,7 +555,7 @@ export default class LiveKitAVClient extends AVClient {
 
   /**
    * Is outbound video enabled for the current user?
-   * @return {boolean}
+   * @returns {boolean}
    */
   isVideoEnabled(): boolean {
     return !!this._liveKitClient.videoTrack;
@@ -760,9 +759,12 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Re-render the AV camera view
-    const renderChange = ["client.audioSink", "client.muteAll"].some((k) =>
-      keys.has(k)
-    );
+    const renderChange = [
+      "client.audioSink",
+      "client.muteAll",
+      "client.disableVideo",
+      "client.nameplates",
+    ].some((k) => keys.has(k));
     if (audioSourceChange || videoSourceChange || renderChange)
       this.master.render();
   }
