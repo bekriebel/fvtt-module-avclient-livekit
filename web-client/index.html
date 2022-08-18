@@ -92,16 +92,6 @@
                 Force TURN
               </label>
             </div>
-            <div style="display: none">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="publish-only"
-              />
-              <label for="publish-only" class="form-check-label">
-                PublishOnly
-              </label>
-            </div>
             <div>
               <select
                 id="preferred-codec"
@@ -109,8 +99,8 @@
                 style="width: auto"
               >
                 <option value="" selected>PreferredCodec</option>
-                <option value="h264">H264</option>
-                <option value="vp9">VP9</option>
+                <option value="vp8">VP8</option>
+                <option value="h264">H.264</option>
                 <option value="av1">AV1</option>
               </select>
             </div>
@@ -178,6 +168,7 @@
                 <option value="node-failure">Node failure</option>
                 <option value="server-leave">Server booted</option>
                 <option value="migration">Migration</option>
+                <option value="switch-candidate">Switch candidate</option>
               </select>
               <button
                 id="disconnect-room-button"

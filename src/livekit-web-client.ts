@@ -1,24 +1,27 @@
 import {
   ConnectionQuality,
+  ConnectionState,
   DataPacket_Kind,
+  DisconnectReason,
   LocalParticipant,
+  LogLevel,
   MediaDeviceFailure,
   Participant,
   ParticipantEvent,
   RemoteParticipant,
+  RemoteTrackPublication,
+  RemoteVideoTrack,
   Room,
   RoomConnectOptions,
   RoomEvent,
   RoomOptions,
-  ConnectionState,
   setLogLevel,
   Track,
   TrackPublication,
   VideoCaptureOptions,
-  VideoPresets43,
   VideoCodec,
+  VideoPresets43,
   VideoQuality,
-  LogLevel,
 } from "livekit-client";
 
 const $ = (id: string) => document.getElementById(id);
@@ -31,6 +34,8 @@ const state = {
   bitrateInterval: undefined as any,
 };
 let currentRoom: Room | undefined;
+
+let startTime: number;
 
 const searchParams = new URLSearchParams(window.location.search);
 const storedUrl = searchParams.get("url") ?? "ws://localhost:7880";
@@ -58,7 +63,6 @@ const appActions = {
     const dynacast = (<HTMLInputElement>$("dynacast")).checked;
     const forceTURN = (<HTMLInputElement>$("force-turn")).checked;
     const adaptiveStream = (<HTMLInputElement>$("adaptive-stream")).checked;
-    const publishOnly = (<HTMLInputElement>$("publish-only")).checked;
     const shouldPublish = (<HTMLInputElement>$("publish-option")).checked;
     const preferredCodec = (<HTMLSelectElement>$("preferred-codec"))
       .value as VideoCodec;
@@ -67,12 +71,12 @@ const appActions = {
     updateSearchParams(url, token);
 
     const roomOpts: RoomOptions = {
-      adaptiveStream: adaptiveStream,
+      adaptiveStream,
       dynacast,
       publishDefaults: {
         simulcast,
         videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
-        videoCodec: preferredCodec,
+        videoCodec: preferredCodec || "vp8",
       },
       videoCaptureDefaults: {
         resolution: VideoPresets43.h720.resolution,
@@ -80,28 +84,20 @@ const appActions = {
     };
 
     const connectOpts: RoomConnectOptions = {
-      autoSubscribe: !publishOnly,
-      publishOnly: publishOnly ? "publish_only" : undefined,
+      autoSubscribe: true,
     };
     if (forceTURN) {
       connectOpts.rtcConfig = {
         iceTransportPolicy: "relay",
       };
     }
-    const room = await appActions.connectToRoom(
+    await appActions.connectToRoom(
       url,
       token,
       roomOpts,
-      connectOpts
+      connectOpts,
+      shouldPublish
     );
-
-    if (room && shouldPublish) {
-      await Promise.all([
-        room.localParticipant.setMicrophoneEnabled(true),
-        room.localParticipant.setCameraEnabled(true),
-      ]);
-      updateButtonsForPublishState();
-    }
 
     state.bitrateInterval = setInterval(renderBitrate, 1000);
   },
@@ -110,9 +106,11 @@ const appActions = {
     url: string,
     token: string,
     roomOptions?: RoomOptions,
-    connectOptions?: RoomConnectOptions
+    connectOptions?: RoomConnectOptions,
+    shouldPublish?: boolean
   ): Promise<Room | undefined> => {
     const room = new Room(roomOptions);
+
     room
       .on(RoomEvent.ParticipantConnected, participantConnected)
       .on(RoomEvent.ParticipantDisconnected, participantDisconnected)
@@ -128,12 +126,12 @@ const appActions = {
       .on(RoomEvent.LocalTrackPublished, () => {
         renderParticipant(room.localParticipant);
         updateButtonsForPublishState();
-        renderScreenShare();
+        renderScreenShare(room);
       })
       .on(RoomEvent.LocalTrackUnpublished, () => {
         renderParticipant(room.localParticipant);
         updateButtonsForPublishState();
-        renderScreenShare();
+        renderScreenShare(room);
       })
       .on(RoomEvent.RoomMetadataChanged, (metadata) => {
         appendLog("new metadata for room", metadata);
@@ -159,12 +157,31 @@ const appActions = {
             quality
           );
         }
-      );
+      )
+      .on(RoomEvent.TrackSubscribed, (_1, pub, participant) => {
+        appendLog("subscribed to track", pub.trackSid, participant.identity);
+        renderParticipant(participant);
+        renderScreenShare(room);
+      })
+      .on(RoomEvent.TrackUnsubscribed, (_, pub, participant) => {
+        appendLog("unsubscribed from track", pub.trackSid);
+        renderParticipant(participant);
+        renderScreenShare(room);
+      })
+      .on(RoomEvent.SignalConnected, async () => {
+        if (shouldPublish) {
+          await Promise.all([
+            room.localParticipant.setCameraEnabled(true),
+            room.localParticipant.setMicrophoneEnabled(true),
+          ]);
+          updateButtonsForPublishState();
+        }
+      });
 
     try {
-      const start = Date.now();
+      startTime = Date.now();
       await room.connect(url, token, connectOptions);
-      const elapsed = Date.now() - start;
+      const elapsed = Date.now() - startTime;
       appendLog(
         `successfully connected to ${room.name} in ${Math.round(elapsed)}ms`,
         room.engine.connectedServerAddress
@@ -246,7 +263,9 @@ const appActions = {
     const enabled = currentRoom.localParticipant.isScreenShareEnabled;
     appendLog(`${enabled ? "stopping" : "starting"} screen share`);
     setButtonDisabled("share-screen-button", true);
-    await currentRoom.localParticipant.setScreenShareEnabled(!enabled);
+    await currentRoom.localParticipant.setScreenShareEnabled(!enabled, {
+      audio: true,
+    });
     setButtonDisabled("share-screen-button", false);
     updateButtonsForPublishState();
   },
@@ -280,20 +299,8 @@ const appActions = {
   handleScenario: (e: Event) => {
     const scenario = (<HTMLSelectElement>e.target).value;
     if (scenario !== "") {
-      if (scenario === "signal-reconnect") {
-        appActions.disconnectSignal();
-      } else {
-        currentRoom?.simulateScenario(scenario);
-      }
+      currentRoom?.simulateScenario(scenario);
       (<HTMLSelectElement>e.target).value = "";
-    }
-  },
-
-  disconnectSignal: () => {
-    if (!currentRoom) return;
-    currentRoom.engine.client.close();
-    if (currentRoom.engine.client.onClose) {
-      currentRoom.engine.client.onClose("manual disconnect");
     }
   },
 
@@ -371,16 +378,6 @@ function participantConnected(participant: Participant) {
     participant.metadata
   );
   participant
-    .on(ParticipantEvent.TrackSubscribed, (_, pub: TrackPublication) => {
-      appendLog("subscribed to track", pub.trackSid, participant.identity);
-      renderParticipant(participant);
-      renderScreenShare();
-    })
-    .on(ParticipantEvent.TrackUnsubscribed, (_, pub: TrackPublication) => {
-      appendLog("unsubscribed from track", pub.trackSid);
-      renderParticipant(participant);
-      renderScreenShare();
-    })
     .on(ParticipantEvent.TrackMuted, (pub: TrackPublication) => {
       appendLog("track was muted", pub.trackSid, participant.identity);
       renderParticipant(participant);
@@ -403,15 +400,15 @@ function participantDisconnected(participant: RemoteParticipant) {
   renderParticipant(participant, true);
 }
 
-function handleRoomDisconnect() {
+function handleRoomDisconnect(reason?: DisconnectReason) {
   if (!currentRoom) return;
-  appendLog("disconnected from room");
+  appendLog("disconnected from room", { reason });
   setButtonsForState(false);
   renderParticipant(currentRoom.localParticipant, true);
   currentRoom.participants.forEach((p) => {
     renderParticipant(p, true);
   });
-  renderScreenShare();
+  renderScreenShare(currentRoom);
 
   const container = $("participants-area");
   if (container) {
@@ -462,6 +459,10 @@ function renderParticipant(participant: Participant, remove = false) {
         <div id="name-${identity}" class="name">
         </div>
         <div style="text-align: center;">
+          <span id="codec-${identity}" ${
+      infoHidden ? 'style="display: none"' : ""
+    } class="codec">
+          </span>
           <span id="size-${identity}" ${
       infoHidden ? 'style="display: none"' : ""
     } class="size">
@@ -538,12 +539,20 @@ function renderParticipant(participant: Participant, remove = false) {
       // flip
       videoElm.style.transform = "scale(-1, 1)";
     } else if (!cameraPub?.videoTrack?.attachedElements.includes(videoElm)) {
-      const startTime = Date.now();
+      const renderStartTime = Date.now();
       // measure time to render
       videoElm.onloadeddata = () => {
-        const elapsed = Date.now() - startTime;
+        const elapsed = Date.now() - renderStartTime;
+        let fromJoin = 0;
+        if (
+          participant.joinedAt &&
+          participant.joinedAt.getTime() < startTime
+        ) {
+          fromJoin = Date.now() - startTime;
+        }
         appendLog(
-          `RemoteVideoTrack ${cameraPub?.trackSid} (${videoElm.videoWidth}x${videoElm.videoHeight}) rendered in ${elapsed}ms`
+          `RemoteVideoTrack ${cameraPub?.trackSid} (${videoElm.videoWidth}x${videoElm.videoHeight}) rendered in ${elapsed}ms`,
+          fromJoin > 0 ? `, ${fromJoin}ms from start` : ""
         );
       };
     }
@@ -564,6 +573,17 @@ function renderParticipant(participant: Participant, remove = false) {
   if (micEnabled) {
     if (!(participant instanceof LocalParticipant)) {
       // don't attach local audio
+      audioELm.onloadeddata = () => {
+        if (
+          participant.joinedAt &&
+          participant.joinedAt.getTime() < startTime
+        ) {
+          const fromJoin = Date.now() - startTime;
+          appendLog(
+            `RemoteAudioTrack ${micPub?.trackSid} played ${fromJoin}ms from start`
+          );
+        }
+      };
       micPub?.audioTrack?.attach(audioELm);
     }
     micElm.className = "mic-on";
@@ -586,17 +606,18 @@ function renderParticipant(participant: Participant, remove = false) {
   }
 }
 
-function renderScreenShare() {
+function renderScreenShare(room: Room) {
   const div = $("screenshare-area")!;
-  if (!currentRoom || currentRoom.state !== ConnectionState.Connected) {
+  if (room.state !== ConnectionState.Connected) {
     div.style.display = "none";
     return;
   }
   let participant: Participant | undefined;
   let screenSharePub: TrackPublication | undefined =
-    currentRoom.localParticipant.getTrack(Track.Source.ScreenShare);
+    room.localParticipant.getTrack(Track.Source.ScreenShare);
+  let screenShareAudioPub: RemoteTrackPublication | undefined;
   if (!screenSharePub) {
-    currentRoom.participants.forEach((p) => {
+    room.participants.forEach((p) => {
       if (screenSharePub) {
         return;
       }
@@ -605,15 +626,22 @@ function renderScreenShare() {
       if (pub?.isSubscribed) {
         screenSharePub = pub;
       }
+      const audioPub = p.getTrack(Track.Source.ScreenShareAudio);
+      if (audioPub?.isSubscribed) {
+        screenShareAudioPub = audioPub;
+      }
     });
   } else {
-    participant = currentRoom.localParticipant;
+    participant = room.localParticipant;
   }
 
   if (screenSharePub && participant) {
     div.style.display = "block";
     const videoElm = <HTMLVideoElement>$("screenshare-video");
     screenSharePub.videoTrack?.attach(videoElm);
+    if (screenShareAudioPub) {
+      screenShareAudioPub.audioTrack?.attach(videoElm);
+    }
     videoElm.onresize = () => {
       updateVideoSize(videoElm, <HTMLSpanElement>$("screenshare-resolution"));
     };
@@ -637,6 +665,13 @@ function renderBitrate() {
     for (const t of p.tracks.values()) {
       if (t.track) {
         totalBitrate += t.track.currentBitrate;
+      }
+
+      if (t.source === Track.Source.Camera) {
+        if (t.videoTrack instanceof RemoteVideoTrack) {
+          const codecElm = $(`codec-${p.identity}`)!;
+          codecElm.innerHTML = t.videoTrack.getDecoderImplementation() ?? "";
+        }
       }
     }
     let displayText = "";
