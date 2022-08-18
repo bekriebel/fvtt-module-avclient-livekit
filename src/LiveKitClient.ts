@@ -24,6 +24,7 @@ import {
   VideoCaptureOptions,
   VideoPresets43,
   VideoTrack,
+  DisconnectReason,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as jwt from "jsonwebtoken";
@@ -701,11 +702,16 @@ export default class LiveKitClient {
     this.setConnectionQualityIndicator(fvttUserId, quality);
   }
 
-  onDisconnected(): void {
-    log.debug("Client disconnected");
-    ui.notifications?.warn(
-      `${getGame().i18n.localize(`${LANG_NAME}.onDisconnected`)}`
-    );
+  onDisconnected(reason?: DisconnectReason): void {
+    reason = DisconnectReason.JOIN_FAILURE;
+    log.debug("Client disconnected", { reason });
+    let disconnectWarning = `${getGame().i18n.localize(
+      `${LANG_NAME}.onDisconnected`
+    )}`;
+    if (reason) {
+      disconnectWarning += `: ${DisconnectReason[reason]}`;
+    }
+    ui.notifications?.warn(disconnectWarning);
 
     // Clear the participant map
     this.liveKitParticipants.clear();
