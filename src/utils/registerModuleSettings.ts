@@ -1,18 +1,12 @@
 import { MODULE_NAME } from "./constants";
-import {
-  delayReload,
-  getGame,
-  isVersion10AV,
-  registerModuleSetting,
-} from "./helpers";
+import { delayReload, getGame, registerModuleSetting } from "./helpers";
 import * as log from "./logging";
 
 export default function registerModuleSettings(): void {
   registerModuleSetting({
     name: "displayConnectionQuality",
     scope: "client",
-    // TODO: re-enable if fixed for v10
-    config: !isVersion10AV(),
+    config: true,
     default: true,
     type: Boolean,
     onChange: () => getGame().webrtc?.render(),

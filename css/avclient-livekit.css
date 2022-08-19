@@ -18,6 +18,16 @@
   display: inline-block;
 }
 
+.camera-view .connection-quality-indicator.is-version-10-av {
+  position: absolute;
+  bottom: calc(var(--av-frame-absolute-margin) + 5px);
+  left: calc(16px + var(--av-frame-absolute-margin));
+}
+
+.camera-view .connection-quality-indicator.is-version-10-av.no-nameplate {
+  left: calc(4px + var(--av-frame-absolute-margin));
+}
+
 .camera-view .connection-quality-indicator.excellent {
   background-color: green;
 }

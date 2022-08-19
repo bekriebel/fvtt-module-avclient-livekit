@@ -164,12 +164,6 @@ export default class LiveKitClient {
   }
 
   addConnectionQualityIndicator(userId: string): void {
-    // TODO: re-enable if fixed for v10
-    if (isVersion10AV()) {
-      log.debug("Connection quality indicator not yet supported in v10");
-      return;
-    }
-
     if (!getGame().settings.get(MODULE_NAME, "displayConnectionQuality")) {
       // Connection quality indicator is not enabled
       return;
@@ -185,13 +179,27 @@ export default class LiveKitClient {
     }
 
     const connectionQualityIndicator = $(
-      `<span class="connection-quality-indicator unknown" title="${getGame().i18n.localize(
+      `<div class="connection-quality-indicator unknown" title="${getGame().i18n.localize(
         `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`
       )}">`
     );
 
     if (userNameBar instanceof Element) {
-      $(userNameBar).prepend(connectionQualityIndicator);
+      if (isVersion10AV()) {
+        $(userNameBar).after(connectionQualityIndicator);
+        connectionQualityIndicator.addClass("is-version-10-av");
+
+        // @ts-expect-error Expecting error until foundry-vtt-types is updated for FVTT v10
+        const nameplateModes = AVSettings.NAMEPLATE_MODES;
+        const nameplateSetting =
+          // @ts-expect-error Expecting error until foundry-vtt-types is updated for FVTT v10
+          this.settings.client.nameplates ?? nameplateModes.BOTH;
+        if (nameplateSetting === nameplateModes.OFF) {
+          connectionQualityIndicator.addClass("no-nameplate");
+        }
+      } else {
+        $(userNameBar).prepend(connectionQualityIndicator);
+      }
     }
 
     this.setConnectionQualityIndicator(userId);
@@ -1253,7 +1261,7 @@ export default class LiveKitClient {
         ConnectionQuality.Unknown;
     }
 
-    if (connectionQualityIndicator instanceof HTMLSpanElement) {
+    if (connectionQualityIndicator instanceof HTMLDivElement) {
       // Remove all existing quality classes
       connectionQualityIndicator.classList.remove(
         ...Object.values(ConnectionQuality)
