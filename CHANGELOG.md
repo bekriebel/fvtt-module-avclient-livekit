@@ -1,3 +1,13 @@
+# 0.5.8
+
+- **Note**: It seems that the latest LiveKit release has adjusted the way the Connection Quality is calculated. It seems to be much more sensitive in my testing. A lower quality indicator may not mean your connection is unstable
+- Update dependencies, including livekit-client v1.2.11
+- Update web client for livekit-client v1.2.11
+- Display the reason for a disconnect when provided by the server
+- Updates to support FVTT v10.278; includes Nameplate settings and rendering on new settings changes
+- Switch to injecting custom elements into CameraViews instead of making a full copy of CameraViews. This allows better compatibility with FVTT v10
+- Fix the Connection Quality Indicator for FVTT v10
+
 # 0.5.7
 
 - Update dependencies, including livekit-client v1.2.0
