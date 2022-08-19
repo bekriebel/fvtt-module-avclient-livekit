@@ -197,6 +197,46 @@ export default class LiveKitClient {
     this.setConnectionQualityIndicator(userId);
   }
 
+  addToggleReceiveButtons(userId: string): void {
+    // Get the user camera view, settings, and audio element
+    const userCameraView = ui.webrtc?.getUserCameraView(userId);
+    const userSettings = getGame().webrtc?.settings.getUser(userId);
+    const userToggleAudioElement = userCameraView?.querySelector(
+      '[data-action="toggle-audio"]'
+    );
+
+    const receiveVideoState = !!userSettings?.hidden;
+    const receiveVideoTitle = receiveVideoState
+      ? getGame().i18n.localize(`${LANG_NAME}.TooltipEnableUserVideo`)
+      : getGame().i18n.localize(`${LANG_NAME}.TooltipDisableUserVideo`);
+    const receiveVideoIcon = receiveVideoState ? "fa-video-slash" : "fa-video";
+    const toggleReceiveVideoButton = $(
+      `<a class="av-control toggle livekit-control toggle-receive-video" title="${receiveVideoTitle}"><i class="fas ${receiveVideoIcon}"></i></a>`
+    );
+    toggleReceiveVideoButton.on("click", () => {
+      this.onClickToggleReceiveVideo(userId);
+    });
+
+    if (userToggleAudioElement instanceof Element) {
+      $(userToggleAudioElement).after(toggleReceiveVideoButton);
+    }
+
+    const receiveAudioState = !!userSettings?.muted;
+    const receiveAudioTitle = receiveAudioState
+      ? getGame().i18n.localize(`${LANG_NAME}.TooltipEnableUserAudio`)
+      : getGame().i18n.localize(`${LANG_NAME}.TooltipDisableUserAudio`);
+    const receiveAudioIcon = receiveAudioState
+      ? "fa-microphone-slash"
+      : "fa-microphone";
+    const toggleReceiveAudioButton = $(
+      `<a class="av-control toggle livekit-control toggle-receive-audio" title="${receiveAudioTitle}"><i class="fas ${receiveAudioIcon}"></i></a>`
+    );
+    toggleReceiveAudioButton.on("click", () => {
+      this.onClickToggleReceiveAudio(userId);
+    });
+    toggleReceiveVideoButton.after(toggleReceiveAudioButton);
+  }
+
   addLiveKitServerType(liveKitServerType: LiveKitServerType): boolean {
     if (!this.isLiveKitServerType(liveKitServerType)) {
       log.error(
@@ -678,6 +718,59 @@ export default class LiveKitClient {
         videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
       });
     }
+  }
+
+  onClickToggleReceiveAudio(userId: string): void {
+    // Toggle audio output
+    const userSettings = this.settings.getUser(userId);
+    const userActivity = this.settings.activity[userId || ""];
+    if (!userSettings?.canBroadcastAudio) {
+      return ui.notifications?.warn(
+        `${LANG_NAME}.WarningCannotBroadcastUserAudio`,
+        {
+          localize: true,
+        }
+      );
+    }
+    if (userActivity?.muted) {
+      return ui.notifications?.warn(
+        `${LANG_NAME}.WarningCannotEnableUserAudio`,
+        {
+          localize: true,
+        }
+      );
+    }
+    this.settings?.set("client", `users.${userId}.muted`, !userSettings?.muted);
+    ui.webrtc?.render();
+  }
+
+  onClickToggleReceiveVideo(userId: string): void {
+    // Toggle video display
+    const userSettings = this.settings.getUser(userId);
+    const userActivity = this.settings.activity[userId || ""];
+
+    if (!userSettings?.canBroadcastVideo) {
+      return ui.notifications?.warn(
+        `${LANG_NAME}.WarningCannotBroadcastUserVideo`,
+        {
+          localize: true,
+        }
+      );
+    }
+    if (userActivity?.hidden) {
+      return ui.notifications?.warn(
+        `${LANG_NAME}.WarningCannotEnableUserVideo`,
+        {
+          localize: true,
+        }
+      );
+    }
+    this.settings?.set(
+      "client",
+      `users.${userId}.hidden`,
+      !userSettings?.hidden
+    );
+    ui.webrtc?.render();
   }
 
   onConnectionQualityChanged(quality: string, participant: Participant) {

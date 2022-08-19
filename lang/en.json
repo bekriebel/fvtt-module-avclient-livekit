@@ -51,12 +51,12 @@
   "LIVEKITAVCLIENT.liveKitServerDetails": "LiveKit Server Details",
   "LIVEKITAVCLIENT.liveKitServerAPIKey": "LiveKit API Key",
   "LIVEKITAVCLIENT.liveKitServerSecretKey": "LiveKit Secret Key",
-  "WEBRTC.TooltipEnableUserVideo": "Enable User Video",
-  "WEBRTC.TooltipDisableUserVideo": "Disable User Video",
-  "WEBRTC.TooltipEnableUserAudio": "Enable User Audio",
-  "WEBRTC.TooltipDisableUserAudio": "Mute User Audio",
-  "WEBRTC.WarningCannotBroadcastUserVideo": "You cannot enable the user's camera because they to not have permission to broadcast their video feed.",
-  "WEBRTC.WarningCannotBroadcastUserAudio": "You cannot enable the user's microphone because they to not have permission to broadcast their audio feed.",
-  "WEBRTC.WarningCannotEnableUserVideo": "You cannot enable the user's camera because they have hidden themselves.",
-  "WEBRTC.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves."
+  "LIVEKITAVCLIENT.TooltipEnableUserVideo": "Enable User Video",
+  "LIVEKITAVCLIENT.TooltipDisableUserVideo": "Disable User Video",
+  "LIVEKITAVCLIENT.TooltipEnableUserAudio": "Enable User Audio",
+  "LIVEKITAVCLIENT.TooltipDisableUserAudio": "Mute User Audio",
+  "LIVEKITAVCLIENT.WarningCannotBroadcastUserVideo": "You cannot enable the user's camera because they to not have permission to broadcast their video feed.",
+  "LIVEKITAVCLIENT.WarningCannotBroadcastUserAudio": "You cannot enable the user's microphone because they to not have permission to broadcast their audio feed.",
+  "LIVEKITAVCLIENT.WarningCannotEnableUserVideo": "You cannot enable the user's camera because they have hidden themselves.",
+  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves."
 }

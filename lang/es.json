@@ -54,12 +54,12 @@
   "LIVEKITAVCLIENT.liveKitServerDetails": "Detalles del servidor LiveKit",
   "LIVEKITAVCLIENT.liveKitServerAPIKey": "Clave API LiveKit",
   "LIVEKITAVCLIENT.liveKitServerSecretKey": "Clave secreta LiveKit",
-  "WEBRTC.TooltipEnableUserVideo": "Habilitar vídeo de los usuarios",
-  "WEBRTC.TooltipDisableUserVideo": "Deshabilitar vídeo de los usuarios",
-  "WEBRTC.TooltipEnableUserAudio": "Habilitar audio de los usuarios",
-  "WEBRTC.TooltipDisableUserAudio": "Silenciar audio de los usuarios",
-  "WEBRTC.WarningCannotBroadcastUserVideo": "No puede habilitar la cámara del usuario porque no tiene permisos para enviar vídeo",
-  "WEBRTC.WarningCannotBroadcastUserAudio": "No puede habilitar el micrófono del usuario porque no tiene permisos para enviar vídeo",
-  "WEBRTC.WarningCannotEnableUserVideo": "No puede habilitar la cámara porque el usuario la ha desactivado",
-  "WEBRTC.WarningCannotEnableUserAudio": "No puede habilitar el micrófono porque el usuario se ha silenciado"
+  "LIVEKITAVCLIENT.TooltipEnableUserVideo": "Habilitar vídeo de los usuarios",
+  "LIVEKITAVCLIENT.TooltipDisableUserVideo": "Deshabilitar vídeo de los usuarios",
+  "LIVEKITAVCLIENT.TooltipEnableUserAudio": "Habilitar audio de los usuarios",
+  "LIVEKITAVCLIENT.TooltipDisableUserAudio": "Silenciar audio de los usuarios",
+  "LIVEKITAVCLIENT.WarningCannotBroadcastUserVideo": "No puede habilitar la cámara del usuario porque no tiene permisos para enviar vídeo",
+  "LIVEKITAVCLIENT.WarningCannotBroadcastUserAudio": "No puede habilitar el micrófono del usuario porque no tiene permisos para enviar vídeo",
+  "LIVEKITAVCLIENT.WarningCannotEnableUserVideo": "No puede habilitar la cámara porque el usuario la ha desactivado",
+  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "No puede habilitar el micrófono porque el usuario se ha silenciado"
 }

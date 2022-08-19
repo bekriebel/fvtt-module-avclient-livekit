@@ -709,6 +709,9 @@ export default class LiveKitAVClient extends AVClient {
     // Add connection quality indicator
     this._liveKitClient.addConnectionQualityIndicator(userId);
 
+    // Add receive audio/video toggle buttons
+    this._liveKitClient.addToggleReceiveButtons(userId);
+
     const event = new CustomEvent("webrtcVideoSet", { detail: userId });
     videoElement.dispatchEvent(event);
   }
