@@ -1,3 +1,8 @@
+# 0.5.9
+
+- Add an Audio Music Mode to tune settings for streaming audio from your A/V session
+- Update dependencies, including livekit-client v1.3.0
+
 # 0.5.8
 
 - **Note**: It seems that the latest LiveKit release has adjusted the way the Connection Quality is calculated. It seems to be much more sensitive in my testing. A lower quality indicator may not mean your connection is unstable
