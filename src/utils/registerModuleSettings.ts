@@ -13,6 +13,16 @@ export default function registerModuleSettings(): void {
   });
 
   registerModuleSetting({
+    name: "audioMusicMode",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () =>
+      getGame().webrtc?.client._liveKitClient.changeAudioSource(true),
+  });
+
+  registerModuleSetting({
     name: "disableReceivingAudio",
     scope: "client",
     config: true,

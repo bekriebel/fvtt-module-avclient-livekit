@@ -20,11 +20,12 @@ import {
   ConnectionState,
   Track,
   TrackPublication,
-  TrackPublishDefaults,
   VideoCaptureOptions,
   VideoPresets43,
   VideoTrack,
   DisconnectReason,
+  AudioPresets,
+  TrackPublishOptions,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as jwt from "jsonwebtoken";
@@ -337,7 +338,15 @@ export default class LiveKitClient {
     userVideoTrack.attach(videoElement);
   }
 
-  async changeAudioSource(): Promise<void> {
+  async changeAudioSource(forceStop = false): Promise<void> {
+    // Force the stop of an existing track
+    if (forceStop && this.audioTrack) {
+      this.liveKitRoom?.localParticipant.unpublishTrack(this.audioTrack);
+      this.audioTrack.stop();
+      this.audioTrack = null;
+      getGame().user?.broadcastActivity({ av: { muted: true } });
+    }
+
     if (
       !this.audioTrack ||
       this.settings.get("client", "audioSrc") === "disabled" ||
@@ -352,7 +361,8 @@ export default class LiveKitClient {
         await this.initializeAudioTrack();
         if (this.audioTrack) {
           await this.liveKitRoom?.localParticipant.publishTrack(
-            this.audioTrack
+            this.audioTrack,
+            this.trackPublishOptions
           );
           getGame().user?.broadcastActivity({ av: { muted: false } });
           this.avMaster.render();
@@ -383,10 +393,7 @@ export default class LiveKitClient {
         if (this.videoTrack) {
           await this.liveKitRoom?.localParticipant.publishTrack(
             this.videoTrack,
-            {
-              simulcast: this.simulcastEnabled,
-              videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
-            }
+            this.trackPublishOptions
           );
           const userVideoElement = ui.webrtc?.getUserVideoElement(
             getGame().user?.id || ""
@@ -454,13 +461,26 @@ export default class LiveKitClient {
       getGame().user?.id || ""
     );
 
-    return typeof audioSrc === "string" &&
-      audioSrc !== "disabled" &&
-      canBroadcastAudio
-      ? {
-          deviceId: { ideal: audioSrc },
-        }
-      : false;
+    if (
+      typeof audioSrc !== "string" ||
+      audioSrc === "disabled" ||
+      !canBroadcastAudio
+    ) {
+      return false;
+    }
+
+    const audioCaptureOptions: AudioCaptureOptions = {
+      deviceId: { ideal: audioSrc },
+    };
+
+    // Set audio parameters for music streaming mode
+    if (getGame().settings.get(MODULE_NAME, "audioMusicMode")) {
+      audioCaptureOptions.autoGainControl = false;
+      audioCaptureOptions.echoCancellation = false;
+      audioCaptureOptions.noiseSuppression = false;
+    }
+
+    return audioCaptureOptions;
   }
 
   getParticipantFVTTUser(participant: Participant): User | undefined {
@@ -654,15 +674,12 @@ export default class LiveKitClient {
 
   async initializeRoom(): Promise<void> {
     // set the LiveKit publish defaults
-    const liveKitPublishDefaults: TrackPublishDefaults = {
-      simulcast: this.simulcastEnabled,
-      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
-    };
+    const liveKitPublishDefaults = this.trackPublishOptions;
 
     // Set the livekit room options
     const liveKitRoomOptions: RoomOptions = {
-      adaptiveStream: this.simulcastEnabled,
-      dynacast: this.simulcastEnabled,
+      adaptiveStream: liveKitPublishDefaults.simulcast,
+      dynacast: liveKitPublishDefaults.simulcast,
       publishDefaults: liveKitPublishDefaults,
     };
 
@@ -718,13 +735,16 @@ export default class LiveKitClient {
 
     // Publish local tracks
     if (this.audioTrack) {
-      await this.liveKitRoom?.localParticipant.publishTrack(this.audioTrack);
+      await this.liveKitRoom?.localParticipant.publishTrack(
+        this.audioTrack,
+        this.trackPublishOptions
+      );
     }
     if (this.videoTrack) {
-      await this.liveKitRoom?.localParticipant.publishTrack(this.videoTrack, {
-        simulcast: this.simulcastEnabled,
-        videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
-      });
+      await this.liveKitRoom?.localParticipant.publishTrack(
+        this.videoTrack,
+        this.trackPublishOptions
+      );
     }
   }
 
@@ -1158,7 +1178,7 @@ export default class LiveKitClient {
 
     // Set resolution higher if simulcast is enabled
     let videoResolution = VideoPresets43.h240.resolution;
-    if (this.simulcastEnabled) {
+    if (this.trackPublishOptions.simulcast) {
       videoResolution = VideoPresets43.h720.resolution;
     }
 
@@ -1368,8 +1388,17 @@ export default class LiveKitClient {
     log.info("shareScreen:", enabled);
 
     if (enabled) {
+      // Configure audio options
+      const screenAudioOptions: AudioCaptureOptions = {
+        autoGainControl: false,
+        echoCancellation: false,
+        noiseSuppression: false,
+      };
+
       // Get screen tracks
-      this.screenTracks = await createLocalScreenTracks({ audio: true });
+      this.screenTracks = await createLocalScreenTracks({
+        audio: screenAudioOptions,
+      });
 
       this.screenTracks.forEach(async (screenTrack: LocalTrack) => {
         log.debug("screenTrack enable:", screenTrack);
@@ -1389,9 +1418,12 @@ export default class LiveKitClient {
         }
 
         // Publish the track
-        await this.liveKitRoom?.localParticipant.publishTrack(screenTrack, {
-          audioBitrate: 160000,
-        });
+        const screenTrackPublishOptions = this.trackPublishOptions;
+        screenTrackPublishOptions.audioBitrate = 128_000;
+        await this.liveKitRoom?.localParticipant.publishTrack(
+          screenTrack,
+          screenTrackPublishOptions
+        );
       });
     } else {
       this.screenTracks.forEach(async (screenTrack: LocalTrack) => {
@@ -1402,7 +1434,8 @@ export default class LiveKitClient {
         // Restart our video track
         if (screenTrack instanceof LocalVideoTrack && this.videoTrack) {
           await this.liveKitRoom?.localParticipant.publishTrack(
-            this.videoTrack
+            this.videoTrack,
+            this.trackPublishOptions
           );
 
           if (!this.videoTrack.isMuted) {
@@ -1413,9 +1446,17 @@ export default class LiveKitClient {
     }
   }
 
-  get simulcastEnabled(): boolean {
-    // Set simulcast to always enabled for testing of this functionality
-    // return getGame().settings.get(MODULE_NAME, "simulcast") === true;
-    return true;
+  get trackPublishOptions(): TrackPublishOptions {
+    const trackPublishOptions: TrackPublishOptions = {
+      audioBitrate: AudioPresets.speech.maxBitrate,
+      simulcast: true,
+      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
+    };
+
+    if (getGame().settings.get(MODULE_NAME, "audioMusicMode")) {
+      trackPublishOptions.audioBitrate = 128_000;
+    }
+
+    return trackPublishOptions;
   }
 }

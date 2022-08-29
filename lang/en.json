@@ -7,6 +7,8 @@
   "LIVEKITAVCLIENT.connectionQuality.good": "Good connection quality",
   "LIVEKITAVCLIENT.connectionQuality.poor": "Poor connection quality",
   "LIVEKITAVCLIENT.connectionQuality.unknown": "Unknown connection quality",
+  "LIVEKITAVCLIENT.audioMusicMode": "Audio Music Mode",
+  "LIVEKITAVCLIENT.audioMusicModeHint": "Configures audio input for music streaming by adjusting bitrate and disabling echo cancelation & noise suppression. This should not be used for normal voice communication.",
   "LIVEKITAVCLIENT.debug": "Enable debug logging",
   "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging",
   "LIVEKITAVCLIENT.disableReceivingAudio": "Disable receiving audio",
