@@ -19,7 +19,15 @@ interface ModuleSettingsObject<T = unknown> {
   scope: "client" | "world";
   config: boolean;
   default: boolean;
-  type: BooleanConstructor | undefined;
+  type?: T extends string
+    ? typeof String
+    : T extends number
+    ? typeof Number
+    : T extends boolean
+    ? typeof Boolean
+    : T extends Array<any>
+    ? typeof Array
+    : ConstructorOf<T>;
   range?: T extends number
     ? {
         max: number;
