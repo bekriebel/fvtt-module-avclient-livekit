@@ -14,28 +14,10 @@ interface DeviceInfo {
 }
 
 // Module Settings object
-interface ModuleSettingsObject<T = unknown> {
+interface ModuleSettingsObject<T = unknown>
+  extends Omit<SettingConfig<T>, "key" | "namespace"> {
+  /** The name that will be used to generate the key, name, and hint*/
   name: string;
-  scope: "client" | "world";
-  config: boolean;
-  default: boolean;
-  type?: T extends string
-    ? typeof String
-    : T extends number
-    ? typeof Number
-    : T extends boolean
-    ? typeof Boolean
-    : T extends Array<any>
-    ? typeof Array
-    : ConstructorOf<T>;
-  range?: T extends number
-    ? {
-        max: number;
-        min: number;
-        step: number;
-      }
-    : undefined;
-  onChange: (value: T) => void;
 }
 
 /**
@@ -135,8 +117,8 @@ export async function loadScript(scriptSrc: string): Promise<boolean> {
   });
 }
 
-export function registerModuleSetting(
-  settingsObject: ModuleSettingsObject
+export function registerModuleSetting<T>(
+  settingsObject: ModuleSettingsObject<T>
 ): void {
   getGame().settings.register(MODULE_NAME, settingsObject.name, {
     name: `${LANG_NAME}.${settingsObject.name}`,
