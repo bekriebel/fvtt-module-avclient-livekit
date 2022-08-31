@@ -1,3 +1,7 @@
+# 0.5.11
+
+- Add Dock Position settings in config screen for FoundryVTT v10.283
+
 # 0.5.10
 
 - Add adjustable bitrate for Music Mode
