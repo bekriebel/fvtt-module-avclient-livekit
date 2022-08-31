@@ -18,6 +18,24 @@ export default function registerModuleSettings(): void {
     config: true,
     default: false,
     type: Boolean,
+    onChange: () => {
+      // Re-register settings to update visibility of audioMusicModeRate
+      registerModuleSettings();
+      getGame().webrtc?.client._liveKitClient.changeAudioSource(true);
+    },
+  });
+
+  registerModuleSetting<number>({
+    name: "audioMusicModeRate",
+    scope: "client",
+    config: getGame().settings.get(MODULE_NAME, "audioMusicMode") === true,
+    default: 96,
+    type: Number,
+    range: {
+      min: 8,
+      max: 256,
+      step: 8,
+    },
     onChange: () =>
       getGame().webrtc?.client._liveKitClient.changeAudioSource(true),
   });

@@ -1417,9 +1417,18 @@ export default class LiveKitClient {
           }
         }
 
-        // Publish the track
+        // Get publishing options
         const screenTrackPublishOptions = this.trackPublishOptions;
-        screenTrackPublishOptions.audioBitrate = 128_000;
+
+        // Use the music mode bitrate
+        const audioMusicModeRate =
+          ((getGame().settings.get(
+            MODULE_NAME,
+            "audioMusicModeRate"
+          ) as number) || 96) * 1000;
+        screenTrackPublishOptions.audioBitrate = audioMusicModeRate;
+
+        // Publish the track
         await this.liveKitRoom?.localParticipant.publishTrack(
           screenTrack,
           screenTrackPublishOptions
@@ -1454,7 +1463,12 @@ export default class LiveKitClient {
     };
 
     if (getGame().settings.get(MODULE_NAME, "audioMusicMode")) {
-      trackPublishOptions.audioBitrate = 128_000;
+      const audioMusicModeRate =
+        ((getGame().settings.get(
+          MODULE_NAME,
+          "audioMusicModeRate"
+        ) as number) || 96) * 1000;
+      trackPublishOptions.audioBitrate = audioMusicModeRate;
     }
 
     return trackPublishOptions;

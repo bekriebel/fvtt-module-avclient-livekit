@@ -9,6 +9,8 @@
   "LIVEKITAVCLIENT.connectionQuality.unknown": "Unknown connection quality",
   "LIVEKITAVCLIENT.audioMusicMode": "Audio Music Mode",
   "LIVEKITAVCLIENT.audioMusicModeHint": "Configures audio input for music streaming by adjusting bitrate and disabling echo cancelation & noise suppression. This should not be used for normal voice communication.",
+  "LIVEKITAVCLIENT.audioMusicModeRate": "Music Mode Bitrate (kbps)",
+  "LIVEKITAVCLIENT.audioMusicModeRateHint": "The bitrate used for audio when Music Mode is enabled. Increasing this will affect bandwidth and resource requirements on all clients.",
   "LIVEKITAVCLIENT.debug": "Enable debug logging",
   "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging",
   "LIVEKITAVCLIENT.disableReceivingAudio": "Disable receiving audio",
