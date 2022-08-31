@@ -58,6 +58,13 @@
 
         {{#if isVersion10AV}}
         <div class="form-group">
+            <label>{{localize "WEBRTC.DockPosition"}}</label>
+            <select name="client.dockPosition">
+                {{selectOptions dockPositions selected=settings.client.dockPosition}}
+            </select>
+        </div>
+
+        <div class="form-group">
             <label>{{localize "WEBRTC.Nameplates"}}</label>
             <select name="client.nameplates" data-dtype="Number">
                 {{selectOptions nameplates selected=nameplateSetting localize=true}}
@@ -117,7 +124,7 @@
     </div>
     {{/if}}
 
-    <button type="submit" name="submit" {{#if noSSL}}disabled{{/if}}>
+    <button type="submit" {{#if noSSL}}disabled{{/if}}>
         <i class="far fa-save"></i> {{localize "Save Changes"}}
     </button>
 </form>
