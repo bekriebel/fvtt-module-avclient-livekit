@@ -1,3 +1,7 @@
+# 0.5.10
+
+- Add adjustable bitrate for Music Mode
+
 # 0.5.9
 
 - Add an Audio Music Mode to tune settings for streaming audio from your A/V session
