@@ -33,6 +33,9 @@
             <i class="fas fa-server"></i> {{localize "WEBRTC.ServerTab"}}
         </a>
         {{/if}}
+        <a class="item" data-tab="livekit">
+            <i class="fas fa-cogs"></i> {{localize "LIVEKITAVCLIENT.moduleName"}}
+        </a>
     </nav>
 
     <!-- General Tab -->
@@ -123,6 +126,47 @@
         </div>
     </div>
     {{/if}}
+
+    <!-- Livekit Tab -->
+    <div class="tab" data-tab="livekit">
+        {{#each this.liveKitSettings}}
+        <div class="form-group">
+            <label>{{this.name}}</label>
+            <div class="form-fields">
+
+                {{#if this.isCheckbox}}
+                <input type="checkbox" name="{{this.id}}" data-dtype="Boolean" {{checked this.value}}/>
+
+                {{else if this.isSelect}}
+                <select name="{{this.id}}" data-dtype="{{this.settingType}}">
+                    {{#select this.value}}
+                    {{#each this.choices as |name k|}}
+                    <option value="{{k}}">{{localize name}}</option>
+                    {{/each}}
+                    {{/select}}
+                </select>
+
+                {{else if this.isRange}}
+                <input type="range" name="{{this.id}}" data-dtype="Number" value="{{ this.value }}"
+                    min="{{ this.range.min }}" max="{{ this.range.max }}" step="{{ this.range.step }}"/>
+                <span class="range-value">{{this.value}}</span>
+
+                {{else if this.filePicker}}
+                {{filePicker target=this.id type=this.filePickerType}}
+                <input type="text" name="{{this.id}}" value="{{this.value}}" data-dtype="{{this.settingType}}"/>
+
+                {{else if this.isNumber}}
+                {{numberInput this.value name=this.id}}
+
+                {{else}}
+                <input type="text" name="{{this.id}}" value="{{this.value}}" data-dtype="{{this.settingType}}"/>
+                {{/if}}
+            </div>
+
+            <p class="notes">{{this.hint}}</p>
+        </div>
+        {{/each}}
+    </div>
 
     <button type="submit" {{#if noSSL}}disabled{{/if}}>
         <i class="far fa-save"></i> {{localize "Save Changes"}}

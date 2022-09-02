@@ -24,6 +24,7 @@
   "LIVEKITAVCLIENT.displayConnectionQualityHint": "Display a connection quality indicator beside each player's name to show the quality of their connection to the LiveKit server",
   "LIVEKITAVCLIENT.indicatorMuted": "Audio Muted",
   "LIVEKITAVCLIENT.indicatorHidden": "Video Hidden",
+  "LIVEKITAVCLIENT.moduleName": "LiveKit AVClient",
   "LIVEKITAVCLIENT.onDisconnected": "Disconnected from LiveKit A/V Server",
   "LIVEKITAVCLIENT.liveKitTrace": "Enable LiveKit trace logging",
   "LIVEKITAVCLIENT.liveKitTraceHint": "Enables trace logging of the LiveKit client library",

@@ -1,4 +1,6 @@
+import { LiveKitSettingsConfig } from "../types/avclient-livekit";
 import LiveKitClient from "./LiveKitClient";
+import { MODULE_NAME } from "./utils/constants";
 import { getGame, isVersion10AV } from "./utils/helpers";
 import * as log from "./utils/logging";
 
@@ -8,6 +10,40 @@ export default class LiveKitAVConfig extends AVConfig {
     return mergeObject(super.defaultOptions, {
       template: "modules/avclient-livekit/templates/av-config.html",
     });
+  }
+
+  _getLiveKitSettings() {
+    const gs = getGame().settings;
+    const canConfigure = getGame().user?.can("SETTINGS_MODIFY");
+
+    const liveKitSettings = [];
+
+    for (const setting of gs.settings.values()) {
+      if (
+        setting.namespace !== MODULE_NAME ||
+        !setting.config ||
+        (!canConfigure && setting.scope !== "client")
+      )
+        continue;
+
+      // Update setting data
+      const s: LiveKitSettingsConfig = foundry.utils.deepClone(setting);
+      s.id = `${s.namespace}.${s.key}`;
+      s.name = getGame().i18n.localize(s.name || "");
+      s.hint = getGame().i18n.localize(s.hint || "");
+      s.value = getGame().settings.get(s.namespace, s.key);
+      s.settingType =
+        setting.type instanceof Function ? setting.type.name : "String";
+      s.isCheckbox = setting.type === Boolean;
+      s.isSelect = s.choices !== undefined;
+      s.isRange = setting.type === Number && s.range;
+      s.isNumber = setting.type === Number;
+      s.filePickerType = s.filePicker === true ? "any" : s.filePicker;
+
+      liveKitSettings.push(s);
+    }
+
+    return liveKitSettings;
   }
 
   /** @override */
@@ -20,6 +56,7 @@ export default class LiveKitAVConfig extends AVConfig {
       isVersion10AV: isVersion10AV(),
       liveKitServerTypes:
         getGame().webrtc?.client._liveKitClient.liveKitServerTypes,
+      liveKitSettings: this._getLiveKitSettings(),
     });
   }
 
@@ -144,5 +181,20 @@ export default class LiveKitAVConfig extends AVConfig {
     if (section) {
       section.find("p").html(value);
     }
+  }
+
+  /** @override */
+  async _updateObject(event: Event, formData: object) {
+    for (const [k, v] of Object.entries(
+      foundry.utils.flattenObject(formData)
+    )) {
+      const s = getGame().settings.settings.get(k);
+      if (s?.namespace !== MODULE_NAME) continue;
+      const current = getGame().settings.get(s.namespace, s.key);
+      if (v === current) continue;
+      await getGame().settings.set(s.namespace, s.key, v);
+    }
+
+    await super._updateObject(event, formData);
   }
 }

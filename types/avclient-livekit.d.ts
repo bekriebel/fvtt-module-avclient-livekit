@@ -52,6 +52,21 @@ interface SocketMessage {
 }
 
 /**
+ * Types
+ */
+
+type LiveKitSettingsConfig = SettingConfig & {
+  id?: string;
+  value?: unknown;
+  settingType?: string;
+  isCheckbox?: boolean;
+  isSelect?: boolean;
+  isRange?: boolean;
+  isNumber?: boolean;
+  filePickerType?: string;
+};
+
+/**
  * Global settings
  */
 
