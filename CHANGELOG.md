@@ -1,3 +1,9 @@
+# 0.5.12
+
+- Update README to include new informational badges and link to our community Discord server
+- Add a `LiveKit AVClient` tab under Audio/Video Configuration to easily access module settings
+- Update dependencies, including livekit-client v1.3.1
+
 # 0.5.11
 
 - Add Dock Position settings in config screen for FoundryVTT v10.283
