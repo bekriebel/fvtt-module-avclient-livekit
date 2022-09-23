@@ -1,3 +1,8 @@
+# 0.5.13
+
+- Update dependencies, including livekit-client v1.3.3
+- Update README links to LiveKit server installation guides
+
 # 0.5.12
 
 - Update README to include new informational badges and link to our community Discord server
