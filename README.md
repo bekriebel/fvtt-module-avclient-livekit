@@ -67,7 +67,7 @@ There are several examples available for launching your own livekit server:
 
 - [User created guides for FoundryVTT](https://github.com/bekriebel/fvtt-module-avclient-livekit/wiki)
 - [LiveKit Getting Started](https://docs.livekit.io/guides/getting-started)
-- [Deploy to a VM (GCP/AWS/Digial Ocean/Linode/Vultr/etc)](https://docs.livekit.io/deploy/vm)
+- [Deploy to a VM (GCP/AWS/Digital Ocean/Linode/Vultr/etc)](https://docs.livekit.io/deploy/vm)
 - [Deploy to Kubernetes](https://docs.livekit.io/deploy/kubernetes)
 
 Though newer versions may work, the current recommended LiveKit server version is v0.15.6. This has had the most extensive testing done with the module and matches the current client SDK version that the module is using.
