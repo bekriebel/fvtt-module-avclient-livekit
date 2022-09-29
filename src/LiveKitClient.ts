@@ -478,6 +478,7 @@ export default class LiveKitClient {
       audioCaptureOptions.autoGainControl = false;
       audioCaptureOptions.echoCancellation = false;
       audioCaptureOptions.noiseSuppression = false;
+      audioCaptureOptions.channelCount = { ideal: 2 };
     }
 
     return audioCaptureOptions;
@@ -1393,6 +1394,7 @@ export default class LiveKitClient {
         autoGainControl: false,
         echoCancellation: false,
         noiseSuppression: false,
+        channelCount: { ideal: 2 },
       };
 
       // Get screen tracks
