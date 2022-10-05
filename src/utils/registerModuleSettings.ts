@@ -33,7 +33,7 @@ export default function registerModuleSettings(): void {
     type: Number,
     range: {
       min: 8,
-      max: 256,
+      max: 224,
       step: 8,
     },
     onChange: () =>
