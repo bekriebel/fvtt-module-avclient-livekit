@@ -471,6 +471,7 @@ export default class LiveKitClient {
 
     const audioCaptureOptions: AudioCaptureOptions = {
       deviceId: { ideal: audioSrc },
+      channelCount: { ideal: 1 },
     };
 
     // Set audio parameters for music streaming mode
@@ -1459,7 +1460,7 @@ export default class LiveKitClient {
 
   get trackPublishOptions(): TrackPublishOptions {
     const trackPublishOptions: TrackPublishOptions = {
-      audioBitrate: AudioPresets.speech.maxBitrate,
+      audioBitrate: AudioPresets.music.maxBitrate,
       simulcast: true,
       videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
     };
