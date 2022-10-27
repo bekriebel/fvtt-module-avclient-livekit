@@ -770,6 +770,11 @@ export default class LiveKitAVClient extends AVClient {
     ].some((k) => keys.has(k));
     if (audioSourceChange || videoSourceChange || renderChange)
       this.master.render();
+
+    // Refresh the main settings page if it is open, in case one of our settings has changed
+    if (getGame().settings.sheet.rendered) {
+      getGame().settings.sheet.render();
+    }
   }
 
   /* -------------------------------------------- */
