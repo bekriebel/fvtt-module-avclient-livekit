@@ -15,25 +15,25 @@
   ],
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
-    "livekit-client": "^1.4.1"
+    "livekit-client": "^1.5.0"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
     "@types/jsonwebtoken": "^8.5.9",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
+    "@typescript-eslint/eslint-plugin": "^5.41.0",
+    "@typescript-eslint/parser": "^5.41.0",
     "@typhonjs-fvtt/validate-manifest": "^8.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
     "crypto-browserify": "^3.12.0",
-    "eslint": "^8.24.0",
+    "eslint": "^8.26.0",
     "process": "^0.11.10",
-    "source-map-loader": "^4.0.0",
+    "source-map-loader": "^4.0.1",
     "stream-browserify": "^3.0.0",
     "terser-webpack-plugin": "^5.3.6",
     "ts-loader": "^9.4.1",
     "typescript": "^4.8.4",
-    "util": "^0.12.4",
+    "util": "^0.12.5",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.8.0"
