@@ -111,6 +111,11 @@ const appActions = {
   ): Promise<Room | undefined> => {
     const room = new Room(roomOptions);
 
+    startTime = Date.now();
+    await room.prepareConnection(url);
+    const prewarmTime = Date.now() - startTime;
+    appendLog(`prewarmed connection in ${prewarmTime}ms`);
+
     room
       .on(RoomEvent.ParticipantConnected, participantConnected)
       .on(RoomEvent.ParticipantDisconnected, participantDisconnected)
@@ -169,6 +174,8 @@ const appActions = {
         renderScreenShare(room);
       })
       .on(RoomEvent.SignalConnected, async () => {
+        const signalConnectionTime = Date.now() - startTime;
+        appendLog(`signal connection established in ${signalConnectionTime}ms`);
         if (shouldPublish) {
           await Promise.all([
             room.localParticipant.setCameraEnabled(true),
@@ -179,7 +186,6 @@ const appActions = {
       });
 
     try {
-      startTime = Date.now();
       await room.connect(url, token, connectOptions);
       const elapsed = Date.now() - startTime;
       appendLog(
@@ -298,7 +304,15 @@ const appActions = {
 
   handleScenario: (e: Event) => {
     const scenario = (<HTMLSelectElement>e.target).value;
-    if (scenario !== "") {
+    if (scenario === "subscribe-all") {
+      currentRoom?.participants.forEach((p) => {
+        p.tracks.forEach((rp) => rp.setSubscribed(true));
+      });
+    } else if (scenario === "unsubscribe-all") {
+      currentRoom?.participants.forEach((p) => {
+        p.tracks.forEach((rp) => rp.setSubscribed(false));
+      });
+    } else if (scenario !== "") {
       currentRoom?.simulateScenario(scenario);
       (<HTMLSelectElement>e.target).value = "";
     }
@@ -339,6 +353,17 @@ const appActions = {
       currentRoom.participants.forEach((participant) => {
         participant.tracks.forEach((track) => {
           track.setVideoQuality(q);
+        });
+      });
+    }
+  },
+
+  handlePreferredFPS: (e: Event) => {
+    const fps = +(<HTMLSelectElement>e.target).value;
+    if (currentRoom) {
+      currentRoom.participants.forEach((participant) => {
+        participant.tracks.forEach((track) => {
+          track.setVideoFPS(fps);
         });
       });
     }
@@ -483,7 +508,7 @@ function renderParticipant(participant: Participant, remove = false) {
         <input id="volume-${identity}" type="range" min="0" max="1" step="0.1" value="1" orient="vertical" />
       </div>`
       }
-      
+
     `;
     container.appendChild(div);
 
@@ -747,28 +772,18 @@ async function handleDevicesChanged() {
       }
       const devices = await Room.getLocalDevices(kind);
       const element = <HTMLSelectElement>$(id);
-      populateSelect(kind, element, devices, state.defaultDevices.get(kind));
+      populateSelect(element, devices, state.defaultDevices.get(kind));
     })
   );
 }
 
 function populateSelect(
-  kind: MediaDeviceKind,
   element: HTMLSelectElement,
   devices: MediaDeviceInfo[],
   selectedDeviceId?: string
 ) {
   // clear all elements
   element.innerHTML = "";
-  const initialOption = document.createElement("option");
-  if (kind === "audioinput") {
-    initialOption.text = "Audio Input (default)";
-  } else if (kind === "videoinput") {
-    initialOption.text = "Video Input (default)";
-  } else if (kind === "audiooutput") {
-    initialOption.text = "Audio Output (default)";
-  }
-  element.appendChild(initialOption);
 
   for (const device of devices) {
     const option = document.createElement("option");

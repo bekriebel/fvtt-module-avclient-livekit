@@ -169,6 +169,8 @@
                 <option value="migration">Migration</option>
                 <option value="force-tcp">Force TCP</option>
                 <option value="force-tls">Force TURN/TLS</option>
+                <option value="subscribe-all">Subscribe all</option>
+                <option value="unsubscribe-all">Unsubscribe all</option>
               </select>
               <button
                 id="disconnect-room-button"
@@ -198,6 +200,17 @@
                 <option value="high">high</option>
                 <option value="medium">medium</option>
                 <option value="low">low</option>
+              </select>
+              <select
+                id="preferred-fps"
+                class="custom-select"
+                style="width: auto"
+                onchange="appActions.handlePreferredFPS(event)"
+              >
+                <option value="" selected>PreferredFPS</option>
+                <option value="30">30</option>
+                <option value="15">15</option>
+                <option value="8">8</option>
               </select>
             </div>
           </div>
@@ -275,7 +288,7 @@
         <textarea id="log"></textarea>
       </div>
     </div>
-    <script src="../livekit-web-client.bundle.js"></script>
+    <script src="../livekit-web-client.bundle.js" type="module"></script>
     <!-- for icons -->
     <script
       src="https://kit.fontawesome.com/7c1c4c7e9c.js"
