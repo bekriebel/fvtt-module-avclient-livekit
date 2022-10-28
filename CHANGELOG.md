@@ -1,3 +1,14 @@
+# 0.5.14
+
+- Fix documentation typo (thank, Lektu!)
+- Updated Spanish translations (thanks, @lozalojo!)
+- Update dependencies, including livekit-client v1.5.0 (now with stereo audio support!)
+- Update web-client for livekit-client v1.5.0
+- Set Audio Music Mode and screen sharing to prefer stereo input
+- Set max audio bitrate to 224 to prevent browser crashes
+- Increase the default audio quality to match new LiveKit defaults
+- Re-render the main settings page if it is open when LiveKit settings are changed
+
 # 0.5.13
 
 - Update dependencies, including livekit-client v1.3.3
