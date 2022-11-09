@@ -1,3 +1,9 @@
+# 0.5.15
+
+- Update dependencies
+- Switch foundry-vtt-types to github version for v10 compatibility
+- Update manifest attributes for current standards to remove FoundryVTT warnings
+
 # 0.5.14
 
 - Fix documentation typo (thank, Lektu!)
