@@ -1,3 +1,7 @@
+# 0.5.17
+
+- Once again fix manifest for v9 compatibility entry
+
 # 0.5.16
 
 - Fix manifest for v9 compatibility entry
