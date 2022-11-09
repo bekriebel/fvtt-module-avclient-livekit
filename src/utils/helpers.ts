@@ -82,7 +82,7 @@ export function getGame(): Game {
 // Returns if the current version is using the new v10 AV
 export function isVersion10AV(): boolean {
   return isNewerVersion(
-    getGame().version || getGame().data.version || 0,
+    getGame().release.version || getGame().data.version || 0,
     "10.265"
   );
 }

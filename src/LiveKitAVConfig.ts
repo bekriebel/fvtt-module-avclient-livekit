@@ -47,9 +47,7 @@ export default class LiveKitAVConfig extends AVConfig {
   }
 
   /** @override */
-  async getData(
-    options: Partial<FormApplicationOptions>
-  ): Promise<AVConfig.Data> {
+  async getData(options: Partial<FormApplicationOptions>): Promise<object> {
     const data = await super.getData(options);
 
     return mergeObject(data, {
