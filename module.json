@@ -1,5 +1,6 @@
 {
   "id": "avclient-livekit",
+  "name": "avclient-livekit",
   "title": "LiveKit AVClient",
   "description": "Use LiveKit to handle A/V",
   "author": "bekit",
@@ -16,9 +17,11 @@
   ],
   "version": "0.5.16",
   "compatibility": {
-    "minimum": "9",
+    "minimum": "9.238",
     "verified": "10"
   },
+  "minimumCoreVersion": "9.238",
+  "compatibleCoreVersion": "10",
   "manifestPlusVersion": "1.2.0",
   "esmodules": ["avclient-livekit.bundle.js"],
   "styles": ["css/avclient-livekit.css"],
