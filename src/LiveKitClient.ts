@@ -28,7 +28,6 @@ import {
   TrackPublishOptions,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
-import * as jwt from "jsonwebtoken";
 import * as log from "./utils/logging";
 import { getGame, isVersion10AV } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
@@ -38,6 +37,7 @@ import {
   SocketMessage,
 } from "../types/avclient-livekit";
 import { addContextOptions, breakout } from "./LiveKitBreakout";
+import { SignJWT } from "jose";
 
 export enum InitState {
   Uninitialized = "uninitialized",
@@ -428,16 +428,6 @@ export default class LiveKitClient {
     userName: string,
     metadata: string
   ): Promise<string> {
-    // Set ths signing options
-    const signOpts: jwt.SignOptions = {
-      issuer: apiKey, // The configured API Key
-      expiresIn: "10h", // Expire after 12 hours
-      jwtid: userName, // Use the username for the JWT ID
-      subject: userName, // Use the username fot the JWT Subject
-      notBefore: "-15m", // Give us a 15 minute buffer in case the user's clock is set incorrectly
-      noTimestamp: true, // Don't set a timestamp since we are backdating the token
-    };
-
     // Set the payload to be signed, including the permission to join the room and the user metadata
     const tokenPayload = {
       video: {
@@ -448,8 +438,21 @@ export default class LiveKitClient {
       metadata: metadata,
     };
 
+    // Get the epoch timestamp for 15m before now for JWT not before value
+    const notBefore = Math.floor(
+      new Date(Date.now() - 1000 * (60 * 15)).getTime() / 1000
+    );
+
     // Sign and return the JWT
-    const accessTokenJwt = jwt.sign(tokenPayload, secretKey, signOpts);
+    const accessTokenJwt = await new SignJWT(tokenPayload)
+      .setIssuer(apiKey) // The configured API Key
+      .setExpirationTime("10h") // Expire after 12 hours
+      .setJti(userName) // Use the username for the JWT ID
+      .setSubject(userName) // Use the username fot the JWT Subject
+      .setNotBefore(notBefore) // Give us a 15 minute buffer in case the user's clock is set incorrectly
+      .setProtectedHeader({ alg: "HS256" })
+      .sign(new TextEncoder().encode(secretKey));
+
     log.debug("AccessToken:", accessTokenJwt);
     return accessTokenJwt;
   }
