@@ -1,8 +1,10 @@
 import {
   ConnectionQuality,
   ConnectionState,
+  createAudioAnalyser,
   DataPacket_Kind,
   DisconnectReason,
+  LocalAudioTrack,
   LocalParticipant,
   LogLevel,
   MediaDeviceFailure,
@@ -66,6 +68,7 @@ const appActions = {
     const shouldPublish = (<HTMLInputElement>$("publish-option")).checked;
     const preferredCodec = (<HTMLSelectElement>$("preferred-codec"))
       .value as VideoCodec;
+    const autoSubscribe = (<HTMLInputElement>$("auto-subscribe")).checked;
 
     setLogLevel(LogLevel.debug);
     updateSearchParams(url, token);
@@ -84,7 +87,7 @@ const appActions = {
     };
 
     const connectOpts: RoomConnectOptions = {
-      autoSubscribe: true,
+      autoSubscribe: autoSubscribe,
     };
     if (forceTURN) {
       connectOpts.rtcConfig = {
@@ -128,7 +131,19 @@ const appActions = {
           room.engine.connectedServerAddress
         );
       })
-      .on(RoomEvent.LocalTrackPublished, () => {
+      .on(RoomEvent.LocalTrackPublished, (pub) => {
+        const track = pub.track as LocalAudioTrack;
+
+        if (track instanceof LocalAudioTrack) {
+          const { calculateVolume } = createAudioAnalyser(track);
+
+          setInterval(() => {
+            $("local-volume")?.setAttribute(
+              "value",
+              calculateVolume().toFixed(4)
+            );
+          }, 200);
+        }
         renderParticipant(room.localParticipant);
         updateButtonsForPublishState();
         renderScreenShare(room);
@@ -163,7 +178,7 @@ const appActions = {
           );
         }
       )
-      .on(RoomEvent.TrackSubscribed, (_1, pub, participant) => {
+      .on(RoomEvent.TrackSubscribed, (track, pub, participant) => {
         appendLog("subscribed to track", pub.trackSid, participant.identity);
         renderParticipant(participant);
         renderScreenShare(room);
@@ -176,11 +191,11 @@ const appActions = {
       .on(RoomEvent.SignalConnected, async () => {
         const signalConnectionTime = Date.now() - startTime;
         appendLog(`signal connection established in ${signalConnectionTime}ms`);
+        // speed up publishing by starting to publish before it's fully connected
+        // publishing is accepted as soon as signal connection has established
         if (shouldPublish) {
-          await Promise.all([
-            room.localParticipant.setCameraEnabled(true),
-            room.localParticipant.setMicrophoneEnabled(true),
-          ]);
+          await room.localParticipant.enableCameraAndMicrophone();
+          appendLog(`tracks published in ${Date.now() - startTime}ms`);
           updateButtonsForPublishState();
         }
       });
@@ -503,10 +518,11 @@ function renderParticipant(participant: Participant, remove = false) {
         </div>
       </div>
       ${
-        participant instanceof RemoteParticipant &&
-        `<div class="volume-control">
+        participant instanceof RemoteParticipant
+          ? `<div class="volume-control">
         <input id="volume-${identity}" type="range" min="0" max="1" step="0.1" value="1" orient="vertical" />
       </div>`
+          : `<progress id="local-volume" max="1" value="0" />`
       }
 
     `;
