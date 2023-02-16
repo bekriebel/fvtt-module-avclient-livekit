@@ -681,7 +681,6 @@ export default class LiveKitAVClient extends AVClient {
     // For all other users, get their video and audio tracks
     const userAudioTrack = this._liveKitClient.getUserAudioTrack(userId);
     const userVideoTrack = this._liveKitClient.getUserVideoTrack(userId);
-    const userCanShareAudio = this.master.canUserShareAudio(userId);
 
     // Add the video for the user
     if (userVideoTrack) {
@@ -689,7 +688,7 @@ export default class LiveKitAVClient extends AVClient {
     }
 
     // Get the audio element for the user
-    if (userAudioTrack instanceof RemoteAudioTrack && userCanShareAudio) {
+    if (userAudioTrack instanceof RemoteAudioTrack) {
       const audioElement = this._liveKitClient.getUserAudioElement(
         userId,
         videoElement,
