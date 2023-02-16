@@ -53,6 +53,30 @@ Hooks.on("ready", () => {
     type: LiveKitAVConfig,
     restricted: false,
   });
+
+  // TODO: Remove when FoundryVTT includes this patch
+  AVSettings.prototype.handleUserActivity = function handleUserActivity(
+    userId: string,
+    settings: AVSettingsData
+  ) {
+    const current = this.activity[userId] || {};
+    this.activity[userId] = foundry.utils.mergeObject(current, settings, {
+      inplace: false,
+    });
+    const hiddenChanged =
+      "hidden" in settings && current.hidden !== settings.hidden;
+    const mutedChanged =
+      "muted" in settings && current.muted !== settings.muted;
+    if (
+      (hiddenChanged || mutedChanged) &&
+      ui.webrtc?.getUserVideoElement(userId)
+    ) {
+      // @ts-expect-error Using a protected method
+      ui.webrtc?._refreshView(userId);
+    }
+    if ("speaking" in settings)
+      ui.webrtc?.setUserIsSpeaking(userId, settings.speaking || false);
+  };
 });
 
 // Listen for DebugSet event
