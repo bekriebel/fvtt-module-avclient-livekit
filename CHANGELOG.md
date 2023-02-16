@@ -1,3 +1,12 @@
+# 0.5.18
+
+- Update dependencies, including livekit-client v1.6.5
+- Update web-client for livekit-client v1.5.0
+- Update token signing to a dependency that supports client-side JWT signing
+- Minor updates to support Foundry v10.291
+- A a temporary fix to AVSettings to prevent camera flickering during mute/un-mute (will be removed when FoundryVTT integrates this patch)
+- Fix to always create the web audio element when a track is provided
+
 # 0.5.17
 
 - Once again fix manifest for v9 compatibility entry
