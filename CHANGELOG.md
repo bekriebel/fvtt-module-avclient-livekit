@@ -1,3 +1,8 @@
+# 0.5.19
+
+- Catch errors when trying to get a list of media devices
+- Switch to using LiveKit's media device listing method
+
 # 0.5.18
 
 - Update dependencies, including livekit-client v1.6.5
