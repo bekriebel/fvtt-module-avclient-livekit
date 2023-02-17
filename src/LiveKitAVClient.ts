@@ -4,6 +4,7 @@ import {
   RoomConnectOptions,
   ConnectionState,
   setLogLevel,
+  Room,
 } from "livekit-client";
 
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
@@ -463,14 +464,17 @@ export default class LiveKitAVClient extends AVClient {
   async _getSourcesOfType(
     kind: MediaDeviceKind
   ): Promise<Record<string, string>> {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.reduce((obj: Record<string, string>, device) => {
-      if (device.kind === kind) {
+    try {
+      const devices = await Room.getLocalDevices(kind);
+      return devices.reduce((obj: Record<string, string>, device) => {
         obj[device.deviceId] =
           device.label || getGame().i18n.localize("WEBRTC.UnknownDevice");
-      }
-      return obj;
-    }, {});
+        return obj;
+      }, {});
+    } catch (error: unknown) {
+      log.error("Could not get media devices of type", kind, "; error:", error);
+      return {};
+    }
   }
 
   /* -------------------------------------------- */
