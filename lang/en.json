@@ -63,5 +63,11 @@
   "LIVEKITAVCLIENT.WarningCannotBroadcastUserVideo": "You cannot enable the user's camera because they to not have permission to broadcast their video feed.",
   "LIVEKITAVCLIENT.WarningCannotBroadcastUserAudio": "You cannot enable the user's microphone because they to not have permission to broadcast their audio feed.",
   "LIVEKITAVCLIENT.WarningCannotEnableUserVideo": "You cannot enable the user's camera because they have hidden themselves.",
-  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves."
+  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "You cannot enable the user's microphone because they have muted themselves.",
+  "LIVEKITAVCLIENT.limitBitRate": "Limit Bitrate",
+  "LIVEKITAVCLIENT.limitBitRateHint": "Set a maximum bitrate and framerate values to conserve bandwidth.",
+  "LIVEKITAVCLIENT.maximumVideoRate": "Maximum bitrate (kbps)",
+  "LIVEKITAVCLIENT.maximumVideoRateHint": "The maximum bitrate that will be used for both audio and video tracks.",
+  "LIVEKITAVCLIENT.maximumFrameRate": "Maximum frame rate (kbps)",
+  "LIVEKITAVCLIENT.maximumFrameRateHint": "The maximum frame rate of the video tracks. Limit this to conserve bandwidth."
 }

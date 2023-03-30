@@ -1467,6 +1467,16 @@ export default class LiveKitClient {
       simulcast: true,
       videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
     };
+    if (getGame().settings.get(MODULE_NAME, "limitBitRate")) {
+      const maxBitRate = getGame().settings.get(MODULE_NAME, "maximumVideoRate") as number;
+      const maxFrameRate = getGame().settings.get(MODULE_NAME, "maximumFrameRate") as number;
+      if (maxBitRate && maxFrameRate) {
+        trackPublishOptions.videoEncoding =
+            {maxBitrate: maxBitRate * 1000, maxFramerate: maxFrameRate}
+      } else {
+        log.warn("Invalid video encoding settings");
+      }
+    }
 
     if (getGame().settings.get(MODULE_NAME, "audioMusicMode")) {
       const audioMusicModeRate =

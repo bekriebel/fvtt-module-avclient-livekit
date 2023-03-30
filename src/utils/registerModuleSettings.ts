@@ -117,4 +117,32 @@ export default function registerModuleSettings(): void {
     type: Boolean,
     onChange: () => delayReload(),
   });
+
+  registerModuleSetting({
+    name: "limitBitRate",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: () => delayReload(),
+  });
+
+  registerModuleSetting<number>({
+    name: "maximumVideoRate",
+    scope: "world",
+    config: getGame().settings.get(MODULE_NAME, "limitBitRate") === true,
+    default: 300,
+    type: Number,
+    onChange: () => delayReload(),
+  });
+
+  registerModuleSetting<number>({
+    name: "maximumFrameRate",
+    scope: "world",
+    config: getGame().settings.get(MODULE_NAME, "limitBitRate") === true,
+    default: 60,
+    type: Number,
+    onChange: () => delayReload(),
+  });
+
 }

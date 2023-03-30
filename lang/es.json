@@ -66,5 +66,11 @@
   "LIVEKITAVCLIENT.WarningCannotBroadcastUserVideo": "No puede habilitar la cámara del usuario porque no tiene permisos para enviar vídeo",
   "LIVEKITAVCLIENT.WarningCannotBroadcastUserAudio": "No puede habilitar el micrófono del usuario porque no tiene permisos para enviar vídeo",
   "LIVEKITAVCLIENT.WarningCannotEnableUserVideo": "No puede habilitar la cámara porque el usuario la ha desactivado",
-  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "No puede habilitar el micrófono porque el usuario se ha silenciado"
+  "LIVEKITAVCLIENT.WarningCannotEnableUserAudio": "No puede habilitar el micrófono porque el usuario se ha silenciado",
+  "LIVEKITAVCLIENT.limitBitRate": "Limitar el Bitrate",
+  "LIVEKITAVCLIENT.limitBitRateHint": "Limitar el bitrate máximo para reducir el consumo de ancho de banda",
+  "LIVEKITAVCLIENT.maximumVideoRate": "Bitrate máximo (kbps)",
+  "LIVEKITAVCLIENT.maximumVideoRateHint": "El bitrate máximo que se usara para la videoconferencia.",
+  "LIVEKITAVCLIENT.maximumFrameRate": "Fotogramas máximos (kbps)",
+  "LIVEKITAVCLIENT.maximumFrameRateHint": "El número máximo de fotogramas por minuto. Poner un valor más pequeño para reducir el consumo de ancho de banda"
 }
