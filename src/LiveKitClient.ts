@@ -26,6 +26,7 @@ import {
   DisconnectReason,
   AudioPresets,
   TrackPublishOptions,
+  ScreenShareCaptureOptions,
 } from "livekit-client";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import * as log from "./utils/logging";
@@ -1399,6 +1400,13 @@ export default class LiveKitClient {
         echoCancellation: false,
         noiseSuppression: false,
         channelCount: { ideal: 2 },
+      };
+
+      // Configure screen share capture options
+      const screenCaptureOptions: ScreenShareCaptureOptions = {
+        selfBrowserSurface: "include",
+        surfaceSwitching: "include",
+        systemAudio: "include",
       };
 
       // Get screen tracks
