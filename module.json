@@ -18,10 +18,10 @@
   "version": "0.5.19",
   "compatibility": {
     "minimum": "9.238",
-    "verified": "10"
+    "verified": "11"
   },
   "minimumCoreVersion": "9.238",
-  "compatibleCoreVersion": "10",
+  "compatibleCoreVersion": "11",
   "manifestPlusVersion": "1.2.0",
   "esmodules": ["avclient-livekit.bundle.js"],
   "styles": ["css/avclient-livekit.css"],
