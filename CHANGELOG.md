@@ -1,3 +1,8 @@
+# 0.5.20
+
+- Update dependencies, including livekit-client v1.7.1
+- Set compatibility to include FoundryVTT v11
+
 # 0.5.19
 
 - Catch errors when trying to get a list of media devices
