@@ -14,14 +14,14 @@
     "defaults"
   ],
   "dependencies": {
-    "jose": "^4.13.2",
-    "livekit-client": "^1.7.1"
+    "jose": "^4.14.1",
+    "livekit-client": "^1.8.0"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "https://github.com/League-of-Foundry-Developers/foundry-vtt-types.git",
     "@types/jsonwebtoken": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.58.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
     "@typhonjs-fvtt/validate-manifest": "^8.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -34,7 +34,7 @@
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
     "util": "^0.12.5",
-    "webpack": "^5.79.0",
+    "webpack": "^5.80.0",
     "webpack-cli": "^5.0.1",
     "webpack-merge": "^5.8.0"
   }
