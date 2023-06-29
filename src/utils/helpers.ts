@@ -87,6 +87,14 @@ export function isVersion10AV(): boolean {
   );
 }
 
+// Returns if the current version is using the new v10 AV
+export function isVersion11AV(): boolean {
+  return isNewerVersion(
+    getGame().release.version || getGame().data.version || 0,
+    "11.292"
+  );
+}
+
 /**
  * Dynamically load additional script files, returning when loaded
  * @param scriptSrc    The location of the script file

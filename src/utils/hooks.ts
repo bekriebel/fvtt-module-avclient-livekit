@@ -1,7 +1,7 @@
 import { SocketMessage } from "../../types/avclient-livekit";
 import LiveKitAVConfig from "../LiveKitAVConfig";
 import { MODULE_NAME } from "./constants";
-import { getGame } from "./helpers";
+import { getGame, isVersion11AV } from "./helpers";
 import registerModuleSettings from "./registerModuleSettings";
 
 /* -------------------------------------------- */
@@ -55,28 +55,31 @@ Hooks.on("ready", () => {
   });
 
   // TODO: Remove when FoundryVTT includes this patch
-  AVSettings.prototype.handleUserActivity = function handleUserActivity(
-    userId: string,
-    settings: AVSettingsData
-  ) {
-    const current = this.activity[userId] || {};
-    this.activity[userId] = foundry.utils.mergeObject(current, settings, {
-      inplace: false,
-    });
-    const hiddenChanged =
-      "hidden" in settings && current.hidden !== settings.hidden;
-    const mutedChanged =
-      "muted" in settings && current.muted !== settings.muted;
-    if (
-      (hiddenChanged || mutedChanged) &&
-      ui.webrtc?.getUserVideoElement(userId)
+  if (!isVersion11AV()) {
+    AVSettings.prototype.handleUserActivity = function handleUserActivity(
+      userId: string,
+      settings: AVSettingsData
     ) {
-      // @ts-expect-error Using a protected method
-      ui.webrtc?._refreshView(userId);
-    }
-    if ("speaking" in settings)
-      ui.webrtc?.setUserIsSpeaking(userId, settings.speaking || false);
-  };
+      const current = this.activity[userId] || {};
+      this.activity[userId] = foundry.utils.mergeObject(current, settings, {
+        inplace: false,
+      });
+      if (!ui.webrtc) return;
+      const hiddenChanged =
+        "hidden" in settings && current.hidden !== settings.hidden;
+      const mutedChanged =
+        "muted" in settings && current.muted !== settings.muted;
+      if (
+        (hiddenChanged || mutedChanged) &&
+        ui.webrtc?.getUserVideoElement(userId)
+      ) {
+        // @ts-expect-error Using a protected method
+        ui.webrtc._refreshView(userId);
+      }
+      if ("speaking" in settings)
+        ui.webrtc?.setUserIsSpeaking(userId, settings.speaking || false);
+    };
+  }
 });
 
 // Listen for DebugSet event
