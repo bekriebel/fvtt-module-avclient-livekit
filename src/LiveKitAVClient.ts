@@ -110,6 +110,9 @@ export default class LiveKitAVClient extends AVClient {
     // Initialize the local tracks
     await this._liveKitClient.initializeLocalTracks();
 
+    // Initialize the AVSettings to ensure muted & hidden states are correct
+    this.settings.initialize();
+
     this._liveKitClient.initState = InitState.Initialized;
     Hooks.callAll("liveKitClientInitialized", this._liveKitClient);
   }
