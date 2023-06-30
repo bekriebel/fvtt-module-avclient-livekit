@@ -1,7 +1,6 @@
 import {
   ConnectionQuality,
   ConnectionState,
-  createAudioAnalyser,
   DataPacket_Kind,
   DisconnectReason,
   LocalAudioTrack,
@@ -17,16 +16,31 @@ import {
   RoomConnectOptions,
   RoomEvent,
   RoomOptions,
-  setLogLevel,
   Track,
   TrackPublication,
   VideoCaptureOptions,
   VideoCodec,
   VideoPresets43,
   VideoQuality,
+  createAudioAnalyser,
+  setLogLevel,
+  supportsAV1,
+  supportsVP9,
 } from "livekit-client";
 
-const $ = (id: string) => document.getElementById(id);
+type SimulationScenario =
+  | "signal-reconnect"
+  | "speaker"
+  | "node-failure"
+  | "server-leave"
+  | "migration"
+  | "resume-reconnect"
+  | "force-tcp"
+  | "force-tls"
+  | "full-reconnect";
+
+const $ = <T extends HTMLElement>(id: string) =>
+  document.getElementById(id) as T;
 
 const state = {
   isFrontFacing: false,
@@ -42,8 +56,8 @@ let startTime: number;
 const searchParams = new URLSearchParams(window.location.search);
 const storedUrl = searchParams.get("url") ?? "ws://localhost:7880";
 const storedToken = searchParams.get("token") ?? "";
-(<HTMLInputElement>$("url")).value = storedUrl;
-(<HTMLInputElement>$("token")).value = storedToken;
+$<HTMLInputElement>("url").value = storedUrl;
+$<HTMLInputElement>("token").value = storedToken;
 
 let infoHidden = false;
 
@@ -328,7 +342,7 @@ const appActions = {
         p.tracks.forEach((rp) => rp.setSubscribed(false));
       });
     } else if (scenario !== "") {
-      currentRoom?.simulateScenario(scenario);
+      currentRoom?.simulateScenario(scenario as SimulationScenario);
       (<HTMLSelectElement>e.target).value = "";
     }
   },
@@ -844,4 +858,33 @@ async function acquireDeviceList() {
   handleDevicesChanged();
 }
 
+function populateSupportedCodecs() {
+  /*
+<option value="" selected>PreferredCodec</option>
+                <option value="vp8">VP8</option>
+                <option value="h264">H.264</option>
+                <option value="vp9">VP9</option>
+                <option value="av1">AV1</option>
+*/
+  const codecSelect = $("preferred-codec");
+  const options: string[][] = [
+    ["", "Preferred codec"],
+    ["h264", "H.264"],
+    ["vp8", "VP8"],
+  ];
+  if (supportsVP9()) {
+    options.push(["vp9", "VP9"]);
+  }
+  if (supportsAV1()) {
+    options.push(["av1", "AV1"]);
+  }
+  for (const o of options) {
+    const n = document.createElement("option");
+    n.value = o[0];
+    n.appendChild(document.createTextNode(o[1]));
+    codecSelect.appendChild(n);
+  }
+}
+
 acquireDeviceList();
+populateSupportedCodecs();
