@@ -1,3 +1,9 @@
+# 0.5.22
+
+- Updates to support Foundry v11
+- Update dependencies, including livekit-client v1.11.4
+- Update dependency handling to Yarn v3
+
 # 0.5.21
 
 - Update dependencies, including livekit-client v1.8.0
