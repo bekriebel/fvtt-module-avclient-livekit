@@ -1183,7 +1183,7 @@ export default class LiveKitClient {
     );
 
     // Set resolution higher if simulcast is enabled
-    let videoResolution = VideoPresets43.h240.resolution;
+    let videoResolution = VideoPresets43.h180.resolution;
     if (this.trackPublishOptions.simulcast) {
       videoResolution = VideoPresets43.h720.resolution;
     }
@@ -1473,7 +1473,7 @@ export default class LiveKitClient {
     const trackPublishOptions: TrackPublishOptions = {
       audioBitrate: AudioPresets.music.maxBitrate,
       simulcast: true,
-      videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
+      videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
     };
 
     if (getGame().settings.get(MODULE_NAME, "audioMusicMode")) {

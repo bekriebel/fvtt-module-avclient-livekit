@@ -92,7 +92,7 @@ const appActions = {
       dynacast,
       publishDefaults: {
         simulcast,
-        videoSimulcastLayers: [VideoPresets43.h120, VideoPresets43.h240],
+        videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
         videoCodec: preferredCodec || "vp8",
       },
       videoCaptureDefaults: {
