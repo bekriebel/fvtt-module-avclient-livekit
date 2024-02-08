@@ -109,7 +109,27 @@
             <label>{{localize "LIVEKITAVCLIENT.liveKitServerDetails"}}:</label>
             <p></p>
         </div>
-
+        <div class="form-group submenu livekit-tavern-auth">
+            <label>{{localize "LIVEKITAVCLIENT.tavernAccountLabel"}}:</label>
+            {{#if settings.world.livekit.tavernPatreonToken}}
+                <button type="button" id="tavern-logout-button">
+                    <i class="fa-brands fa-patreon"></i>
+                    <label>{{ localize "LIVEKITAVCLIENT.tavernAccountLogoutLabel" }}</label>
+                </button>
+                {{#if tavernAuthResponse }}
+                <p class="notes">
+                    {{ localize "LIVEKITAVCLIENT.patreonAccountNote"}}: <i>{{#if tavernAuthResponse.vanity}}{{tavernAuthResponse.vanity}}{{else}}{{tavernAuthResponse.full_name}}{{/if}}</i>
+                    (<a href="https://www.patreon.com/bekit">{{#if tavernAuthResponse.active_tier}}{{tavernAuthResponse.active_tier}}{{else}}{{localize "LIVEKITAVCLIENT.patreonAccountNotMember"}}{{/if}}</a>)
+                </p>
+                {{/if}}
+            {{else}}
+                <button type="button" id="tavern-patreon-button">
+                    <i class="fa-brands fa-patreon"></i>
+                    <label>{{ localize "LIVEKITAVCLIENT.tavernAccountPatreonLabel" }}</label>
+                </button>
+                <p class="notes">{{ localize "LIVEKITAVCLIENT.tavernAccountPatreonHint" }}</p>
+            {{/if}}
+        </div>
         <div class="webrtc-custom-server-config">
             <div class="form-group livekit-url">
                 <label>{{localize "LIVEKITAVCLIENT.liveKitServerURL"}}:</label>

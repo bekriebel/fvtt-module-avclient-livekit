@@ -1,7 +1,7 @@
 import { LiveKitSettingsConfig } from "../types/avclient-livekit";
 import LiveKitClient from "./LiveKitClient";
-import { MODULE_NAME } from "./utils/constants";
-import { getGame, isVersion10AV } from "./utils/helpers";
+import { LANG_NAME, MODULE_NAME, TAVERN_AUTH_SERVER } from "./utils/constants";
+import { delayReload, getGame, isVersion10AV } from "./utils/helpers";
 import * as log from "./utils/logging";
 
 export default class LiveKitAVConfig extends AVConfig {
@@ -57,6 +57,7 @@ export default class LiveKitAVConfig extends AVConfig {
       liveKitServerTypes:
         getGame().webrtc?.client._liveKitClient.liveKitServerTypes,
       liveKitSettings: this._getLiveKitSettings(),
+      tavernAuthResponse: await this._patreonGetUserInfo(),
     });
   }
 
@@ -113,6 +114,39 @@ export default class LiveKitAVConfig extends AVConfig {
         ".livekit-password",
         liveKitServerType.passwordRequired
       );
+      this._setConfigSectionVisible(
+        ".livekit-tavern-auth",
+        liveKitServerTypeKey === "tavern"
+      );
+
+      // Tavern only
+      if (liveKitServerTypeKey === "tavern") {
+        const authServer =
+          (getGame().webrtc?.client.settings.get(
+            "world",
+            "livekit.tavernAuthServer"
+          ) as string) || TAVERN_AUTH_SERVER;
+        const id = btoa(
+          `{"host": "${window.location.hostname}", "world": "${
+            getGame().world.id
+          }"}`
+        );
+        html.find("#tavern-patreon-button").on("click", (clickEvent) => {
+          clickEvent.preventDefault();
+          window.addEventListener("message", this._patreonLoginListener, {
+            once: true,
+          });
+          window.open(
+            `${authServer}/auth/patreon?id=${id}`,
+            undefined,
+            "width=600,height=800"
+          );
+        });
+        html.find("#tavern-logout-button").on("click", (clickEvent) => {
+          clickEvent.preventDefault();
+          this._patreonLogout();
+        });
+      }
     } else {
       log.warn("activateListeners: liveKitClient not yet available");
     }
@@ -123,6 +157,7 @@ export default class LiveKitAVConfig extends AVConfig {
     const choice = event.currentTarget.value;
     const liveKitServerType =
       getGame().webrtc?.client._liveKitClient.liveKitServerTypes[choice];
+    const current = this.object.settings.get("world", "livekit.type");
 
     if (!liveKitServerType) {
       log.warn("liveKitServerType", choice, "not found");
@@ -150,6 +185,12 @@ export default class LiveKitAVConfig extends AVConfig {
     this._setConfigSectionVisible(
       ".livekit-password",
       liveKitServerType.passwordRequired
+    );
+    // We only set this if the selection was already Tavern,
+    // otherwise a sign in may happen without saving the server selection
+    this._setConfigSectionVisible(
+      ".livekit-tavern-auth",
+      choice === "tavern" && current === "tavern"
     );
   }
 
@@ -181,6 +222,101 @@ export default class LiveKitAVConfig extends AVConfig {
     if (section) {
       section.find("p").html(value);
     }
+  }
+
+  async _patreonLogout() {
+    // GM only
+    if (!getGame().user?.isGM) return;
+    const authServer =
+      (getGame().webrtc?.client.settings.get(
+        "world",
+        "livekit.tavernAuthServer"
+      ) as string) || TAVERN_AUTH_SERVER;
+    const token = getGame().webrtc?.client.settings.get(
+      "world",
+      "livekit.tavernPatreonToken"
+    ) as string;
+    if (!token) return;
+    const response = await fetch(`${authServer}/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: token }),
+    });
+    if (!response.ok) {
+      ui.notifications?.error(`${LANG_NAME}.tavernAccountLogoutError`, {
+        localize: true,
+      });
+      log.warn("Error signing out of Patreon account", response);
+    }
+    getGame().webrtc?.client.settings.set(
+      "world",
+      "livekit.tavernPatreonToken",
+      ""
+    );
+    delayReload();
+  }
+
+  async _patreonLoginListener(messageEvent: MessageEvent) {
+    // GM only
+    if (!getGame().user?.isGM) return;
+    const authServer =
+      (getGame().webrtc?.client.settings.get(
+        "world",
+        "livekit.tavernAuthServer"
+      ) as string) || TAVERN_AUTH_SERVER;
+    if (messageEvent.origin !== authServer) return;
+
+    messageEvent.preventDefault();
+    getGame().webrtc?.client.settings.set(
+      "world",
+      "livekit.tavernPatreonToken",
+      messageEvent.data.id
+    );
+    delayReload();
+  }
+
+  async _patreonGetUserInfo() {
+    // GM only
+    if (!getGame().user?.isGM) return;
+    // Tavern only
+    if (this.object.settings.get("world", "livekit.type") !== "tavern") return;
+    const authServer =
+      (getGame().webrtc?.client.settings.get(
+        "world",
+        "livekit.tavernAuthServer"
+      ) as string) || TAVERN_AUTH_SERVER;
+    const token = getGame().webrtc?.client.settings.get(
+      "world",
+      "livekit.tavernPatreonToken"
+    ) as string;
+    if (!token) return;
+    let response;
+    try {
+      response = await fetch(`${authServer}/validate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: token }),
+      });
+    } catch (e) {
+      log.warn("Error validating Patreon account", e);
+      return;
+    }
+    if (!response.ok) {
+      log.warn("Error validating Patreon account", response);
+      return;
+    }
+    let responseJson;
+    try {
+      responseJson = await response.json();
+    } catch (e) {
+      log.warn("Error parsing response", e);
+      return;
+    }
+    return responseJson;
   }
 
   /** @override */

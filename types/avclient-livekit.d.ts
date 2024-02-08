@@ -6,7 +6,6 @@ import LiveKitAVClient from "../src/LiveKitAVClient";
 
 // LiveKit connection settings
 interface ConnectionSettings {
-  type: string;
   url: string;
   room: string;
   username: string;

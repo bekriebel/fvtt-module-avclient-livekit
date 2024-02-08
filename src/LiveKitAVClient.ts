@@ -203,6 +203,22 @@ export default class LiveKitAVClient extends AVClient {
       return false;
     }
 
+    // Check for Tavern account settings
+    if (
+      getGame().user?.isGM &&
+      liveKitServerType.key === "tavern" &&
+      (this.settings.get("world", "livekit.tavernPatreonToken") || "") === ""
+    ) {
+      this.master.config.render(true);
+      log.error("LiveKit Tavern connection information missing");
+      ui.notifications?.error(
+        `${getGame().i18n.localize(`${LANG_NAME}.tavernAccountMissing`)}`,
+        { permanent: true }
+      );
+      this._liveKitClient.connectionState = ConnectionState.Disconnected;
+      return false;
+    }
+
     // Set a room name if one doesn't yet exist
     if (!connectionSettings.room) {
       log.warn("No meeting room set, creating random name.");

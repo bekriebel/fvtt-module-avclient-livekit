@@ -28,7 +28,7 @@ import {
   TrackPublishOptions,
   ScreenShareCaptureOptions,
 } from "livekit-client";
-import { LANG_NAME, MODULE_NAME } from "./utils/constants";
+import { LANG_NAME, MODULE_NAME, TAVERN_AUTH_SERVER } from "./utils/constants";
 import * as log from "./utils/logging";
 import { getGame, isVersion10AV } from "./utils/helpers";
 import LiveKitAVClient from "./LiveKitAVClient";
@@ -80,9 +80,9 @@ export default class LiveKitClient {
       details: `${LANG_NAME}.serverDetailsTavern`,
       url: "livekit.tavern.at",
       urlRequired: false,
-      usernameRequired: true,
-      passwordRequired: true,
-      tokenFunction: this.getAccessToken,
+      usernameRequired: false,
+      passwordRequired: false,
+      tokenFunction: this.getTavernAccessToken,
     },
   };
 
@@ -456,6 +456,63 @@ export default class LiveKitClient {
 
     log.debug("AccessToken:", accessTokenJwt);
     return accessTokenJwt;
+  }
+
+  /**
+   * Gets an access token from the Tavern authentication server
+   * @param apiKey API Key (unused)
+   * @param apiSecret Secret (unused)
+   * @param roomName The LiveKit room to join
+   * @param userName Display name of the FVTT user
+   * @param metadata User metadata, including the FVTT User ID
+   */
+  async getTavernAccessToken(
+    apiKey: string,
+    secretKey: string,
+    roomName: string,
+    userName: string,
+    metadata: string
+  ): Promise<string> {
+    const authServer =
+      (getGame().webrtc?.client.settings.get(
+        "world",
+        "livekit.tavernAuthServer"
+      ) as string) || TAVERN_AUTH_SERVER;
+    const token = getGame().webrtc?.client.settings.get(
+      "world",
+      "livekit.tavernPatreonToken"
+    ) as string;
+    if (!token) return "";
+    let response;
+    try {
+      response = await fetch(`${authServer}/livekit/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: token,
+          room: roomName,
+          userName: userName,
+          metadata: metadata,
+        }),
+      });
+    } catch (e) {
+      log.warn("Error validating Patreon account", e);
+      return "";
+    }
+    if (!response.ok) {
+      log.warn("Error validating Patreon account", response);
+      return "";
+    }
+    let responseText;
+    try {
+      responseText = await response.text();
+    } catch (e) {
+      log.warn("Error parsing response", e);
+      return "";
+    }
+    return responseText;
   }
 
   getAudioParams(): AudioCaptureOptions | false {
