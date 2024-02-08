@@ -1,3 +1,8 @@
+# 0.5.23
+
+- Adjust simulcast resolutions to better fit FVTT's default camera view sizes
+- Add Patreon authentication for the Tavern LiveKit cluster
+
 # 0.5.22
 
 - Updates to support Foundry v11
