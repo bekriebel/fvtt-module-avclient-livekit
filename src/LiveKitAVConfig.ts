@@ -141,13 +141,13 @@ export default class LiveKitAVConfig extends AVConfig {
             undefined,
             "width=600,height=800"
           );
+          html.find("#tavern-account-token").removeClass("hidden");
+          this.setPosition(this.position);
         });
         html.find("#tavern-logout-button").on("click", (clickEvent) => {
           clickEvent.preventDefault();
           this._patreonLogout();
         });
-        html.find("#tavern-account-token").removeClass("hidden");
-        this.setPosition(this.position);
       }
     } else {
       log.warn("activateListeners: liveKitClient not yet available");
