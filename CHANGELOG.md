@@ -1,3 +1,7 @@
+# 0.5.25
+
+- Fix the un-hidding of the authentication token input field for the Tavern LiveKit cluster
+
 # 0.5.24
 
 - Add a way to paste the authentication token into settings when using the Tavern LiveKit cluster on the Electron based FoundryVTT client
