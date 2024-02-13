@@ -61,6 +61,8 @@
   "LIVEKITAVCLIENT.tavernAccountLogoutLabel": "Sign out",
   "LIVEKITAVCLIENT.tavernAccountLogoutError": "Error signing out of Patreon account",
   "LIVEKITAVCLIENT.tavernAccountPatreonHint": "Sign in with your Patreon account to access the Tavern LiveKit cluster",
+  "LIVEKITAVCLIENT.tavernAccountToken": "Authentication Token",
+  "LIVEKITAVCLIENT.tavernAccountTokenHint": "Paste the token provided after signing in with Patreon",
   "LIVEKITAVCLIENT.tavernAccountMissing": "LiveKit connection information missing; please sign in to your Patreon account with access to the Tavern LiveKit cluster",
   "LIVEKITAVCLIENT.patreonAccountNote": "Patreon account",
   "LIVEKITAVCLIENT.patreonAccountNotMember": "Not a member",

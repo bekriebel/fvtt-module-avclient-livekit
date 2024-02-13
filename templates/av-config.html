@@ -128,6 +128,11 @@
                     <label>{{ localize "LIVEKITAVCLIENT.tavernAccountPatreonLabel" }}</label>
                 </button>
                 <p class="notes">{{ localize "LIVEKITAVCLIENT.tavernAccountPatreonHint" }}</p>
+                <div class="form-group tavern-account-token hidden" id="tavern-account-token">
+                    <label>{{localize "LIVEKITAVCLIENT.tavernAccountToken"}}:</label>
+                    <input type="password" name="world.livekit.tavernPatreonToken" value="{{settings.world.livekit.tavernPatreonToken}}" />
+                    <p class="notes">{{ localize "LIVEKITAVCLIENT.tavernAccountTokenHint" }}</p>
+                </div>
             {{/if}}
         </div>
         <div class="webrtc-custom-server-config">
