@@ -283,7 +283,6 @@ export default class LiveKitClient {
     }
 
     // Set audio output device
-    // @ts-expect-error - sinkId is currently an experimental property and not in the defined types
     if (audioElement.sinkId === undefined) {
       log.warn("Your web browser does not support output audio sink selection");
     } else {

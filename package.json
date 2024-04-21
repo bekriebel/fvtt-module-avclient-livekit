@@ -14,29 +14,29 @@
     "defaults"
   ],
   "dependencies": {
-    "jose": "^4.14.4",
-    "livekit-client": "^1.11.4"
+    "jose": "^5.2.4",
+    "livekit-client": "^1.15.13"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "https://github.com/League-of-Foundry-Developers/foundry-vtt-types.git",
-    "@types/jsonwebtoken": "^9.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
     "@typhonjs-fvtt/validate-manifest": "^8.0.0",
     "buffer": "^6.0.3",
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "^12.0.2",
     "crypto-browserify": "^3.12.0",
-    "eslint": "^8.44.0",
+    "eslint": "^9.1.0",
     "process": "^0.11.10",
-    "source-map-loader": "^4.0.1",
+    "source-map-loader": "^5.0.0",
     "stream-browserify": "^3.0.0",
-    "terser-webpack-plugin": "^5.3.9",
-    "ts-loader": "^9.4.4",
-    "typescript": "^5.1.6",
+    "terser-webpack-plugin": "^5.3.10",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.5",
     "util": "^0.12.5",
-    "webpack": "^5.88.1",
+    "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
-    "webpack-merge": "^5.9.0"
+    "webpack-merge": "^5.10.0"
   },
   "packageManager": "yarn@3.6.0"
 }
