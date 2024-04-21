@@ -1,3 +1,8 @@
+# 0.5.26
+
+- Update dependencies, including livekit-client v1.15.13
+- Includes a possible workaround for a chrome AV1 encoding issue: https://issues.chromium.org/issues/331565934?pli=1
+
 # 0.5.25
 
 - Fix the un-hidding of the authentication token input field for the Tavern LiveKit cluster
