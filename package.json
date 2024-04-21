@@ -15,18 +15,18 @@
   ],
   "dependencies": {
     "jose": "^5.2.4",
-    "livekit-client": "^1.15.13"
+    "livekit-client": "^2.1.0"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "https://github.com/League-of-Foundry-Developers/foundry-vtt-types.git",
     "@types/jsonwebtoken": "^9.0.6",
-    "@typescript-eslint/eslint-plugin": "^7.7.0",
-    "@typescript-eslint/parser": "^7.7.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
     "@typhonjs-fvtt/validate-manifest": "^8.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^12.0.2",
     "crypto-browserify": "^3.12.0",
-    "eslint": "^9.1.0",
+    "eslint": "^9.1.1",
     "process": "^0.11.10",
     "source-map-loader": "^5.0.0",
     "stream-browserify": "^3.0.0",
