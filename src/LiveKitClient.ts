@@ -1529,6 +1529,7 @@ export default class LiveKitClient {
     const trackPublishOptions: TrackPublishOptions = {
       audioBitrate: AudioPresets.music.maxBitrate,
       simulcast: true,
+      videoCodec: "vp8",
       videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
     };
 
