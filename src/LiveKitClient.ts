@@ -120,9 +120,11 @@ export default class LiveKitClient {
     }
 
     // Set up all other users
-    this.liveKitRoom.participants.forEach((participant: RemoteParticipant) => {
-      this.onParticipantConnected(participant);
-    });
+    this.liveKitRoom.remoteParticipants.forEach(
+      (participant: RemoteParticipant) => {
+        this.onParticipantConnected(participant);
+      }
+    );
   }
 
   addConnectionButtons(element: JQuery<HTMLElement>): void {
@@ -565,15 +567,17 @@ export default class LiveKitClient {
       return audioTrack;
     }
 
-    this.liveKitParticipants.get(userId)?.audioTracks.forEach((publication) => {
-      if (
-        publication.kind === Track.Kind.Audio &&
-        (publication.track instanceof LocalAudioTrack ||
-          publication.track instanceof RemoteAudioTrack)
-      ) {
-        audioTrack = publication.track;
-      }
-    });
+    this.liveKitParticipants
+      .get(userId)
+      ?.audioTrackPublications.forEach((publication) => {
+        if (
+          publication.kind === Track.Kind.Audio &&
+          (publication.track instanceof LocalAudioTrack ||
+            publication.track instanceof RemoteAudioTrack)
+        ) {
+          audioTrack = publication.track;
+        }
+      });
     return audioTrack;
   }
 
@@ -584,7 +588,7 @@ export default class LiveKitClient {
       return "";
     }
 
-    for (const t of participant.tracks.values()) {
+    for (const t of participant.trackPublications.values()) {
       if (t.track) {
         totalBitrate += t.track.currentBitrate;
       }
@@ -615,15 +619,17 @@ export default class LiveKitClient {
       return videoTrack;
     }
 
-    this.liveKitParticipants.get(userId)?.videoTracks.forEach((publication) => {
-      if (
-        publication.kind === Track.Kind.Video &&
-        (publication.track instanceof LocalVideoTrack ||
-          publication.track instanceof RemoteVideoTrack)
-      ) {
-        videoTrack = publication.track;
-      }
-    });
+    this.liveKitParticipants
+      .get(userId)
+      ?.videoTrackPublications.forEach((publication) => {
+        if (
+          publication.kind === Track.Kind.Video &&
+          (publication.track instanceof LocalVideoTrack ||
+            publication.track instanceof RemoteVideoTrack)
+        ) {
+          videoTrack = publication.track;
+        }
+      });
     return videoTrack;
   }
 
@@ -964,7 +970,7 @@ export default class LiveKitClient {
     // Set up remote participant callbacks
     this.setRemoteParticipantCallbacks(participant);
 
-    participant.tracks.forEach((publication) => {
+    participant.trackPublications.forEach((publication) => {
       this.onTrackPublished(publication, participant);
     });
 
@@ -1496,7 +1502,9 @@ export default class LiveKitClient {
             MODULE_NAME,
             "audioMusicModeRate"
           ) as number) || 96) * 1000;
-        screenTrackPublishOptions.audioBitrate = audioMusicModeRate;
+        screenTrackPublishOptions.audioPreset = {
+          maxBitrate: audioMusicModeRate,
+        };
 
         // Publish the track
         await this.liveKitRoom?.localParticipant.publishTrack(
@@ -1527,7 +1535,7 @@ export default class LiveKitClient {
 
   get trackPublishOptions(): TrackPublishOptions {
     const trackPublishOptions: TrackPublishOptions = {
-      audioBitrate: AudioPresets.music.maxBitrate,
+      audioPreset: { maxBitrate: AudioPresets.music.maxBitrate },
       simulcast: true,
       videoCodec: "vp8",
       videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
@@ -1539,7 +1547,7 @@ export default class LiveKitClient {
           MODULE_NAME,
           "audioMusicModeRate"
         ) as number) || 96) * 1000;
-      trackPublishOptions.audioBitrate = audioMusicModeRate;
+      trackPublishOptions.audioPreset = { maxBitrate: audioMusicModeRate };
     }
 
     return trackPublishOptions;
