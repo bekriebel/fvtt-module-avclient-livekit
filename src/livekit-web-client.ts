@@ -233,7 +233,7 @@ const appActions = {
     window.currentRoom = room;
     setButtonsForState(true);
 
-    room.remoteParticipants.forEach((participant) => {
+    room.participants.forEach((participant) => {
       participantConnected(participant);
     });
     participantConnected(room.localParticipant);
@@ -273,7 +273,7 @@ const appActions = {
   },
 
   flipVideo: () => {
-    const videoPub = currentRoom?.localParticipant.getTrackPublication(
+    const videoPub = currentRoom?.localParticipant.getTrack(
       Track.Source.Camera
     );
     if (!videoPub) {
@@ -314,7 +314,7 @@ const appActions = {
     const textField = <HTMLInputElement>$("entry");
     if (textField.value) {
       const msg = state.encoder.encode(textField.value);
-      currentRoom.localParticipant.publishData(msg, { reliable: true });
+      currentRoom.localParticipant.publishData(msg, DataPacket_Kind.RELIABLE);
       (<HTMLTextAreaElement>(
         $("chat")
       )).value += `${currentRoom.localParticipant.identity} (me): ${textField.value}\n`;
@@ -334,12 +334,12 @@ const appActions = {
   handleScenario: (e: Event) => {
     const scenario = (<HTMLSelectElement>e.target).value;
     if (scenario === "subscribe-all") {
-      currentRoom?.remoteParticipants.forEach((p) => {
-        p.trackPublications.forEach((rp) => rp.setSubscribed(true));
+      currentRoom?.participants.forEach((p) => {
+        p.tracks.forEach((rp) => rp.setSubscribed(true));
       });
     } else if (scenario === "unsubscribe-all") {
-      currentRoom?.remoteParticipants.forEach((p) => {
-        p.trackPublications.forEach((rp) => rp.setSubscribed(false));
+      currentRoom?.participants.forEach((p) => {
+        p.tracks.forEach((rp) => rp.setSubscribed(false));
       });
     } else if (scenario !== "") {
       currentRoom?.simulateScenario(scenario as SimulationScenario);
@@ -379,8 +379,8 @@ const appActions = {
         break;
     }
     if (currentRoom) {
-      currentRoom.remoteParticipants.forEach((participant) => {
-        participant.trackPublications.forEach((track) => {
+      currentRoom.participants.forEach((participant) => {
+        participant.tracks.forEach((track) => {
           track.setVideoQuality(q);
         });
       });
@@ -390,8 +390,8 @@ const appActions = {
   handlePreferredFPS: (e: Event) => {
     const fps = +(<HTMLSelectElement>e.target).value;
     if (currentRoom) {
-      currentRoom.remoteParticipants.forEach((participant) => {
-        participant.trackPublications.forEach((track) => {
+      currentRoom.participants.forEach((participant) => {
+        participant.tracks.forEach((track) => {
           track.setVideoFPS(fps);
         });
       });
@@ -459,7 +459,7 @@ function handleRoomDisconnect(reason?: DisconnectReason) {
   appendLog("disconnected from room", { reason });
   setButtonsForState(false);
   renderParticipant(currentRoom.localParticipant, true);
-  currentRoom.remoteParticipants.forEach((p) => {
+  currentRoom.participants.forEach((p) => {
     renderParticipant(p, true);
   });
   renderScreenShare(currentRoom);
@@ -570,8 +570,8 @@ function renderParticipant(participant: Participant, remove = false) {
   }
   const micElm = $(`mic-${identity}`)!;
   const signalElm = $(`signal-${identity}`)!;
-  const cameraPub = participant.getTrackPublication(Track.Source.Camera);
-  const micPub = participant.getTrackPublication(Track.Source.Microphone);
+  const cameraPub = participant.getTrack(Track.Source.Camera);
+  const micPub = participant.getTrack(Track.Source.Microphone);
   if (participant.isSpeaking) {
     div!.classList.add("speaking");
   } else {
@@ -669,19 +669,19 @@ function renderScreenShare(room: Room) {
   }
   let participant: Participant | undefined;
   let screenSharePub: TrackPublication | undefined =
-    room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
+    room.localParticipant.getTrack(Track.Source.ScreenShare);
   let screenShareAudioPub: RemoteTrackPublication | undefined;
   if (!screenSharePub) {
-    room.remoteParticipants.forEach((p) => {
+    room.participants.forEach((p) => {
       if (screenSharePub) {
         return;
       }
       participant = p;
-      const pub = p.getTrackPublication(Track.Source.ScreenShare);
+      const pub = p.getTrack(Track.Source.ScreenShare);
       if (pub?.isSubscribed) {
         screenSharePub = pub;
       }
-      const audioPub = p.getTrackPublication(Track.Source.ScreenShareAudio);
+      const audioPub = p.getTrack(Track.Source.ScreenShareAudio);
       if (audioPub?.isSubscribed) {
         screenShareAudioPub = audioPub;
       }
@@ -711,15 +711,13 @@ function renderBitrate() {
   if (!currentRoom || currentRoom.state !== ConnectionState.Connected) {
     return;
   }
-  const participants: Participant[] = [
-    ...currentRoom.remoteParticipants.values(),
-  ];
+  const participants: Participant[] = [...currentRoom.participants.values()];
   participants.push(currentRoom.localParticipant);
 
   for (const p of participants) {
     const elm = $(`bitrate-${p.identity}`);
     let totalBitrate = 0;
-    for (const t of p.trackPublications.values()) {
+    for (const t of p.tracks.values()) {
       if (t.track) {
         totalBitrate += t.track.currentBitrate;
       }

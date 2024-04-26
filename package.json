@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "jose": "^5.2.4",
-    "livekit-client": "^2.1.0"
+    "livekit-client": "^1.15.13"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "https://github.com/League-of-Foundry-Developers/foundry-vtt-types.git",

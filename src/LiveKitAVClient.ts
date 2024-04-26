@@ -655,7 +655,7 @@ export default class LiveKitAVClient extends AVClient {
       // Ensure the video track is published to avoid an error when un-muting an unpublished track
       if (
         !this._liveKitClient.videoTrack.sid ||
-        !this._liveKitClient.liveKitRoom?.localParticipant.videoTrackPublications.has(
+        !this._liveKitClient.liveKitRoom?.localParticipant.videoTracks.has(
           this._liveKitClient.videoTrack.sid
         )
       ) {
