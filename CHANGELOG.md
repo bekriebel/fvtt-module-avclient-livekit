@@ -1,3 +1,7 @@
+# 0.5.28
+
+- Revert to livekit-client v1.15.13. There is an echo issue with v2.1.0 that needs to be resolved before it can be used
+
 # 0.5.27
 
 - Update dependencies, including livekit-client v2.1.0
