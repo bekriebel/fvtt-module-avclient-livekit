@@ -1,3 +1,7 @@
+# 0.5.27
+
+- Update dependencies, including livekit-client v2.1.0
+
 # 0.5.26
 
 - Update dependencies, including livekit-client v1.15.13
