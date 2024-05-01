@@ -307,16 +307,15 @@ export default class LiveKitAVConfig extends AVConfig {
       log.warn("Error validating Patreon account", e);
       return;
     }
-    if (!response.ok) {
-      log.warn("Error validating Patreon account", response);
-      return;
-    }
     let responseJson;
     try {
       responseJson = await response.json();
     } catch (e) {
       log.warn("Error parsing response", e);
       return;
+    }
+    if (!response.ok) {
+      log.error("Error validating Patreon account", responseJson);
     }
     return responseJson;
   }

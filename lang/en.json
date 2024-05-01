@@ -66,6 +66,7 @@
   "LIVEKITAVCLIENT.tavernAccountMissing": "LiveKit connection information missing; please sign in to your Patreon account with access to the Tavern LiveKit cluster",
   "LIVEKITAVCLIENT.patreonAccountNote": "Patreon account",
   "LIVEKITAVCLIENT.patreonAccountNotMember": "Not a member",
+  "LIVEKITAVCLIENT.patreonAccountError": "Error getting account; please sign out and try again",
   "LIVEKITAVCLIENT.TooltipEnableUserVideo": "Enable User Video",
   "LIVEKITAVCLIENT.TooltipDisableUserVideo": "Disable User Video",
   "LIVEKITAVCLIENT.TooltipEnableUserAudio": "Enable User Audio",

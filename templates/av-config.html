@@ -118,8 +118,12 @@
                 </button>
                 {{#if tavernAuthResponse }}
                 <p class="notes">
-                    {{ localize "LIVEKITAVCLIENT.patreonAccountNote"}}: <i>{{#if tavernAuthResponse.vanity}}{{tavernAuthResponse.vanity}}{{else}}{{tavernAuthResponse.full_name}}{{/if}}</i>
-                    (<a href="https://www.patreon.com/bekit">{{#if tavernAuthResponse.active_tier}}{{tavernAuthResponse.active_tier}}{{else}}{{localize "LIVEKITAVCLIENT.patreonAccountNotMember"}}{{/if}}</a>)
+                    {{#if tavernAuthResponse.error}}
+                      {{ localize "LIVEKITAVCLIENT.patreonAccountError"}}: <i>{{tavernAuthResponse.error}}</i>
+                    {{else}}
+                      {{ localize "LIVEKITAVCLIENT.patreonAccountNote"}}: <i>{{#if tavernAuthResponse.vanity}}{{tavernAuthResponse.vanity}}{{else}}{{tavernAuthResponse.full_name}}{{/if}}</i>
+                      (<a href="https://www.patreon.com/bekit">{{#if tavernAuthResponse.active_tier}}{{tavernAuthResponse.active_tier}}{{else}}{{localize "LIVEKITAVCLIENT.patreonAccountNotMember"}}{{/if}}</a>)
+                    {{/if}}
                 </p>
                 {{/if}}
             {{else}}

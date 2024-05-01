@@ -497,11 +497,11 @@ export default class LiveKitClient {
         }),
       });
     } catch (e) {
-      log.warn("Error validating Patreon account", e);
+      log.error("Error validating Patreon account", e);
       return "";
     }
     if (!response.ok) {
-      log.warn("Error validating Patreon account", response);
+      log.error("Error validating Patreon account", await response.json());
       return "";
     }
     let responseText;
