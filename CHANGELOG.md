@@ -1,3 +1,7 @@
+# 0.5.30
+
+- Validate compatibility with FoundryVTT v12
+
 # 0.5.29
 
 - Improve error handling for At the Tavern Patreon accounts
