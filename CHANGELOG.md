@@ -1,3 +1,7 @@
+# 0.5.31
+
+- Improve the regex when finding the URL for use with the External A/V page
+
 # 0.5.30
 
 - Validate compatibility with FoundryVTT v12
