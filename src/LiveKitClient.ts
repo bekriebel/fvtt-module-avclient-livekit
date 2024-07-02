@@ -1255,7 +1255,7 @@ export default class LiveKitClient {
   }
 
   sendJoinMessage(liveKitServer: string, accessToken: string) {
-    const foundryHost = window.location.href.replace(/\/game.*$/, "");
+    const foundryHost = window.location.href.replace(/(\/\/.*)\/game.*$/, "$1");
     // Create the url for user to join the external LiveKit web client
     const params = new URLSearchParams({
       url: `wss://${liveKitServer}`,
