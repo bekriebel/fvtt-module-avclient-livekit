@@ -2,9 +2,9 @@
 
 [![Join our Discord](https://img.shields.io/discord/909201876740890694?color=5865F2&logo=discord&logoColor=white)](https://discord.gg/Tcp9JtbpC5)
 [![Become a Patron](https://img.shields.io/badge/support-patreon-orange.svg?logo=patreon)](https://tavern.at/patreon)
-[![Donate via Ko-Fi](https://img.shields.io/badge/donate-ko--fi-red.svg?logo=ko-fi)](https://ko-fi.com/bekit)  
+[![Donate via Ko-Fi](https://img.shields.io/badge/donate-ko--fi-red.svg?logo=ko-fi)](https://ko-fi.com/bekit)
 [![Latest Version](https://img.shields.io/github/v/tag/bekriebel/fvtt-module-avclient-livekit?label=version)](https://github.com/bekriebel/fvtt-module-avclient-livekit/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/bekriebel/fvtt-module-avclient-livekit/Release%20FoundryVTT%20Module)](https://github.com/bekriebel/fvtt-module-avclient-livekit/actions/workflows/release-fvtt-module.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/bekriebel/fvtt-module-avclient-livekit/release-fvtt-module.yml?branch=main)](https://github.com/bekriebel/fvtt-module-avclient-livekit/actions/workflows/release-fvtt-module.yml)
 [![Download Count](https://img.shields.io/github/downloads/bekriebel/fvtt-module-avclient-livekit/latest/fvtt-module-avclient-livekit.zip)](https://github.com/bekriebel/fvtt-module-avclient-livekit/releases)
 
 ## About
