@@ -2,7 +2,7 @@
     "I18N.LANGUAGE": "Русский",
     "I18N.MAINTAINERS": "Oxy949",
   
-    "LIVEKITAVCLIENT.connect": "Подключиться",
+    "LIVEKITAVCLIENT.connect": "Подключиться к A/V серверу",
     "LIVEKITAVCLIENT.connectError": "Ошибка подключения к серверу LiveKit",
     "LIVEKITAVCLIENT.connectErrorCheckClock": "Не удалось создать безопасный токен. Пожалуйста, проверьте дату и время на вашем компьютере, чтобы убедиться, что они установлены точно",
     "LIVEKITAVCLIENT.connectionInfoMissing": "Информация о подключении к LiveKit отсутствует; укажите адрес сервера, API-ключ и секретный ключ",
