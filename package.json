@@ -14,6 +14,7 @@
     "defaults"
   ],
   "dependencies": {
+    "@livekit/krisp-noise-filter": "^0.2.16",
     "jose": "^5.2.4",
     "livekit-client": "^2.11.0"
   },

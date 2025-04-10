@@ -210,6 +210,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@livekit/krisp-noise-filter@npm:^0.2.16":
+  version: 0.2.16
+  resolution: "@livekit/krisp-noise-filter@npm:0.2.16"
+  peerDependencies:
+    livekit-client: ^2.0.8
+  checksum: 5b4bbf2543584f0c0353cc9272fea0f9d6555a0ea78037d27d7a249b91c89d1958e4a44fc60a51ddbf66d8ab6ee4e254725fce1ffab37d4cdb7e0bae8744a026
+  languageName: node
+  linkType: hard
+
 "@livekit/mutex@npm:1.1.1":
   version: 1.1.1
   resolution: "@livekit/mutex@npm:1.1.1"
@@ -1350,6 +1359,7 @@ __metadata:
   resolution: "avclient-livekit@workspace:."
   dependencies:
     "@league-of-foundry-developers/foundry-vtt-types": "https://github.com/League-of-Foundry-Developers/foundry-vtt-types.git"
+    "@livekit/krisp-noise-filter": ^0.2.16
     "@types/jsonwebtoken": ^9.0.6
     "@typescript-eslint/eslint-plugin": ^7.7.1
     "@typescript-eslint/parser": ^7.7.1
