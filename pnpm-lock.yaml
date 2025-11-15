@@ -47,7 +47,7 @@ importers:
         version: 9.35.0
       fvtt-types:
         specifier: github:League-of-Foundry-Developers/foundry-vtt-types#main
-        version: '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/463980bfa6f72c273c850e5721fe6e922781c80e(ae77af0cacee97c640d7470d77191217)'
+        version: '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/47a8965ec9aee1de3f94c0313a8b004866078f82(ae77af0cacee97c640d7470d77191217)'
       prettier:
         specifier: 3.6.2
         version: 3.6.2
@@ -326,8 +326,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/463980bfa6f72c273c850e5721fe6e922781c80e':
-    resolution: {tarball: https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/463980bfa6f72c273c850e5721fe6e922781c80e}
+  '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/47a8965ec9aee1de3f94c0313a8b004866078f82':
+    resolution: {tarball: https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/47a8965ec9aee1de3f94c0313a8b004866078f82}
     version: 13.346.0
     peerDependencies:
       '@typescript/native-preview': '*'
@@ -2138,7 +2138,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/463980bfa6f72c273c850e5721fe6e922781c80e(ae77af0cacee97c640d7470d77191217)':
+  '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/47a8965ec9aee1de3f94c0313a8b004866078f82(ae77af0cacee97c640d7470d77191217)':
     dependencies:
       '@codemirror/lang-html': 6.4.9
       '@codemirror/lang-javascript': 6.2.4
