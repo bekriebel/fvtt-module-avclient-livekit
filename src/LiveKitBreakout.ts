@@ -229,6 +229,14 @@ function _endAllBreakouts(liveKitClient: LiveKitClient): void {
     return;
   }
 
+  // Clear the breakout room registry
+  // Note: breakoutRoomRegistry has scope "client", so this only clears the GM's local copy.
+  // The socket broadcast below tells other clients to leave their breakout rooms,
+  // which will trigger their own cleanup via the breakout() function.
+  game.settings.set(MODULE_NAME, "breakoutRoomRegistry", {}).catch((error: unknown) => {
+    log.error("Error clearing breakout room registry:", error);
+  });
+
   game.socket.emit(`module.${MODULE_NAME}`, {
     action: "breakout",
     userId: undefined,

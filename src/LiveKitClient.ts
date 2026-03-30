@@ -64,6 +64,7 @@ export default class LiveKitClient {
   useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
+  private _boundOnVolumeChange = this.onVolumeChange.bind(this);
 
   liveKitServerTypes: LiveKitServerTypes = {
     custom: {
@@ -198,7 +199,7 @@ export default class LiveKitClient {
       `<div class="connection-quality-indicator unknown" title="${
         game.i18n?.localize(
           `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
-        ) ?? "Connectin Quality Unknown"
+        ) ?? "Connection Quality Unknown"
       }"></div>`,
     );
 
@@ -415,19 +416,29 @@ export default class LiveKitClient {
   }
 
   getParticipantFVTTUser(participant: Participant): User | undefined {
-    const { fvttUserId } = JSON.parse(participant.metadata ?? "{}") as {
-      fvttUserId: string;
-    };
-    return game.users?.get(fvttUserId);
+    try {
+      const { fvttUserId } = JSON.parse(participant.metadata ?? "{}") as {
+        fvttUserId?: string;
+      };
+      return fvttUserId ? game.users?.get(fvttUserId) : undefined;
+    } catch (error) {
+      log.warn("Failed to parse participant metadata for FVTT user lookup:", error);
+      return undefined;
+    }
   }
 
   getParticipantUseExternalAV(participant: Participant): boolean {
-    const { useExternalAV } = JSON.parse(
-      participant.metadata ?? "{ false }",
-    ) as {
-      useExternalAV: boolean;
-    };
-    return useExternalAV;
+    try {
+      const { useExternalAV } = JSON.parse(
+        participant.metadata ?? "{}",
+      ) as {
+        useExternalAV?: boolean;
+      };
+      return useExternalAV ?? false;
+    } catch (error) {
+      log.warn("Failed to parse participant metadata for useExternalAV:", error);
+      return false;
+    }
   }
 
   getUserAudioTrack(
@@ -538,7 +549,8 @@ export default class LiveKitClient {
         videoElement.parentElement?.parentElement?.querySelector(
           ".webrtc-volume-slider",
         );
-      volumeSlider?.addEventListener("change", this.onVolumeChange.bind(this));
+      volumeSlider?.removeEventListener("change", this._boundOnVolumeChange);
+      volumeSlider?.addEventListener("change", this._boundOnVolumeChange);
     }
 
     if (audioElement instanceof HTMLAudioElement) {
@@ -1206,6 +1218,20 @@ export default class LiveKitClient {
   }
 
   setLocalParticipantCallbacks(): void {
+    // Remove existing listeners to prevent duplication on reconnect
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.IsSpeakingChanged,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.ParticipantMetadataChanged,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.TrackPublished,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.TrackSubscriptionStatusChanged,
+    );
+
     this.liveKitRoom?.localParticipant
       .on(
         ParticipantEvent.IsSpeakingChanged,
@@ -1237,6 +1263,10 @@ export default class LiveKitClient {
       return;
     }
 
+    // Remove existing listeners to prevent duplication on reconnect
+    participant.removeAllListeners(ParticipantEvent.IsSpeakingChanged);
+    participant.removeAllListeners(ParticipantEvent.ParticipantMetadataChanged);
+
     participant
       .on(
         ParticipantEvent.IsSpeakingChanged,
@@ -1254,6 +1284,26 @@ export default class LiveKitClient {
       );
       return;
     }
+
+    // Remove existing event listeners to prevent duplication on reconnect.
+    // IMPORTANT: Do NOT use removeAllListeners() without an event argument —
+    // that would also remove LiveKit SDK's internal listeners and break the room.
+    this.liveKitRoom.removeAllListeners(RoomEvent.AudioPlaybackStatusChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantConnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantDisconnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackSubscribed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackSubscriptionFailed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnpublished);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnsubscribed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.LocalTrackUnpublished);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ConnectionQualityChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Disconnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Reconnecting);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackMuted);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnmuted);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantMetadataChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.RoomMetadataChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Reconnected);
 
     // Set up event callbacks
     this.liveKitRoom
@@ -1310,9 +1360,14 @@ export default class LiveKitClient {
       };
 
       // Get screen tracks
-      this.screenTracks = await createLocalScreenTracks({
-        audio: screenAudioOptions,
-      });
+      try {
+        this.screenTracks = await createLocalScreenTracks({
+          audio: screenAudioOptions,
+        });
+      } catch (error) {
+        log.warn("Screen share cancelled or failed:", error);
+        return;
+      }
 
       for (const screenTrack of this.screenTracks) {
         log.debug("screenTrack enable:", screenTrack);
