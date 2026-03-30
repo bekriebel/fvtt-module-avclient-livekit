@@ -415,19 +415,29 @@ export default class LiveKitClient {
   }
 
   getParticipantFVTTUser(participant: Participant): User | undefined {
-    const { fvttUserId } = JSON.parse(participant.metadata ?? "{}") as {
-      fvttUserId: string;
-    };
-    return game.users?.get(fvttUserId);
+    try {
+      const { fvttUserId } = JSON.parse(participant.metadata ?? "{}") as {
+        fvttUserId?: string;
+      };
+      return fvttUserId ? game.users?.get(fvttUserId) : undefined;
+    } catch (error) {
+      log.warn("Failed to parse participant metadata for FVTT user lookup:", error);
+      return undefined;
+    }
   }
 
   getParticipantUseExternalAV(participant: Participant): boolean {
-    const { useExternalAV } = JSON.parse(
-      participant.metadata ?? "{ false }",
-    ) as {
-      useExternalAV: boolean;
-    };
-    return useExternalAV;
+    try {
+      const { useExternalAV } = JSON.parse(
+        participant.metadata ?? "{}",
+      ) as {
+        useExternalAV?: boolean;
+      };
+      return useExternalAV ?? false;
+    } catch (error) {
+      log.warn("Failed to parse participant metadata for useExternalAV:", error);
+      return false;
+    }
   }
 
   getUserAudioTrack(
