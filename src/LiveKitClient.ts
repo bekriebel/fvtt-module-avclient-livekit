@@ -64,6 +64,7 @@ export default class LiveKitClient {
   useExternalAV = false;
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
+  private _boundOnVolumeChange = this.onVolumeChange.bind(this);
 
   liveKitServerTypes: LiveKitServerTypes = {
     custom: {
@@ -548,7 +549,8 @@ export default class LiveKitClient {
         videoElement.parentElement?.parentElement?.querySelector(
           ".webrtc-volume-slider",
         );
-      volumeSlider?.addEventListener("change", this.onVolumeChange.bind(this));
+      volumeSlider?.removeEventListener("change", this._boundOnVolumeChange);
+      volumeSlider?.addEventListener("change", this._boundOnVolumeChange);
     }
 
     if (audioElement instanceof HTMLAudioElement) {
