@@ -1320,9 +1320,14 @@ export default class LiveKitClient {
       };
 
       // Get screen tracks
-      this.screenTracks = await createLocalScreenTracks({
-        audio: screenAudioOptions,
-      });
+      try {
+        this.screenTracks = await createLocalScreenTracks({
+          audio: screenAudioOptions,
+        });
+      } catch (error) {
+        log.warn("Screen share cancelled or failed:", error);
+        return;
+      }
 
       for (const screenTrack of this.screenTracks) {
         log.debug("screenTrack enable:", screenTrack);
