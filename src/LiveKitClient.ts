@@ -1218,6 +1218,20 @@ export default class LiveKitClient {
   }
 
   setLocalParticipantCallbacks(): void {
+    // Remove existing listeners to prevent duplication on reconnect
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.IsSpeakingChanged,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.ParticipantMetadataChanged,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.TrackPublished,
+    );
+    this.liveKitRoom?.localParticipant.removeAllListeners(
+      ParticipantEvent.TrackSubscriptionStatusChanged,
+    );
+
     this.liveKitRoom?.localParticipant
       .on(
         ParticipantEvent.IsSpeakingChanged,
@@ -1249,6 +1263,10 @@ export default class LiveKitClient {
       return;
     }
 
+    // Remove existing listeners to prevent duplication on reconnect
+    participant.removeAllListeners(ParticipantEvent.IsSpeakingChanged);
+    participant.removeAllListeners(ParticipantEvent.ParticipantMetadataChanged);
+
     participant
       .on(
         ParticipantEvent.IsSpeakingChanged,
@@ -1266,6 +1284,26 @@ export default class LiveKitClient {
       );
       return;
     }
+
+    // Remove existing event listeners to prevent duplication on reconnect.
+    // IMPORTANT: Do NOT use removeAllListeners() without an event argument —
+    // that would also remove LiveKit SDK's internal listeners and break the room.
+    this.liveKitRoom.removeAllListeners(RoomEvent.AudioPlaybackStatusChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantConnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantDisconnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackSubscribed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackSubscriptionFailed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnpublished);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnsubscribed);
+    this.liveKitRoom.removeAllListeners(RoomEvent.LocalTrackUnpublished);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ConnectionQualityChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Disconnected);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Reconnecting);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackMuted);
+    this.liveKitRoom.removeAllListeners(RoomEvent.TrackUnmuted);
+    this.liveKitRoom.removeAllListeners(RoomEvent.ParticipantMetadataChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.RoomMetadataChanged);
+    this.liveKitRoom.removeAllListeners(RoomEvent.Reconnected);
 
     // Set up event callbacks
     this.liveKitRoom
