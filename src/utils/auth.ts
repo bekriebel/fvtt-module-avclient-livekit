@@ -63,7 +63,7 @@ export async function getAccessToken(
   // Sign and return the JWT
   const accessTokenJwt = await new SignJWT(tokenPayload)
     .setIssuer(apiKey) // The configured API Key
-    .setExpirationTime("10h") // Expire after 12 hours
+    .setExpirationTime("10h") // Expire after 10 hours
     .setJti(userName) // Use the username for the JWT ID
     .setSubject(userName) // Use the username for the JWT Subject
     .setNotBefore(notBefore) // Give us a 15 minute buffer in case the user's clock is set incorrectly

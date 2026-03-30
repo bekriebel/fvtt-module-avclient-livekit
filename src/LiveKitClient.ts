@@ -199,7 +199,7 @@ export default class LiveKitClient {
       `<div class="connection-quality-indicator unknown" title="${
         game.i18n?.localize(
           `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
-        ) ?? "Connectin Quality Unknown"
+        ) ?? "Connection Quality Unknown"
       }"></div>`,
     );
 

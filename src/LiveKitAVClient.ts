@@ -784,7 +784,7 @@ export default class LiveKitAVClient extends foundry.av.AVClient {
     const audioSourceChange = keys.has("client.audioSrc");
     if (audioSourceChange)
       this._liveKitClient.changeAudioSource().catch((error: unknown) => {
-        log.error("Error chaning audio source:", error);
+        log.error("Error changing audio source:", error);
       });
 
     // Change video source
@@ -820,7 +820,7 @@ export default class LiveKitAVClient extends foundry.av.AVClient {
     // Refresh the main settings page if it is open, in case one of our settings has changed
     if (game.settings?.sheet.rendered) {
       game.settings.sheet.render().catch((error: unknown) => {
-        log.error("Error redering settings sheet:", error);
+        log.error("Error rendering settings sheet:", error);
       });
     }
   }
