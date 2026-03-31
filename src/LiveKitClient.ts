@@ -38,6 +38,7 @@ import { addContextOptions, breakout } from "./LiveKitBreakout";
 import { Logger } from "./utils/logger";
 import { getAccessToken, getTavernAccessToken } from "./utils/auth";
 import { debounceRefreshView } from "./utils/helpers";
+import { ReconnectManager } from "./utils/reconnect";
 
 const log = new Logger();
 
@@ -65,6 +66,7 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
   private _boundOnVolumeChange = this.onVolumeChange.bind(this);
+  private reconnectManager = new ReconnectManager();
 
   liveKitServerTypes: LiveKitServerTypes = {
     custom: {
@@ -742,7 +744,17 @@ export default class LiveKitClient {
 
     this.connectionState = ConnectionState.Disconnected;
 
-    // TODO: Add some incremental back-off reconnect logic here
+    // Attempt reconnect unless it was intentional
+    if (reason !== DisconnectReason.CLIENT_INITIATED) {
+      this.reconnectManager
+        .attemptReconnect(() => this.avMaster.connect())
+        .catch((error: unknown) => {
+          log.error("Reconnect failed:", error);
+        });
+    } else {
+      // Cancel any pending reconnect if disconnect was intentional
+      this.reconnectManager.cancel();
+    }
   }
 
   onGetUserContextOptions(
@@ -846,6 +858,7 @@ export default class LiveKitClient {
 
   onReconnected(): void {
     log.info("Reconnect issued");
+    this.reconnectManager.reset();
     // Re-render just in case users changed
     this.render();
   }

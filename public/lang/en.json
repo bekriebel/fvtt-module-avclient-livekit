@@ -88,5 +88,8 @@
   "LIVEKITAVCLIENT.videoBitrateHint": "Maximum video bitrate in kilobits per second. Set to 0 for automatic (recommended). Higher values improve quality but use more bandwidth.",
   "LIVEKITAVCLIENT.audioBitrate": "Audio Bitrate (kbps)",
   "LIVEKITAVCLIENT.audioBitrateHint": "Audio bitrate in kilobits per second. Set to 0 to use the default speech preset. Higher values improve quality but use more bandwidth.",
+  "LIVEKITAVCLIENT.reconnecting": "Reconnecting to A/V server",
+  "LIVEKITAVCLIENT.reconnected": "Reconnected to A/V server",
+  "LIVEKITAVCLIENT.reconnectFailed": "Failed to reconnect to A/V server after maximum attempts",
   "WEBRTC.TABS.livekit": "LiveKit AVClient"
 }
