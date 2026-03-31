@@ -250,7 +250,7 @@ export function breakout(
     log.error("Failed to connect to breakout room");
     liveKitClient.breakoutRoom = undefined;
     ui.notifications?.error(
-      game.i18n.localize(`${LANG_NAME}.failedToJoinAVBreakout`),
+      game.i18n?.localize(`${LANG_NAME}.failedToJoinAVBreakout`) ?? "Failed to join breakout room",
     );
   });
 }

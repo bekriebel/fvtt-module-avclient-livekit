@@ -112,7 +112,11 @@ export async function getTavernAccessToken(
     return "";
   }
   if (!response.ok) {
-    log.error("Error validating Patreon account", await response.json());
+    try {
+      log.error("Error validating Patreon account", await response.json());
+    } catch {
+      log.error("Error validating Patreon account, status:", response.status);
+    }
     return "";
   }
   let responseText;

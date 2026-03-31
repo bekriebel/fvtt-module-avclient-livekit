@@ -108,7 +108,7 @@ export default class LiveKitClient {
     this.settings = liveKitAvClient.settings;
 
     this.render = foundry.utils.debounce(
-      this.avMaster.render.bind(this.liveKitAvClient),
+      this.avMaster.render.bind(this.avMaster),
       2000,
     );
     Hooks.callAll("liveKitClientAvailable", this);
@@ -924,7 +924,7 @@ export default class LiveKitClient {
         if (
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           game.users?.get(userId)?.isGM &&
-          (!message.userId || message.userId === game.user.id)
+          (!message.userId || message.userId === game.user?.id)
         ) {
           breakout(message.breakoutRoom, this);
         }
@@ -1059,7 +1059,7 @@ export default class LiveKitClient {
     }
 
     const videoElement = document.querySelector(
-      `.camera-view[data-user="${fvttUserId}"]`,
+      `.camera-view[data-user="${fvttUserId}"] video.user-video`,
     );
 
     if (!(videoElement instanceof HTMLVideoElement)) {
@@ -1555,6 +1555,7 @@ export default class LiveKitClient {
           }
         }
       }
+      this.screenTracks = [];
     }
   }
 
