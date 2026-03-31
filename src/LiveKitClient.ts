@@ -67,6 +67,8 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
   private _boundOnVolumeChange = this.onVolumeChange.bind(this);
+  locallyMutedUsers = new Set<string>();
+  locallyHiddenUsers = new Set<string>();
   private noiseCancellation = new NoiseCancellation();
   private reconnectManager = new ReconnectManager();
 
@@ -888,6 +890,15 @@ export default class LiveKitClient {
   onReconnected(): void {
     log.info("Reconnect issued");
     this.reconnectManager.reset();
+
+    // Re-apply local mute/hide state for all tracked users
+    for (const userId of this.locallyMutedUsers) {
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, false);
+    }
+    for (const userId of this.locallyHiddenUsers) {
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, false);
+    }
+
     // Re-render just in case users changed
     this.render();
   }
@@ -1077,6 +1088,23 @@ export default class LiveKitClient {
       log.warn("Unknown track type subscribed from publication", publication);
     }
 
+    // Apply local mute/hide state for this user
+    if (
+      track instanceof RemoteAudioTrack &&
+      this.locallyMutedUsers.has(fvttUserId)
+    ) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(false);
+      }
+    } else if (
+      track instanceof RemoteVideoTrack &&
+      this.locallyHiddenUsers.has(fvttUserId)
+    ) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(false);
+      }
+    }
+
     debounceRefreshView(fvttUserId);
   }
 
@@ -1087,6 +1115,52 @@ export default class LiveKitClient {
   ): void {
     log.debug("onTrackUnSubscribed:", track, publication, participant);
     track.detach();
+  }
+
+  toggleLocalMute(userId: string): void {
+    if (this.locallyMutedUsers.has(userId)) {
+      this.locallyMutedUsers.delete(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, true);
+      log.info("Locally unmuted user:", userId);
+    } else {
+      this.locallyMutedUsers.add(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, false);
+      log.info("Locally muted user:", userId);
+    }
+  }
+
+  toggleLocalHide(userId: string): void {
+    if (this.locallyHiddenUsers.has(userId)) {
+      this.locallyHiddenUsers.delete(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, true);
+      log.info("Locally unhidden user:", userId);
+    } else {
+      this.locallyHiddenUsers.add(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, false);
+      log.info("Locally hidden user:", userId);
+    }
+  }
+
+  private setRemoteTrackEnabled(
+    userId: string,
+    kind: Track.Kind,
+    enabled: boolean,
+  ): void {
+    const participant = this.liveKitParticipants.get(userId);
+    if (!participant || !(participant instanceof RemoteParticipant)) {
+      return;
+    }
+
+    const publications =
+      kind === Track.Kind.Audio
+        ? participant.audioTrackPublications
+        : participant.videoTrackPublications;
+
+    for (const publication of publications.values()) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(enabled);
+      }
+    }
   }
 
   /**
