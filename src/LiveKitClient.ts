@@ -1094,10 +1094,32 @@ export default class LiveKitClient {
       game.user?.id ?? "",
     );
 
-    // Set resolution higher if simulcast is enabled
-    let videoResolution = VideoPresets43.h180.resolution;
+    const resolutionSetting =
+      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
+    const resolutionMap: Record<
+      string,
+      (typeof VideoPresets43)[keyof typeof VideoPresets43]
+    > = {
+      h180: VideoPresets43.h180,
+      h360: VideoPresets43.h360,
+      h540: VideoPresets43.h540,
+      h720: VideoPresets43.h720,
+    };
+
+    const selectedPreset = resolutionMap[resolutionSetting] ?? VideoPresets43.h360;
+
+    // With simulcast, capture at the selected resolution (or 720p minimum
+    // to have enough quality for higher layers)
+    let videoResolution = selectedPreset.resolution;
     if (this.trackPublishOptions.simulcast) {
-      videoResolution = VideoPresets43.h720.resolution;
+      // Capture at least 720p when simulcast is on so higher layers are available
+      const h720 = VideoPresets43.h720.resolution;
+      if (
+        selectedPreset.resolution.width < h720.width ||
+        selectedPreset.resolution.height < h720.height
+      ) {
+        videoResolution = h720;
+      }
     }
 
     return typeof videoSrc === "string" &&
@@ -1422,13 +1444,49 @@ export default class LiveKitClient {
   }
 
   get trackPublishOptions(): TrackPublishOptions {
+    const resolutionSetting =
+      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
+
+    // Build simulcast layers: include all presets below the selected resolution
+    const orderedPresets = [
+      { key: "h180", preset: VideoPresets43.h180 },
+      { key: "h360", preset: VideoPresets43.h360 },
+      { key: "h540", preset: VideoPresets43.h540 },
+      { key: "h720", preset: VideoPresets43.h720 },
+    ];
+    const selectedIndex = orderedPresets.findIndex(
+      (p) => p.key === resolutionSetting,
+    );
+    const simulcastLayers = orderedPresets
+      .slice(0, Math.max(selectedIndex, 1))
+      .map((p) => p.preset);
+
     const trackPublishOptions: TrackPublishOptions = {
       audioPreset: AudioPresets.speech,
       simulcast: true,
       videoCodec: "vp8",
-      videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
+      videoSimulcastLayers: simulcastLayers,
     };
 
+    // Apply custom video bitrate
+    const videoBitrate =
+      game.settings?.get(MODULE_NAME, "videoBitrate") ?? 0;
+    if (videoBitrate > 0) {
+      trackPublishOptions.videoEncoding = {
+        maxBitrate: videoBitrate * 1000,
+      };
+    }
+
+    // Apply custom audio bitrate via audioPreset
+    const audioBitrate =
+      game.settings?.get(MODULE_NAME, "audioBitrate") ?? 0;
+    if (audioBitrate > 0) {
+      trackPublishOptions.audioPreset = {
+        maxBitrate: audioBitrate * 1000,
+      };
+    }
+
+    // Music mode overrides audio preset
     if (game.settings?.get(MODULE_NAME, "audioMusicMode")) {
       trackPublishOptions.audioPreset = AudioPresets.musicHighQuality;
     }
