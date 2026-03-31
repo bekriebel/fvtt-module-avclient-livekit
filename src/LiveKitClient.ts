@@ -1087,6 +1087,22 @@ export default class LiveKitClient {
     }
   }
 
+  private static readonly VIDEO_PRESETS_ORDERED = [
+    { key: "h180", preset: VideoPresets43.h180 },
+    { key: "h360", preset: VideoPresets43.h360 },
+    { key: "h540", preset: VideoPresets43.h540 },
+    { key: "h720", preset: VideoPresets43.h720 },
+  ] as const;
+
+  private get selectedVideoPresetIndex(): number {
+    const resolutionSetting =
+      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
+    const index = LiveKitClient.VIDEO_PRESETS_ORDERED.findIndex(
+      (p) => p.key === resolutionSetting,
+    );
+    return index >= 0 ? index : 1; // Default to h360 (index 1)
+  }
+
   getVideoParams(): VideoCaptureOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
@@ -1094,32 +1110,17 @@ export default class LiveKitClient {
       game.user?.id ?? "",
     );
 
-    const resolutionSetting =
-      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
-    const resolutionMap: Record<
-      string,
-      (typeof VideoPresets43)[keyof typeof VideoPresets43]
-    > = {
-      h180: VideoPresets43.h180,
-      h360: VideoPresets43.h360,
-      h540: VideoPresets43.h540,
-      h720: VideoPresets43.h720,
-    };
+    const selectedPreset =
+      LiveKitClient.VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
 
-    const selectedPreset = resolutionMap[resolutionSetting] ?? VideoPresets43.h360;
-
-    // With simulcast, capture at the selected resolution (or 720p minimum
-    // to have enough quality for higher layers)
+    // With simulcast, capture at least 720p so higher layers are available
     let videoResolution = selectedPreset.resolution;
-    if (this.trackPublishOptions.simulcast) {
-      // Capture at least 720p when simulcast is on so higher layers are available
-      const h720 = VideoPresets43.h720.resolution;
-      if (
-        selectedPreset.resolution.width < h720.width ||
-        selectedPreset.resolution.height < h720.height
-      ) {
-        videoResolution = h720;
-      }
+    const h720 = VideoPresets43.h720.resolution;
+    if (
+      selectedPreset.resolution.width < h720.width ||
+      selectedPreset.resolution.height < h720.height
+    ) {
+      videoResolution = h720;
     }
 
     return typeof videoSrc === "string" &&
@@ -1444,20 +1445,9 @@ export default class LiveKitClient {
   }
 
   get trackPublishOptions(): TrackPublishOptions {
-    const resolutionSetting =
-      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
-
     // Build simulcast layers: include all presets below the selected resolution
-    const orderedPresets = [
-      { key: "h180", preset: VideoPresets43.h180 },
-      { key: "h360", preset: VideoPresets43.h360 },
-      { key: "h540", preset: VideoPresets43.h540 },
-      { key: "h720", preset: VideoPresets43.h720 },
-    ];
-    const selectedIndex = orderedPresets.findIndex(
-      (p) => p.key === resolutionSetting,
-    );
-    const simulcastLayers = orderedPresets
+    const selectedIndex = this.selectedVideoPresetIndex;
+    const simulcastLayers = LiveKitClient.VIDEO_PRESETS_ORDERED
       .slice(0, Math.max(selectedIndex, 1))
       .map((p) => p.preset);
 
