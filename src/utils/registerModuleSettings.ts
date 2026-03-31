@@ -15,6 +15,60 @@ export default function registerModuleSettings(): void {
     onChange: () => game.webrtc?.render(),
   });
 
+  game.settings?.register(MODULE_NAME, "videoResolution", {
+    name: "LIVEKITAVCLIENT.videoResolution",
+    hint: "LIVEKITAVCLIENT.videoResolutionHint",
+    scope: "client",
+    config: true,
+    default: "h360",
+    type: new foundry.data.fields.StringField({ initial: "h360" }),
+    choices: {
+      h180: "180p",
+      h360: "360p",
+      h540: "540p",
+      h720: "720p",
+    },
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeVideoSource()
+        .catch((error: unknown) => {
+          log.error("videoResolution: Error changing video source", error);
+        });
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "videoBitrate", {
+    name: "LIVEKITAVCLIENT.videoBitrate",
+    hint: "LIVEKITAVCLIENT.videoBitrateHint",
+    scope: "client",
+    config: true,
+    default: 0,
+    type: new foundry.data.fields.NumberField({ initial: 0, min: 0, max: 2500, step: 100 }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeVideoSource()
+        .catch((error: unknown) => {
+          log.error("videoBitrate: Error changing video source", error);
+        });
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "audioBitrate", {
+    name: "LIVEKITAVCLIENT.audioBitrate",
+    hint: "LIVEKITAVCLIENT.audioBitrateHint",
+    scope: "client",
+    config: true,
+    default: 0,
+    type: new foundry.data.fields.NumberField({ initial: 0, min: 0, max: 128, step: 8 }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeAudioSource(true)
+        .catch((error: unknown) => {
+          log.error("audioBitrate: Error changing audio source", error);
+        });
+    },
+  });
+
   game.settings?.register(MODULE_NAME, "liveKitConnectionSettings", {
     name: "LIVEKITAVCLIENT.liveKitConnectionSettings",
     hint: "LIVEKITAVCLIENT.liveKitConnectionSettingsHint",
@@ -45,6 +99,25 @@ export default function registerModuleSettings(): void {
     config: false,
     default: {},
     requiresReload: false,
+  });
+
+  game.settings?.register(MODULE_NAME, "enableNoiseCancellation", {
+    name: "LIVEKITAVCLIENT.enableNoiseCancellation",
+    hint: "LIVEKITAVCLIENT.enableNoiseCancellationHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeAudioSource(true)
+        .catch((error: unknown) => {
+          log.error(
+            "enableNoiseCancellation: Error changing audio source",
+            error,
+          );
+        });
+    },
   });
 
   game.settings?.register(MODULE_NAME, "audioMusicMode", {

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@jitsi/rnnoise-wasm':
+        specifier: ^0.2.1
+        version: 0.2.1
       debug:
         specifier: ^4.4.3
         version: 4.4.3
@@ -322,6 +325,9 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@jitsi/rnnoise-wasm@0.2.1':
+    resolution: {integrity: sha512-iEj77www43pS2Yq+cfLZb+hFuI7L5ccisBzzPMcOjjLsG4/LAlkD1CY58/8gc84nHdLBGmD/OPIWGnvYnXvB0A==}
 
   '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/d7751f280498c9d749c5bd821628ab2be9acefbc':
     resolution: {tarball: https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/d7751f280498c9d749c5bd821628ab2be9acefbc}
@@ -2105,6 +2111,8 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@jitsi/rnnoise-wasm@0.2.1': {}
 
   '@league-of-foundry-developers/foundry-vtt-types@https://codeload.github.com/League-of-Foundry-Developers/foundry-vtt-types/tar.gz/d7751f280498c9d749c5bd821628ab2be9acefbc(0285a000af5c3844628f048a3add54a4)':
     dependencies:

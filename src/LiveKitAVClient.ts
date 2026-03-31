@@ -410,7 +410,8 @@ export default class LiveKitAVClient extends foundry.av.AVClient {
           "connectErrorCheckClock";
       }
 
-      // TODO: Add some incremental back-off reconnect logic here
+      // Note: ReconnectManager handles post-connection disconnects.
+      // Initial connection failures are shown as permanent errors below.
       ui.notifications?.error(
         `${game.i18n?.localize(`${LANG_NAME}.connectError`) ?? "connectError"}: ${String(message)}`,
         { permanent: true },

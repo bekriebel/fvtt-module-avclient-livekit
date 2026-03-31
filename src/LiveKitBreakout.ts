@@ -144,6 +144,82 @@ export function addContextOptions(
         _endAllBreakouts(liveKitClient);
       },
     },
+    {
+      name:
+        game.i18n?.localize(`${LANG_NAME}.muteUserLocal`) ??
+        "Mute user (local)",
+      icon: '<i class="fas fa-microphone-slash"></i>',
+      condition: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        return (
+          userId !== game.user?.id &&
+          !liveKitClient.locallyMutedUsers.has(userId)
+        );
+      },
+      callback: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        if (userId) {
+          liveKitClient.toggleLocalMute(userId);
+        }
+      },
+    },
+    {
+      name:
+        game.i18n?.localize(`${LANG_NAME}.unmuteUserLocal`) ??
+        "Unmute user (local)",
+      icon: '<i class="fas fa-microphone"></i>',
+      condition: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        return (
+          userId !== game.user?.id &&
+          liveKitClient.locallyMutedUsers.has(userId)
+        );
+      },
+      callback: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        if (userId) {
+          liveKitClient.toggleLocalMute(userId);
+        }
+      },
+    },
+    {
+      name:
+        game.i18n?.localize(`${LANG_NAME}.hideUserLocal`) ??
+        "Hide video (local)",
+      icon: '<i class="fas fa-video-slash"></i>',
+      condition: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        return (
+          userId !== game.user?.id &&
+          !liveKitClient.locallyHiddenUsers.has(userId)
+        );
+      },
+      callback: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        if (userId) {
+          liveKitClient.toggleLocalHide(userId);
+        }
+      },
+    },
+    {
+      name:
+        game.i18n?.localize(`${LANG_NAME}.showUserLocal`) ??
+        "Show video (local)",
+      icon: '<i class="fas fa-video"></i>',
+      condition: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        return (
+          userId !== game.user?.id &&
+          liveKitClient.locallyHiddenUsers.has(userId)
+        );
+      },
+      callback: (players) => {
+        const userId: string = players.dataset.userId ?? "";
+        if (userId) {
+          liveKitClient.toggleLocalHide(userId);
+        }
+      },
+    },
   );
 }
 

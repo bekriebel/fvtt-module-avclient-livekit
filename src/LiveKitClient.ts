@@ -38,6 +38,8 @@ import { addContextOptions, breakout } from "./LiveKitBreakout";
 import { Logger } from "./utils/logger";
 import { getAccessToken, getTavernAccessToken } from "./utils/auth";
 import { debounceRefreshView } from "./utils/helpers";
+import { NoiseCancellation } from "./utils/noiseCancellation";
+import { ReconnectManager } from "./utils/reconnect";
 
 const log = new Logger();
 
@@ -65,6 +67,10 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
   private _boundOnVolumeChange = this.onVolumeChange.bind(this);
+  locallyMutedUsers = new Set<string>();
+  locallyHiddenUsers = new Set<string>();
+  private noiseCancellation = new NoiseCancellation();
+  private reconnectManager = new ReconnectManager();
 
   liveKitServerTypes: LiveKitServerTypes = {
     custom: {
@@ -586,6 +592,30 @@ export default class LiveKitClient {
       }
     }
 
+    // Apply noise cancellation if enabled and not in music mode
+    const ncEnabled =
+      game.settings?.get(MODULE_NAME, "enableNoiseCancellation") ?? true;
+    const musicMode =
+      game.settings?.get(MODULE_NAME, "audioMusicMode") ?? false;
+
+    if (ncEnabled && !musicMode && this.audioTrack) {
+      const initialized = await this.noiseCancellation.initialize();
+      if (initialized && this.audioTrack.mediaStream) {
+        const processedStream =
+          await this.noiseCancellation.processStream(
+            this.audioTrack.mediaStream,
+          );
+        const processedTrack = processedStream.getAudioTracks()[0] as
+          | MediaStreamTrack
+          | undefined;
+        if (processedTrack) {
+          await this.audioTrack.replaceTrack(processedTrack);
+        }
+      }
+    } else {
+      this.noiseCancellation.toggle(false);
+    }
+
     // Check that mute/hidden/broadcast is toggled properly for the track
     if (
       this.audioTrack &&
@@ -734,6 +764,9 @@ export default class LiveKitClient {
     }
     ui.notifications?.warn(disconnectWarning);
 
+    // Clean up noise cancellation pipeline
+    this.noiseCancellation.destroy();
+
     // Clear the participant map
     this.liveKitParticipants.clear();
 
@@ -742,7 +775,17 @@ export default class LiveKitClient {
 
     this.connectionState = ConnectionState.Disconnected;
 
-    // TODO: Add some incremental back-off reconnect logic here
+    // Attempt reconnect unless it was intentional
+    if (reason !== DisconnectReason.CLIENT_INITIATED) {
+      this.reconnectManager
+        .attemptReconnect(() => this.avMaster.connect())
+        .catch((error: unknown) => {
+          log.error("Reconnect failed:", error);
+        });
+    } else {
+      // Cancel any pending reconnect if disconnect was intentional
+      this.reconnectManager.cancel();
+    }
   }
 
   onGetUserContextOptions(
@@ -846,6 +889,16 @@ export default class LiveKitClient {
 
   onReconnected(): void {
     log.info("Reconnect issued");
+    this.reconnectManager.reset();
+
+    // Re-apply local mute/hide state for all tracked users
+    for (const userId of this.locallyMutedUsers) {
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, false);
+    }
+    for (const userId of this.locallyHiddenUsers) {
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, false);
+    }
+
     // Re-render just in case users changed
     this.render();
   }
@@ -1035,6 +1088,23 @@ export default class LiveKitClient {
       log.warn("Unknown track type subscribed from publication", publication);
     }
 
+    // Apply local mute/hide state for this user
+    if (
+      track instanceof RemoteAudioTrack &&
+      this.locallyMutedUsers.has(fvttUserId)
+    ) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(false);
+      }
+    } else if (
+      track instanceof RemoteVideoTrack &&
+      this.locallyHiddenUsers.has(fvttUserId)
+    ) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(false);
+      }
+    }
+
     debounceRefreshView(fvttUserId);
   }
 
@@ -1045,6 +1115,52 @@ export default class LiveKitClient {
   ): void {
     log.debug("onTrackUnSubscribed:", track, publication, participant);
     track.detach();
+  }
+
+  toggleLocalMute(userId: string): void {
+    if (this.locallyMutedUsers.has(userId)) {
+      this.locallyMutedUsers.delete(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, true);
+      log.info("Locally unmuted user:", userId);
+    } else {
+      this.locallyMutedUsers.add(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Audio, false);
+      log.info("Locally muted user:", userId);
+    }
+  }
+
+  toggleLocalHide(userId: string): void {
+    if (this.locallyHiddenUsers.has(userId)) {
+      this.locallyHiddenUsers.delete(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, true);
+      log.info("Locally unhidden user:", userId);
+    } else {
+      this.locallyHiddenUsers.add(userId);
+      this.setRemoteTrackEnabled(userId, Track.Kind.Video, false);
+      log.info("Locally hidden user:", userId);
+    }
+  }
+
+  private setRemoteTrackEnabled(
+    userId: string,
+    kind: Track.Kind,
+    enabled: boolean,
+  ): void {
+    const participant = this.liveKitParticipants.get(userId);
+    if (!participant || !(participant instanceof RemoteParticipant)) {
+      return;
+    }
+
+    const publications =
+      kind === Track.Kind.Audio
+        ? participant.audioTrackPublications
+        : participant.videoTrackPublications;
+
+    for (const publication of publications.values()) {
+      if (publication instanceof RemoteTrackPublication) {
+        publication.setEnabled(enabled);
+      }
+    }
   }
 
   /**
@@ -1087,6 +1203,22 @@ export default class LiveKitClient {
     }
   }
 
+  private static readonly VIDEO_PRESETS_ORDERED = [
+    { key: "h180", preset: VideoPresets43.h180 },
+    { key: "h360", preset: VideoPresets43.h360 },
+    { key: "h540", preset: VideoPresets43.h540 },
+    { key: "h720", preset: VideoPresets43.h720 },
+  ] as const;
+
+  private get selectedVideoPresetIndex(): number {
+    const resolutionSetting =
+      game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
+    const index = LiveKitClient.VIDEO_PRESETS_ORDERED.findIndex(
+      (p) => p.key === resolutionSetting,
+    );
+    return index >= 0 ? index : 1; // Default to h360 (index 1)
+  }
+
   getVideoParams(): VideoCaptureOptions | false {
     // Configure whether the user can send video
     const videoSrc = this.settings.get("client", "videoSrc");
@@ -1094,10 +1226,17 @@ export default class LiveKitClient {
       game.user?.id ?? "",
     );
 
-    // Set resolution higher if simulcast is enabled
-    let videoResolution = VideoPresets43.h180.resolution;
-    if (this.trackPublishOptions.simulcast) {
-      videoResolution = VideoPresets43.h720.resolution;
+    const selectedPreset =
+      LiveKitClient.VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
+
+    // With simulcast, capture at least 720p so higher layers are available
+    let videoResolution = selectedPreset.resolution;
+    const h720 = VideoPresets43.h720.resolution;
+    if (
+      selectedPreset.resolution.width < h720.width ||
+      selectedPreset.resolution.height < h720.height
+    ) {
+      videoResolution = h720;
     }
 
     return typeof videoSrc === "string" &&
@@ -1422,13 +1561,38 @@ export default class LiveKitClient {
   }
 
   get trackPublishOptions(): TrackPublishOptions {
+    // Build simulcast layers: include all presets below the selected resolution
+    const selectedIndex = this.selectedVideoPresetIndex;
+    const simulcastLayers = LiveKitClient.VIDEO_PRESETS_ORDERED
+      .slice(0, Math.max(selectedIndex, 1))
+      .map((p) => p.preset);
+
     const trackPublishOptions: TrackPublishOptions = {
       audioPreset: AudioPresets.speech,
       simulcast: true,
       videoCodec: "vp8",
-      videoSimulcastLayers: [VideoPresets43.h180, VideoPresets43.h360],
+      videoSimulcastLayers: simulcastLayers,
     };
 
+    // Apply custom video bitrate
+    const videoBitrate =
+      game.settings?.get(MODULE_NAME, "videoBitrate") ?? 0;
+    if (videoBitrate > 0) {
+      trackPublishOptions.videoEncoding = {
+        maxBitrate: videoBitrate * 1000,
+      };
+    }
+
+    // Apply custom audio bitrate via audioPreset
+    const audioBitrate =
+      game.settings?.get(MODULE_NAME, "audioBitrate") ?? 0;
+    if (audioBitrate > 0) {
+      trackPublishOptions.audioPreset = {
+        maxBitrate: audioBitrate * 1000,
+      };
+    }
+
+    // Music mode overrides audio preset
     if (game.settings?.get(MODULE_NAME, "audioMusicMode")) {
       trackPublishOptions.audioPreset = AudioPresets.musicHighQuality;
     }

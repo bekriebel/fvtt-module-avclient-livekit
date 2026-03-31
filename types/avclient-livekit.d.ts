@@ -74,6 +74,24 @@ declare global {
     "avclient-livekit.displayConnectionQuality": foundry.data.fields.BooleanField<{
       initial: true;
     }>;
+    "avclient-livekit.videoResolution": foundry.data.fields.StringField<{
+      initial: "h360";
+    }>;
+    "avclient-livekit.videoBitrate": foundry.data.fields.NumberField<{
+      initial: 0;
+      min: 0;
+      max: 2500;
+      step: 100;
+    }>;
+    "avclient-livekit.audioBitrate": foundry.data.fields.NumberField<{
+      initial: 0;
+      min: 0;
+      max: 128;
+      step: 8;
+    }>;
+    "avclient-livekit.enableNoiseCancellation": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
     "avclient-livekit.audioMusicMode": foundry.data.fields.BooleanField<{
       initial: false;
     }>;
