@@ -219,6 +219,12 @@ class RNNoiseProcessor extends AudioWorkletProcessor {
       outputOffset += toCopy;
     }
 
+    // Zero-fill any remaining output samples to avoid garbage data
+    // during initial warmup before the first full frame is processed
+    if (outputOffset < RENDER_QUANTUM) {
+      output.fill(0, outputOffset);
+    }
+
     return true;
   }
 

@@ -762,6 +762,9 @@ export default class LiveKitClient {
     }
     ui.notifications?.warn(disconnectWarning);
 
+    // Clean up noise cancellation pipeline
+    this.noiseCancellation.destroy();
+
     // Clear the participant map
     this.liveKitParticipants.clear();
 
