@@ -82,5 +82,11 @@
   "LIVEKITAVCLIENT.devModeHint": "Adds additional developer settings",
   "LIVEKITAVCLIENT.forceTurn": "Required TURN relay",
   "LIVEKITAVCLIENT.forceTurnHint": "Sets connection to required relaying via TURN",
+  "LIVEKITAVCLIENT.videoResolution": "Video Resolution",
+  "LIVEKITAVCLIENT.videoResolutionHint": "Maximum video resolution to capture. Higher resolution uses more bandwidth and CPU. With simulcast enabled, lower-quality layers are sent automatically for viewers with limited bandwidth.",
+  "LIVEKITAVCLIENT.videoBitrate": "Video Bitrate (kbps)",
+  "LIVEKITAVCLIENT.videoBitrateHint": "Maximum video bitrate in kilobits per second. Set to 0 for automatic (recommended). Higher values improve quality but use more bandwidth.",
+  "LIVEKITAVCLIENT.audioBitrate": "Audio Bitrate (kbps)",
+  "LIVEKITAVCLIENT.audioBitrateHint": "Audio bitrate in kilobits per second. Set to 0 to use the default speech preset. Higher values improve quality but use more bandwidth.",
   "WEBRTC.TABS.livekit": "LiveKit AVClient"
 }
