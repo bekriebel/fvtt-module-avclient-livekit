@@ -84,7 +84,7 @@ export class ReconnectManager {
   }
 
   cancel(): void {
-    this.cancelled = true;
     this.reset();
+    this.cancelled = true;
   }
 }
