@@ -1,4 +1,5 @@
 import { MODULE_NAME, TAVERN_AUTH_SERVER } from "./constants";
+import { RESOLUTION_CHOICES } from "../LiveKitMediaConfig";
 import { Logger } from "./logger";
 import debug from "debug";
 
@@ -22,12 +23,7 @@ export default function registerModuleSettings(): void {
     config: true,
     default: "h360",
     type: new foundry.data.fields.StringField({ initial: "h360" }),
-    choices: {
-      h180: "180p",
-      h360: "360p",
-      h540: "540p",
-      h720: "720p",
-    },
+    choices: RESOLUTION_CHOICES,
     onChange: () => {
       game.webrtc?.client._liveKitClient
         .changeVideoSource()

@@ -37,9 +37,15 @@ import {
 import { addContextOptions, breakout } from "./LiveKitBreakout";
 import { Logger } from "./utils/logger";
 import { getAccessToken, getTavernAccessToken } from "./utils/auth";
-import { debounceRefreshView } from "./utils/helpers";
+import { debounceRefreshView, getLiveKitUrl } from "./utils/helpers";
 import { NoiseCancellation } from "./utils/noiseCancellation";
 import { ReconnectManager } from "./utils/reconnect";
+import {
+  VIDEO_PRESETS_ORDERED,
+  DEFAULT_VIDEO_CODEC,
+  DEFAULT_AUDIO_PRESET,
+  DEFAULT_SIMULCAST,
+} from "./LiveKitMediaConfig";
 
 const log = new Logger();
 
@@ -201,16 +207,15 @@ export default class LiveKitClient {
       return;
     }
 
-    const connectionQualityIndicator = $(
-      `<div class="connection-quality-indicator unknown" title="${
-        game.i18n?.localize(
-          `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
-        ) ?? "Connection Quality Unknown"
-      }"></div>`,
-    );
+    const connectionQualityIndicator = document.createElement("div");
+    connectionQualityIndicator.className = "connection-quality-indicator unknown";
+    connectionQualityIndicator.title =
+      game.i18n?.localize(
+        `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
+      ) ?? "Connection Quality Unknown";
 
     if (userNameBar instanceof Element) {
-      $(userNameBar).after(connectionQualityIndicator);
+      userNameBar.insertAdjacentElement("afterend", connectionQualityIndicator);
     }
 
     this.setConnectionQualityIndicator(userId);
@@ -1203,17 +1208,10 @@ export default class LiveKitClient {
     }
   }
 
-  private static readonly VIDEO_PRESETS_ORDERED = [
-    { key: "h180", preset: VideoPresets43.h180 },
-    { key: "h360", preset: VideoPresets43.h360 },
-    { key: "h540", preset: VideoPresets43.h540 },
-    { key: "h720", preset: VideoPresets43.h720 },
-  ] as const;
-
   private get selectedVideoPresetIndex(): number {
     const resolutionSetting =
       game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
-    const index = LiveKitClient.VIDEO_PRESETS_ORDERED.findIndex(
+    const index = VIDEO_PRESETS_ORDERED.findIndex(
       (p) => p.key === resolutionSetting,
     );
     return index >= 0 ? index : 1; // Default to h360 (index 1)
@@ -1227,7 +1225,7 @@ export default class LiveKitClient {
     );
 
     const selectedPreset =
-      LiveKitClient.VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
+      VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
 
     // With simulcast, capture at least 720p so higher layers are available
     let videoResolution = selectedPreset.resolution;
@@ -1252,7 +1250,7 @@ export default class LiveKitClient {
   async sendJoinMessage(liveKitServer: string, accessToken: string) {
     // Create the url for user to join the external LiveKit web client
     const params = new URLSearchParams({
-      liveKitUrl: `wss://${liveKitServer}`,
+      liveKitUrl: getLiveKitUrl(liveKitServer),
       token: accessToken,
     });
     const url = `https://meet.livekit.io/custom?${params.toString()}`;
@@ -1563,14 +1561,14 @@ export default class LiveKitClient {
   get trackPublishOptions(): TrackPublishOptions {
     // Build simulcast layers: include all presets below the selected resolution
     const selectedIndex = this.selectedVideoPresetIndex;
-    const simulcastLayers = LiveKitClient.VIDEO_PRESETS_ORDERED
+    const simulcastLayers = VIDEO_PRESETS_ORDERED
       .slice(0, Math.max(selectedIndex, 1))
       .map((p) => p.preset);
 
     const trackPublishOptions: TrackPublishOptions = {
-      audioPreset: AudioPresets.speech,
-      simulcast: true,
-      videoCodec: "vp8",
+      audioPreset: DEFAULT_AUDIO_PRESET,
+      simulcast: DEFAULT_SIMULCAST,
+      videoCodec: DEFAULT_VIDEO_CODEC,
       videoSimulcastLayers: simulcastLayers,
     };
 

@@ -10,7 +10,7 @@ import {
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 
 import LiveKitClient, { InitState } from "./LiveKitClient";
-import { callWhenReady, delayReload } from "./utils/helpers";
+import { callWhenReady, delayReload, getLiveKitUrl } from "./utils/helpers";
 import { LiveKitConnectionSettings } from "../types/avclient-livekit";
 import LiveKitAVConfig from "./LiveKitAVConfig";
 import { Logger } from "./utils/logger";
@@ -387,7 +387,7 @@ export default class LiveKitAVClient extends foundry.av.AVClient {
     // Connect to the server
     try {
       await this._liveKitClient.liveKitRoom?.connect(
-        `wss://${liveKitAddress}`,
+        getLiveKitUrl(liveKitAddress),
         accessToken,
         liveKitRoomConnectOptions,
       );

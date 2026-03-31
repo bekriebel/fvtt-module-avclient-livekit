@@ -1,4 +1,5 @@
 import { Logger } from "./logger";
+import { MODULE_NAME } from "./constants";
 
 const log = new Logger();
 
@@ -78,4 +79,9 @@ export function deviceInfoToObject(
   }
 
   return obj;
+}
+
+export function getLiveKitUrl(address: string): string {
+  const protocol = game.settings?.get(MODULE_NAME, "devMode") ? "ws" : "wss";
+  return `${protocol}://${address}`;
 }
