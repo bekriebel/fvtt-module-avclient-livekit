@@ -93,5 +93,9 @@
   "LIVEKITAVCLIENT.reconnecting": "Reconnecting to A/V server",
   "LIVEKITAVCLIENT.reconnected": "Reconnected to A/V server",
   "LIVEKITAVCLIENT.reconnectFailed": "Failed to reconnect to A/V server after maximum attempts",
+  "LIVEKITAVCLIENT.muteUserLocal": "Mute user (local)",
+  "LIVEKITAVCLIENT.unmuteUserLocal": "Unmute user (local)",
+  "LIVEKITAVCLIENT.hideUserLocal": "Hide video (local)",
+  "LIVEKITAVCLIENT.showUserLocal": "Show video (local)",
   "WEBRTC.TABS.livekit": "LiveKit AVClient"
 }
