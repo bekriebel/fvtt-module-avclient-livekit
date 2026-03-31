@@ -99,14 +99,12 @@ describe("ReconnectManager", () => {
   it("should cancel pending reconnects", async () => {
     const connectFn = vi.fn().mockResolvedValue(true);
 
-    const promise = manager.attemptReconnect(connectFn);
+    void manager.attemptReconnect(connectFn);
     manager.cancel();
 
     // After cancel, the timer is cleared so the promise will never resolve
     // on its own. Advance time to confirm connectFn is never called.
     await vi.advanceTimersByTimeAsync(60000);
-
-    // The promise hangs because the setTimeout callback was cleared.
     // Verify the connect function was never invoked.
     expect(connectFn).not.toHaveBeenCalled();
   });

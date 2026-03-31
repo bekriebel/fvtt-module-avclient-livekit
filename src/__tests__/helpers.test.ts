@@ -47,7 +47,9 @@ describe("getLiveKitUrl", () => {
   });
 
   it("should return wss:// when settings is unavailable", () => {
-    vi.mocked(game.settings!.get).mockReturnValue(undefined);
+    vi.mocked(game.settings!.get).mockReturnValue(
+      undefined as unknown as boolean,
+    );
 
     expect(getLiveKitUrl("livekit.example.com")).toBe(
       "wss://livekit.example.com",
