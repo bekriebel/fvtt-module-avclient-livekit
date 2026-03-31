@@ -38,6 +38,7 @@ import { addContextOptions, breakout } from "./LiveKitBreakout";
 import { Logger } from "./utils/logger";
 import { getAccessToken, getTavernAccessToken } from "./utils/auth";
 import { debounceRefreshView } from "./utils/helpers";
+import { NoiseCancellation } from "./utils/noiseCancellation";
 import { ReconnectManager } from "./utils/reconnect";
 
 const log = new Logger();
@@ -66,6 +67,7 @@ export default class LiveKitClient {
   videoTrack: LocalVideoTrack | null = null;
   windowClickListener: EventListener | null = null;
   private _boundOnVolumeChange = this.onVolumeChange.bind(this);
+  private noiseCancellation = new NoiseCancellation();
   private reconnectManager = new ReconnectManager();
 
   liveKitServerTypes: LiveKitServerTypes = {
@@ -586,6 +588,30 @@ export default class LiveKitClient {
         }
         log.error("Unable to acquire local audio:", message);
       }
+    }
+
+    // Apply noise cancellation if enabled and not in music mode
+    const ncEnabled =
+      game.settings?.get(MODULE_NAME, "enableNoiseCancellation") ?? true;
+    const musicMode =
+      game.settings?.get(MODULE_NAME, "audioMusicMode") ?? false;
+
+    if (ncEnabled && !musicMode && this.audioTrack) {
+      const initialized = await this.noiseCancellation.initialize();
+      if (initialized && this.audioTrack.mediaStream) {
+        const processedStream =
+          await this.noiseCancellation.processStream(
+            this.audioTrack.mediaStream,
+          );
+        const processedTrack = processedStream.getAudioTracks()[0] as
+          | MediaStreamTrack
+          | undefined;
+        if (processedTrack) {
+          await this.audioTrack.replaceTrack(processedTrack);
+        }
+      }
+    } else {
+      this.noiseCancellation.toggle(false);
     }
 
     // Check that mute/hidden/broadcast is toggled properly for the track

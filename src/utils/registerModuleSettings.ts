@@ -101,6 +101,25 @@ export default function registerModuleSettings(): void {
     requiresReload: false,
   });
 
+  game.settings?.register(MODULE_NAME, "enableNoiseCancellation", {
+    name: "LIVEKITAVCLIENT.enableNoiseCancellation",
+    hint: "LIVEKITAVCLIENT.enableNoiseCancellationHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeAudioSource(true)
+        .catch((error: unknown) => {
+          log.error(
+            "enableNoiseCancellation: Error changing audio source",
+            error,
+          );
+        });
+    },
+  });
+
   game.settings?.register(MODULE_NAME, "audioMusicMode", {
     name: "LIVEKITAVCLIENT.audioMusicMode",
     hint: "LIVEKITAVCLIENT.audioMusicModeHint",

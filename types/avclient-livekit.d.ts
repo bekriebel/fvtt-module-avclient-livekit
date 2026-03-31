@@ -89,6 +89,9 @@ declare global {
       max: 128;
       step: 8;
     }>;
+    "avclient-livekit.enableNoiseCancellation": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
     "avclient-livekit.audioMusicMode": foundry.data.fields.BooleanField<{
       initial: false;
     }>;

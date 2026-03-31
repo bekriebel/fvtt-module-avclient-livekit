@@ -88,6 +88,8 @@
   "LIVEKITAVCLIENT.videoBitrateHint": "Maximum video bitrate in kilobits per second. Set to 0 for automatic (recommended). Higher values improve quality but use more bandwidth.",
   "LIVEKITAVCLIENT.audioBitrate": "Audio Bitrate (kbps)",
   "LIVEKITAVCLIENT.audioBitrateHint": "Audio bitrate in kilobits per second. Set to 0 to use the default speech preset. Higher values improve quality but use more bandwidth.",
+  "LIVEKITAVCLIENT.enableNoiseCancellation": "Enable Noise Cancellation",
+  "LIVEKITAVCLIENT.enableNoiseCancellationHint": "Uses RNNoise to suppress background noise before sending audio. Adds ~13ms latency. Automatically disabled when Audio Music Mode is active.",
   "LIVEKITAVCLIENT.reconnecting": "Reconnecting to A/V server",
   "LIVEKITAVCLIENT.reconnected": "Reconnected to A/V server",
   "LIVEKITAVCLIENT.reconnectFailed": "Failed to reconnect to A/V server after maximum attempts",
