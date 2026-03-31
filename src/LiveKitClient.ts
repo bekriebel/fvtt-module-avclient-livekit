@@ -37,7 +37,7 @@ import {
 import { addContextOptions, breakout } from "./LiveKitBreakout";
 import { Logger } from "./utils/logger";
 import { getAccessToken, getTavernAccessToken } from "./utils/auth";
-import { debounceRefreshView } from "./utils/helpers";
+import { debounceRefreshView, getLiveKitUrl } from "./utils/helpers";
 import { NoiseCancellation } from "./utils/noiseCancellation";
 import { ReconnectManager } from "./utils/reconnect";
 
@@ -201,16 +201,15 @@ export default class LiveKitClient {
       return;
     }
 
-    const connectionQualityIndicator = $(
-      `<div class="connection-quality-indicator unknown" title="${
-        game.i18n?.localize(
-          `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
-        ) ?? "Connection Quality Unknown"
-      }"></div>`,
-    );
+    const connectionQualityIndicator = document.createElement("div");
+    connectionQualityIndicator.className = "connection-quality-indicator unknown";
+    connectionQualityIndicator.title =
+      game.i18n?.localize(
+        `${LANG_NAME}.connectionQuality.${ConnectionQuality.Unknown}`,
+      ) ?? "Connection Quality Unknown";
 
     if (userNameBar instanceof Element) {
-      $(userNameBar).after(connectionQualityIndicator);
+      userNameBar.insertAdjacentElement("afterend", connectionQualityIndicator);
     }
 
     this.setConnectionQualityIndicator(userId);
