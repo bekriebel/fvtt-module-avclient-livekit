@@ -1208,17 +1208,10 @@ export default class LiveKitClient {
     }
   }
 
-  private static readonly VIDEO_PRESETS_ORDERED = [
-    { key: "h180", preset: VideoPresets43.h180 },
-    { key: "h360", preset: VideoPresets43.h360 },
-    { key: "h540", preset: VideoPresets43.h540 },
-    { key: "h720", preset: VideoPresets43.h720 },
-  ] as const;
-
   private get selectedVideoPresetIndex(): number {
     const resolutionSetting =
       game.settings?.get(MODULE_NAME, "videoResolution") ?? "h360";
-    const index = LiveKitClient.VIDEO_PRESETS_ORDERED.findIndex(
+    const index = VIDEO_PRESETS_ORDERED.findIndex(
       (p) => p.key === resolutionSetting,
     );
     return index >= 0 ? index : 1; // Default to h360 (index 1)
@@ -1232,7 +1225,7 @@ export default class LiveKitClient {
     );
 
     const selectedPreset =
-      LiveKitClient.VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
+      VIDEO_PRESETS_ORDERED[this.selectedVideoPresetIndex].preset;
 
     // With simulcast, capture at least 720p so higher layers are available
     let videoResolution = selectedPreset.resolution;
@@ -1568,14 +1561,14 @@ export default class LiveKitClient {
   get trackPublishOptions(): TrackPublishOptions {
     // Build simulcast layers: include all presets below the selected resolution
     const selectedIndex = this.selectedVideoPresetIndex;
-    const simulcastLayers = LiveKitClient.VIDEO_PRESETS_ORDERED
+    const simulcastLayers = VIDEO_PRESETS_ORDERED
       .slice(0, Math.max(selectedIndex, 1))
       .map((p) => p.preset);
 
     const trackPublishOptions: TrackPublishOptions = {
-      audioPreset: AudioPresets.speech,
-      simulcast: true,
-      videoCodec: "vp8",
+      audioPreset: DEFAULT_AUDIO_PRESET,
+      simulcast: DEFAULT_SIMULCAST,
+      videoCodec: DEFAULT_VIDEO_CODEC,
       videoSimulcastLayers: simulcastLayers,
     };
 
