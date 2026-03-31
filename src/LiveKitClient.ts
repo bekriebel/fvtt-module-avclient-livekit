@@ -40,6 +40,12 @@ import { getAccessToken, getTavernAccessToken } from "./utils/auth";
 import { debounceRefreshView, getLiveKitUrl } from "./utils/helpers";
 import { NoiseCancellation } from "./utils/noiseCancellation";
 import { ReconnectManager } from "./utils/reconnect";
+import {
+  VIDEO_PRESETS_ORDERED,
+  DEFAULT_VIDEO_CODEC,
+  DEFAULT_AUDIO_PRESET,
+  DEFAULT_SIMULCAST,
+} from "./LiveKitMediaConfig";
 
 const log = new Logger();
 
@@ -1251,7 +1257,7 @@ export default class LiveKitClient {
   async sendJoinMessage(liveKitServer: string, accessToken: string) {
     // Create the url for user to join the external LiveKit web client
     const params = new URLSearchParams({
-      liveKitUrl: `wss://${liveKitServer}`,
+      liveKitUrl: getLiveKitUrl(liveKitServer),
       token: accessToken,
     });
     const url = `https://meet.livekit.io/custom?${params.toString()}`;
