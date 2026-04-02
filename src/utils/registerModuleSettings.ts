@@ -125,7 +125,6 @@ export default function registerModuleSettings(): void {
     name: "LIVEKITAVCLIENT.liveKitTrace",
     hint: "LIVEKITAVCLIENT.liveKitTraceHint",
     scope: "world",
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     config: game.settings.get(MODULE_NAME, "debug") ?? false,
     default: false,
     type: new foundry.data.fields.BooleanField({ initial: false }),
@@ -153,7 +152,6 @@ export default function registerModuleSettings(): void {
     name: "LIVEKITAVCLIENT.authServer",
     hint: "LIVEKITAVCLIENT.authServerHint",
     scope: "world",
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     config: game.settings.get(MODULE_NAME, "devMode") ?? false,
     default: TAVERN_AUTH_SERVER,
     type: new foundry.data.fields.StringField({
@@ -169,7 +167,6 @@ export default function registerModuleSettings(): void {
     name: "LIVEKITAVCLIENT.forceTurn",
     hint: "LIVEKITAVCLIENT.forceTurnHint",
     scope: "world",
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     config: game.settings.get(MODULE_NAME, "devMode") ?? false,
     default: false,
     type: new foundry.data.fields.BooleanField({ initial: false }),
