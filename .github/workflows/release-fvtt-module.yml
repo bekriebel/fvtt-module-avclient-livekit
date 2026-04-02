@@ -35,7 +35,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -44,13 +44,12 @@ jobs:
         id: changelog
         run: |
           CHANGELOG=$(git log --reverse --pretty=oneline --abbrev-commit ${{ needs.check_version.outputs.module_previous_version }}..HEAD)
-          # Support for multiline, see
-          # https://github.com/actions/create-release/pull/11#issuecomment-640071918
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
           echo "Got changelog: $CHANGELOG"
-          echo "::set-output name=changelog::$CHANGELOG"
+          {
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Update download URL
         id: update_module_download_url
         uses: microsoft/variable-substitution@v1
