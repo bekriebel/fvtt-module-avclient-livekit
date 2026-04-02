@@ -12,10 +12,10 @@
       "ko-fi": "bekit"
     }
   ],
-  "version": "0.6.5",
+  "version": "0.6.6",
   "compatibility": {
     "minimum": "13",
-    "verified": "13"
+    "verified": "14"
   },
   "esmodules": ["avclient-livekit.js"],
   "styles": ["css/avclient-livekit.css"],

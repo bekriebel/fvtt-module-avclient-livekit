@@ -1,5 +1,10 @@
 # LiveKit A/V Client for FoundryVTT: Changelog
 
+## 0.6.6
+
+- Update dependencies, including livekit-client v2.17.3
+- Verify compatibility with FoundryVTT v14
+
 ## 0.6.5
 
 - Update dependencies, including livekit-client v2.17.1
