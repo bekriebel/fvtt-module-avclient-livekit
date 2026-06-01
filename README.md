@@ -17,7 +17,7 @@ A replacement for the native SimplePeer / EasyRTC A/V client in FoundryVTT. The 
 
 **Note:** _At the moment, there are no free public LiveKit servers. You must configure a custom signaling server under Audio/Video communication or use one of the following options:_
 
-[At the Tavern](https://tavern.at) is providing access to a multi-region LiveKit server cluster that we maintain to anyone who subscribes to our [Patreon](https://www.patreon.com/bekit) at at least a $5 USD per month level. The fee is used to cover the cost of the server cluster and contribute toward further development of this module.
+[At the Tavern](https://tavern.at) is providing access to a multi-region LiveKit server cluster that we maintain to anyone who subscribes to our [Patreon](https://www.patreon.com/tavern_at) at at least a $5 USD per month level. The fee is used to cover the cost of the server cluster and contribute toward further development of this module.
 
 [Forge](https://forge-vtt.com/) users can make use of the Forge's LiveKit servers with no additional configuration required.
 
@@ -25,7 +25,7 @@ A replacement for the native SimplePeer / EasyRTC A/V client in FoundryVTT. The 
 
 ## Installation
 
-You can install this module by using the following manifest URL: https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json
+You can install this module by using the following manifest URL: <https://github.com/bekriebel/fvtt-module-avclient-livekit/releases/latest/download/module.json>
 
 ## Configuration
 

@@ -65,7 +65,7 @@
                 {{ localize "LIVEKITAVCLIENT.patreonAccountError"}}: <i>{{authResponse.error}}</i>
               {{else}}
                 {{ localize "LIVEKITAVCLIENT.patreonAccountNote"}}: <i>{{#if authResponse.vanity}}{{authResponse.vanity}}{{else}}{{authResponse.full_name}}{{/if}}</i>
-                (<a href="https://www.patreon.com/bekit">{{#if authResponse.active_tier}}{{authResponse.active_tier}}{{else}}{{localize "LIVEKITAVCLIENT.patreonAccountNotMember"}}{{/if}}</a>)
+                (<a href="https://www.patreon.com/tavern_at">{{#if authResponse.active_tier}}{{authResponse.active_tier}}{{else}}{{localize "LIVEKITAVCLIENT.patreonAccountNotMember"}}{{/if}}</a>)
               {{/if}}
             </p>
           {{/if}}
