@@ -1,7 +1,7 @@
 {
   "name": "avclient-livekit",
   "description": "LiveKit A/V module for FoundryVTT",
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.7.0",
   "type": "module",
   "private": true,
   "repository": "https://github.com/bekriebel/fvtt-module-avclient-livekit",
@@ -22,24 +22,24 @@
   ],
   "dependencies": {
     "debug": "^4.4.3",
-    "jose": "^6.2.2",
-    "livekit-client": "2.17.3"
+    "jose": "^6.2.3",
+    "livekit-client": "2.19.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@pixi/assets": "github:foundry-vtt-types/pixi-assets#main",
     "@pixi/compressed-textures": "github:foundry-vtt-types/pixi-compressed-textures#main",
     "@pixi/core": "github:foundry-vtt-types/pixi-core#main",
     "@types/debug": "^4.1.13",
     "@types/jsonwebtoken": "^9.0.10",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
-    "eslint": "^9.39.4",
+    "eslint": "^10.5.0",
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#v13.345.1",
-    "prettier": "3.8.1",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "8.58.0",
-    "vite": "^7.3.1",
-    "vite-plugin-checker": "0.12.0",
-    "vite-plugin-static-copy": "^3.4.0"
+    "prettier": "3.8.4",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "8.61.1",
+    "vite": "^8.0.16",
+    "vite-plugin-checker": "0.14.1",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }
