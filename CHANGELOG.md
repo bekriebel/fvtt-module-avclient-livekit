@@ -1,5 +1,9 @@
 # LiveKit A/V Client for FoundryVTT: Changelog
 
+## 0.6.8
+
+- Update dependencies, including livekit-client v2.19.2
+
 ## 0.6.7
 
 - Update patreon URL
