@@ -14,6 +14,8 @@
   "LIVEKITAVCLIENT.audioMusicModeHint": "Configura el audio para retransmitir música ajustando el bitrate y deshabilitando la cancelación de eco y la supresión de ruido. No debe usarse si solo se va a usar el audio para hablar",
   "LIVEKITAVCLIENT.audioMusicModeRate": "Bitrate del modo música (kbps)",
   "LIVEKITAVCLIENT.audioMusicModeRateHint": "El bitrate que se usará para el audio cuando se habilite el modo música. Incrementarlo afectará al ancho de banda y los recursos de todos los clientes",
+  "LIVEKITAVCLIENT.enhancedNoiseCancellation": "Cancelación de ruido mejorada (RNNoise)",
+  "LIVEKITAVCLIENT.enhancedNoiseCancellationHint": "Usa el modelo de IA de código abierto RNNoise para eliminar el ruido de fondo de tu micrófono. Se ejecuta completamente en tu navegador y funciona con servidores LiveKit autoalojados. Habilitada por defecto. Requiere un navegador moderno compatible con AudioWorklet. Se deshabilita automáticamente mientras el modo música está activo.",
   "LIVEKITAVCLIENT.debug": "Habilitar registro de errores",
   "LIVEKITAVCLIENT.debugHint": "Habilita CONFIG.debug.av y CONFIG.debug.avclient para crear un registro de errores detallado",
   "LIVEKITAVCLIENT.disableReceivingAudio": "Deshabilitar recepción de audio",

@@ -63,6 +63,25 @@ export default function registerModuleSettings(): void {
     },
   });
 
+  game.settings?.register(MODULE_NAME, "enhancedNoiseCancellation", {
+    name: "LIVEKITAVCLIENT.enhancedNoiseCancellation",
+    hint: "LIVEKITAVCLIENT.enhancedNoiseCancellationHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeAudioSource(true)
+        .catch((error: unknown) => {
+          log.error(
+            "enhancedNoiseCancellation: Error changing audio source",
+            error,
+          );
+        });
+    },
+  });
+
   game.settings?.register(MODULE_NAME, "useExternalAV", {
     name: "LIVEKITAVCLIENT.useExternalAV",
     hint: "LIVEKITAVCLIENT.useExternalAVHint",

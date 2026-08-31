@@ -11,6 +11,8 @@
   "LIVEKITAVCLIENT.audioMusicModeHint": "Configures audio input for music streaming by adjusting bitrate and disabling echo cancelation & noise suppression. This should not be used for normal voice communication.",
   "LIVEKITAVCLIENT.audioMusicModeRate": "Music Mode Bitrate (kbps)",
   "LIVEKITAVCLIENT.audioMusicModeRateHint": "The bitrate used for audio when Music Mode is enabled. Increasing this will affect bandwidth and resource requirements on all clients.",
+  "LIVEKITAVCLIENT.enhancedNoiseCancellation": "Enhanced Noise Cancellation (RNNoise)",
+  "LIVEKITAVCLIENT.enhancedNoiseCancellationHint": "Use the open-source RNNoise AI model to remove background noise from your microphone. Runs entirely in your browser and works with self-hosted LiveKit servers. Enabled by default. Requires a modern browser with AudioWorklet support. Automatically disabled while Music Mode is active.",
   "LIVEKITAVCLIENT.debug": "Enable debug logging",
   "LIVEKITAVCLIENT.debugHint": "Enables CONFIG.debug.av and CONFIG.debug.avclient for extra logging",
   "LIVEKITAVCLIENT.disableReceivingAudio": "Disable receiving audio",

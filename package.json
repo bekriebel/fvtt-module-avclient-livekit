@@ -21,6 +21,7 @@
     "defaults"
   ],
   "dependencies": {
+    "@sapphi-red/web-noise-suppressor": "^0.4.0",
     "debug": "^4.4.3",
     "jose": "^6.2.3",
     "livekit-client": "2.19.2"

@@ -10,6 +10,11 @@
   pointer-events: none;
 }
 
+/* Enhanced (RNNoise) noise cancellation toggle button */
+.camera-view .av-control.livekit-rnnoise-control.active {
+  color: #50ffff;
+}
+
 .camera-view .connection-quality-indicator {
   height: 12px;
   width: 12px;
