@@ -82,6 +82,36 @@ export default function registerModuleSettings(): void {
     },
   });
 
+  // Which client-side noise suppression model to use when enhanced noise
+  // cancellation is enabled.
+  game.settings?.register(MODULE_NAME, "noiseSuppressionModel", {
+    name: "LIVEKITAVCLIENT.noiseSuppressionModel",
+    hint: "LIVEKITAVCLIENT.noiseSuppressionModelHint",
+    scope: "client",
+    config: true,
+    default: "rnnoise",
+    type: new foundry.data.fields.StringField({
+      required: true,
+      blank: false,
+      initial: "rnnoise",
+      choices: {
+        rnnoise: "LIVEKITAVCLIENT.noiseSuppressionModelRnnoise",
+        speex: "LIVEKITAVCLIENT.noiseSuppressionModelSpeex",
+        gtcrn: "LIVEKITAVCLIENT.noiseSuppressionModelGtcrn",
+      },
+    }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient
+        .changeAudioSource(true)
+        .catch((error: unknown) => {
+          log.error(
+            "noiseSuppressionModel: Error changing audio source",
+            error,
+          );
+        });
+    },
+  });
+
   game.settings?.register(MODULE_NAME, "useExternalAV", {
     name: "LIVEKITAVCLIENT.useExternalAV",
     hint: "LIVEKITAVCLIENT.useExternalAVHint",

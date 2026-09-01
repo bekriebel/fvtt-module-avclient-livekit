@@ -80,6 +80,11 @@ declare global {
     "avclient-livekit.enhancedNoiseCancellation": foundry.data.fields.BooleanField<{
       initial: true;
     }>;
+    "avclient-livekit.noiseSuppressionModel": foundry.data.fields.StringField<{
+      required: true;
+      blank: false;
+      initial: string;
+    }>;
     "avclient-livekit.useExternalAV": foundry.data.fields.BooleanField<{
       initial: false;
     }>;

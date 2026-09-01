@@ -28,10 +28,11 @@ import {
   TrackPublishOptions,
 } from "livekit-client";
 import {
-  RnnoiseNoiseFilter,
-  isRnnoiseSupported,
-  RNNOISE_SAMPLE_RATE,
-} from "./RnnoiseNoiseFilter";
+  NoiseSuppressorFilter,
+  isNoiseSuppressionSupported,
+  toNoiseSuppressorModel,
+  NOISE_SUPPRESSION_SAMPLE_RATE,
+} from "./NoiseSuppressorFilter";
 import { LANG_NAME, MODULE_NAME } from "./utils/constants";
 import LiveKitAVClient from "./LiveKitAVClient";
 import {
@@ -196,7 +197,7 @@ export default class LiveKitClient {
     }
 
     // Don't add the button if the browser doesn't support the noise filter
-    if (!isRnnoiseSupported()) {
+    if (!isNoiseSuppressionSupported()) {
       return;
     }
 
@@ -209,9 +210,19 @@ export default class LiveKitClient {
       "av-control inline-control toggle icon fa-solid fa-fw fa-wand-magic-sparkles livekit-control livekit-rnnoise-control";
     rnnoiseButton.classList.toggle("active", enabled);
     rnnoiseButton.dataset.tooltip = "";
-    rnnoiseButton.ariaLabel =
+    const model = toNoiseSuppressorModel(
+      game.settings?.get(MODULE_NAME, "noiseSuppressionModel"),
+    );
+    rnnoiseButton.ariaLabel = `${
       game.i18n?.localize(`${LANG_NAME}.enhancedNoiseCancellation`) ??
-      "Enhanced Noise Cancellation";
+      "Enhanced Noise Cancellation"
+    } (${
+      game.i18n?.localize(
+        `${LANG_NAME}.noiseSuppressionModel${
+          model.charAt(0).toUpperCase() + model.slice(1)
+        }`,
+      ) ?? model
+    })`;
 
     rnnoiseButton.addEventListener("click", () => {
       const current =
@@ -460,11 +471,11 @@ export default class LiveKitClient {
       audioCaptureOptions.channelCount = { ideal: 2 };
     } else if (
       (game.settings?.get(MODULE_NAME, "enhancedNoiseCancellation") ?? false) &&
-      isRnnoiseSupported()
+      isNoiseSuppressionSupported()
     ) {
-      // When enhanced (RNNoise) noise cancellation is enabled, disable the
-      // browser's native noise suppression to avoid double-processing the audio.
-      // The RNNoise processor itself is attached in initializeAudioTrack.
+      // When enhanced noise cancellation is enabled, disable the browser's
+      // native noise suppression to avoid double-processing the audio. The
+      // noise suppression processor itself is attached in initializeAudioTrack.
       audioCaptureOptions.noiseSuppression = false;
     }
 
@@ -645,8 +656,9 @@ export default class LiveKitClient {
   }
 
   /**
-   * Lazily create (and reuse) a 48kHz AudioContext used by the RNNoise
-   * processor. RNNoise requires a 48kHz sample rate.
+   * Lazily create (and reuse) a 48kHz AudioContext used by the noise
+   * suppression processor. RNNoise requires a 48kHz sample rate; the other
+   * models resample internally, so a single 48kHz context works for all.
    */
   private getAudioProcessorContext(): AudioContext {
     if (
@@ -654,16 +666,17 @@ export default class LiveKitClient {
       this.audioProcessorContext.state === "closed"
     ) {
       this.audioProcessorContext = new AudioContext({
-        sampleRate: RNNOISE_SAMPLE_RATE,
+        sampleRate: NOISE_SUPPRESSION_SAMPLE_RATE,
       });
     }
     return this.audioProcessorContext;
   }
 
   /**
-   * Attach the RNNoise noise cancellation processor to the current local audio
-   * track when the setting is enabled, the browser supports it, and Music Mode
-   * is not active.
+   * Attach the client-side noise suppression processor to the current local
+   * audio track when the setting is enabled, the browser supports it, and Music
+   * Mode is not active. The model (RNNoise, Speex, or GTCRN) is selected via the
+   * `noiseSuppressionModel` setting.
    *
    * LiveKit requires an AudioContext to be set on the track before a processor
    * can be attached, so we provide our own 48kHz context here.
@@ -681,17 +694,21 @@ export default class LiveKitClient {
       return;
     }
 
-    if (!isRnnoiseSupported()) {
-      log.warn("RNNoise noise filter is not supported on this browser");
+    if (!isNoiseSuppressionSupported()) {
+      log.warn("Noise suppression is not supported on this browser");
       return;
     }
 
+    const model = toNoiseSuppressorModel(
+      game.settings?.get(MODULE_NAME, "noiseSuppressionModel"),
+    );
+
     try {
       this.audioTrack.setAudioContext(this.getAudioProcessorContext());
-      await this.audioTrack.setProcessor(new RnnoiseNoiseFilter());
-      log.info("RNNoise noise filter enabled");
+      await this.audioTrack.setProcessor(new NoiseSuppressorFilter(model));
+      log.info(`Noise suppression enabled (model: ${model})`);
     } catch (error: unknown) {
-      log.error("Error enabling RNNoise noise filter:", error);
+      log.error("Error enabling noise suppression:", error);
     }
   }
 

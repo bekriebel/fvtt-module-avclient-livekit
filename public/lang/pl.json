@@ -11,7 +11,7 @@
   "LIVEKITAVCLIENT.audioMusicModeHint": "Konfiguruje wejście audio do strumieniowego przesyłania muzyki poprzez dostosowanie szybkości transmisji oraz wyłączenie eliminacji echa i tłumienia szumów. Nie należy używać tej opcji do normalnej komunikacji głosowej.",
   "LIVEKITAVCLIENT.audioMusicModeRate": "Szybkość transmisji w trybie muzycznym (kbps)",
   "LIVEKITAVCLIENT.audioMusicModeRateHint": "Szybkość transmisji używana dla dźwięku, gdy włączony jest tryb muzyczny. Zwiększenie tej wartości wpłynie na przepustowość i wymagania dotyczące zasobów na wszystkich klientach.",
-  "LIVEKITAVCLIENT.enhancedNoiseCancellation": "Ulepszona redukcja szumów (RNNoise)",
+  "LIVEKITAVCLIENT.enhancedNoiseCancellation": "Ulepszona redukcja szumów",
   "LIVEKITAVCLIENT.enhancedNoiseCancellationHint": "Używa otwartoźródłowego modelu SI RNNoise do usuwania szumów tła z Twojego mikrofonu. Działa w całości w przeglądarce i współpracuje z samodzielnie hostowanymi serwerami LiveKit. Włączona domyślnie. Wymaga nowoczesnej przeglądarki z obsługą AudioWorklet. Automatycznie wyłączana, gdy aktywny jest tryb muzyczny.",
   "LIVEKITAVCLIENT.debug": "Włącz rejestrowanie debugowania",
   "LIVEKITAVCLIENT.debugHint": "Włącza CONFIG.debug.av i CONFIG.debug.avclient w celu uzyskania dodatkowych informacji w dzienniku.",
