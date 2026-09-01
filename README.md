@@ -87,3 +87,11 @@ By default, debug logs are disabled. If additional logs are needed for troublesh
 ## Changelog
 
 See [CHANGELOG](/CHANGELOG.md)
+
+## Third-party notices
+
+The enhanced noise cancellation feature bundles open-source models
+(RNNoise, Speex, and GTCRN) via
+[`@sapphi-red/web-noise-suppressor`](https://github.com/sapphi-red/web-noise-suppressor).
+See [THIRD-PARTY-NOTICES](/THIRD-PARTY-NOTICES.md) for their licenses and
+attributions.

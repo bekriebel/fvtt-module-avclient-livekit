@@ -37,6 +37,10 @@ export default defineConfig({
           dest: "",
         },
         {
+          src: "THIRD-PARTY-NOTICES.md",
+          dest: "",
+        },
+        {
           src: "README.md",
           dest: "",
         },
