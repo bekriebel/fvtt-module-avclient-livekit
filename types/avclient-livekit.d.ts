@@ -77,6 +77,36 @@ declare global {
     "avclient-livekit.audioMusicMode": foundry.data.fields.BooleanField<{
       initial: false;
     }>;
+    "avclient-livekit.enhancedNoiseCancellation": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
+    "avclient-livekit.noiseSuppressionModel": foundry.data.fields.StringField<{
+      required: true;
+      blank: false;
+      initial: string;
+    }>;
+    "avclient-livekit.audioQualityPreset": foundry.data.fields.StringField<{
+      required: true;
+      blank: false;
+      initial: string;
+    }>;
+    "avclient-livekit.audioAutoGainControl": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
+    "avclient-livekit.audioEchoCancellation": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
+    "avclient-livekit.audioNoiseSuppression": foundry.data.fields.BooleanField<{
+      initial: true;
+    }>;
+    "avclient-livekit.audioNoiseGate": foundry.data.fields.BooleanField<{
+      initial: false;
+    }>;
+    "avclient-livekit.audioNoiseGateThreshold": foundry.data.fields.NumberField<{
+      required: true;
+      nullable: false;
+      initial: number;
+    }>;
     "avclient-livekit.useExternalAV": foundry.data.fields.BooleanField<{
       initial: false;
     }>;

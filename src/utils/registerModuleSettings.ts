@@ -55,11 +55,137 @@ export default function registerModuleSettings(): void {
     default: false,
     type: new foundry.data.fields.BooleanField({ initial: false }),
     onChange: () => {
-      game.webrtc?.client._liveKitClient
-        .changeAudioSource(true)
-        .catch((error: unknown) => {
-          log.error("audioMusicMode: Error changing audio source", error);
-        });
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "enhancedNoiseCancellation", {
+    name: "LIVEKITAVCLIENT.enhancedNoiseCancellation",
+    hint: "LIVEKITAVCLIENT.enhancedNoiseCancellationHint",
+    scope: "client",
+    config: false,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  // Which client-side noise suppression model to use when enhanced noise
+  // cancellation is enabled.
+  game.settings?.register(MODULE_NAME, "noiseSuppressionModel", {
+    name: "LIVEKITAVCLIENT.noiseSuppressionModel",
+    hint: "LIVEKITAVCLIENT.noiseSuppressionModelHint",
+    scope: "client",
+    config: true,
+    default: "gtcrn",
+    type: new foundry.data.fields.StringField({
+      required: true,
+      blank: false,
+      initial: "gtcrn",
+      choices: {
+        rnnoise: "LIVEKITAVCLIENT.noiseSuppressionModelRnnoise",
+        speex: "LIVEKITAVCLIENT.noiseSuppressionModelSpeex",
+        gtcrn: "LIVEKITAVCLIENT.noiseSuppressionModelGtcrn",
+      },
+    }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  // Audio quality preset for outgoing audio publishing
+  game.settings?.register(MODULE_NAME, "audioQualityPreset", {
+    name: "LIVEKITAVCLIENT.audioQualityPreset",
+    hint: "LIVEKITAVCLIENT.audioQualityPresetHint",
+    scope: "client",
+    config: true,
+    default: "speech",
+    type: new foundry.data.fields.StringField({
+      required: true,
+      blank: false,
+      initial: "speech",
+      choices: {
+        telephone: "LIVEKITAVCLIENT.audioQualityPresetTelephone",
+        speech: "LIVEKITAVCLIENT.audioQualityPresetSpeech",
+        music: "LIVEKITAVCLIENT.audioQualityPresetMusic",
+        musicStereo: "LIVEKITAVCLIENT.audioQualityPresetMusicStereo",
+        musicHighQuality: "LIVEKITAVCLIENT.audioQualityPresetMusicHighQuality",
+        musicHighQualityStereo:
+          "LIVEKITAVCLIENT.audioQualityPresetMusicHighQualityStereo",
+      },
+    }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  // WebRTC audio capture constraint toggles
+  game.settings?.register(MODULE_NAME, "audioAutoGainControl", {
+    name: "LIVEKITAVCLIENT.audioAutoGainControl",
+    hint: "LIVEKITAVCLIENT.audioAutoGainControlHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "audioEchoCancellation", {
+    name: "LIVEKITAVCLIENT.audioEchoCancellation",
+    hint: "LIVEKITAVCLIENT.audioEchoCancellationHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "audioNoiseSuppression", {
+    name: "LIVEKITAVCLIENT.audioNoiseSuppression",
+    hint: "LIVEKITAVCLIENT.audioNoiseSuppressionHint",
+    scope: "client",
+    config: true,
+    default: true,
+    type: new foundry.data.fields.BooleanField({ initial: true }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  // Noise gate (client-side, applied as a track processor)
+  game.settings?.register(MODULE_NAME, "audioNoiseGate", {
+    name: "LIVEKITAVCLIENT.audioNoiseGate",
+    hint: "LIVEKITAVCLIENT.audioNoiseGateHint",
+    scope: "client",
+    config: true,
+    default: false,
+    type: new foundry.data.fields.BooleanField({ initial: false }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
+    },
+  });
+
+  game.settings?.register(MODULE_NAME, "audioNoiseGateThreshold", {
+    name: "LIVEKITAVCLIENT.audioNoiseGateThreshold",
+    hint: "LIVEKITAVCLIENT.audioNoiseGateThresholdHint",
+    scope: "client",
+    config: true,
+    default: -50,
+    type: new foundry.data.fields.NumberField({
+      required: true,
+      nullable: false,
+      min: -80,
+      max: 0,
+      step: 1,
+      initial: -50,
+    }),
+    onChange: () => {
+      game.webrtc?.client._liveKitClient.scheduleAudioSourceChange();
     },
   });
 

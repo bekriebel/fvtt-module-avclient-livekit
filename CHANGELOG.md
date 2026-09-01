@@ -1,5 +1,9 @@
 # LiveKit A/V Client for FoundryVTT: Changelog
 
+## Unreleased
+
+- Add selectable noise suppression model for Enhanced Noise Cancellation: **RNNoise** (balanced default), **Speex** (lightest on CPU), and **GTCRN** (strongest neural model). Selected via the new "Noise Suppression Model" dropdown; all models run entirely in the browser and work with self-hosted LiveKit servers.
+
 ## 0.6.8
 
 - Update dependencies, including livekit-client v2.19.2
