@@ -5,6 +5,7 @@ import {
   loadSpeex,
   GtcrnWorkletNode,
   loadGtcrn,
+  NoiseGateWorkletNode,
 } from "@sapphi-red/web-noise-suppressor";
 import type {
   AudioProcessorOptions,
@@ -75,7 +76,7 @@ export function isNoiseSuppressionSupported(): boolean {
 export function toNoiseSuppressorModel(value: unknown): NoiseSuppressorModel {
   return NOISE_SUPPRESSION_MODELS.includes(value as NoiseSuppressorModel)
     ? (value as NoiseSuppressorModel)
-    : "rnnoise";
+    : "gtcrn";
 }
 
 /**
@@ -96,13 +97,21 @@ export class NoiseSuppressorFilter
   processedTrack?: MediaStreamTrack;
 
   private readonly model: NoiseSuppressorModel;
+  private readonly gateThreshold?: number;
   private audioContext?: AudioContext;
   private sourceNode?: MediaStreamAudioSourceNode;
+  private gateNode?: NoiseGateWorkletNode;
   private workletNode?: NoiseWorkletNode;
   private destinationNode?: MediaStreamAudioDestinationNode;
 
-  constructor(model: NoiseSuppressorModel = "rnnoise") {
+  /**
+   * @param model         The noise suppression model to run.
+   * @param gateThreshold When provided (in dB), a noise gate is chained before
+   *   the model so quiet background noise is silenced prior to denoising.
+   */
+  constructor(model: NoiseSuppressorModel = "gtcrn", gateThreshold?: number) {
     this.model = model;
+    this.gateThreshold = gateThreshold;
     this.name = `noise-suppressor-${model}`;
   }
 
@@ -122,11 +131,31 @@ export class NoiseSuppressorFilter
     );
     this.destinationNode = this.audioContext.createMediaStreamDestination();
 
-    this.sourceNode.connect(this.workletNode);
+    // Optionally chain a noise gate before the model: source -> gate -> model.
+    if (typeof this.gateThreshold === "number") {
+      await this.audioContext.audioWorklet.addModule(
+        assetRoute("noise-suppressor/noiseGateWorklet.js"),
+      );
+      this.gateNode = new NoiseGateWorkletNode(this.audioContext, {
+        openThreshold: this.gateThreshold,
+        closeThreshold: this.gateThreshold - 5,
+        holdMs: 90,
+        maxChannels: 1,
+      });
+      this.sourceNode.connect(this.gateNode);
+      this.gateNode.connect(this.workletNode);
+    } else {
+      this.sourceNode.connect(this.workletNode);
+    }
+
     this.workletNode.connect(this.destinationNode);
 
     this.processedTrack = this.destinationNode.stream.getAudioTracks()[0];
-    log.info(`Noise suppression filter initialized (model: ${this.model})`);
+    log.info(
+      `Noise suppression filter initialized (model: ${this.model}${
+        typeof this.gateThreshold === "number" ? " + noise gate" : ""
+      })`,
+    );
   }
 
   private async createWorkletNode(
@@ -182,6 +211,7 @@ export class NoiseSuppressorFilter
   destroy(): Promise<void> {
     try {
       this.sourceNode?.disconnect();
+      this.gateNode?.disconnect();
       this.workletNode?.disconnect();
       this.workletNode?.destroy();
       this.destinationNode?.disconnect();
@@ -191,6 +221,7 @@ export class NoiseSuppressorFilter
       // Note: the AudioContext is owned by the caller (LiveKitClient) and is
       // intentionally not closed here so it can be reused across tracks.
       this.sourceNode = undefined;
+      this.gateNode = undefined;
       this.workletNode = undefined;
       this.destinationNode = undefined;
       this.audioContext = undefined;

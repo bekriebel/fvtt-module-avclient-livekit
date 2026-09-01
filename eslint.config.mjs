@@ -24,6 +24,7 @@ export default tseslint.config(
     ignores: [
       "node_modules",
       "dist",
+      "public",
       "coverage",
       "public",
       "vite.config.ts",
